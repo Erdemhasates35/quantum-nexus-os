@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REVENUE NEXUS — Sonsuz Gelir Motoru</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
+:root{--q:#00FFD4;--p:#7B2FFF;--r:#FF3D6B;--g:#39FF14;--y:#FFD700;--o:#FF6B35;--bg:#03030A;--glass:rgba(255,61,107,0.04);--border:rgba(255,61,107,0.12);}
+*{margin:0;padding:0;box-sizing:border-box;cursor:none;}
+body{background:var(--bg);color:#E8E8FF;font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+#cursor{position:fixed;width:10px;height:10px;background:var(--g);border-radius:50%;pointer-events:none;z-index:9999;}
+#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(57,255,20,0.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all 0.12s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 48px;background:rgba(3,3,10,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--r);letter-spacing:0.3em;}
+.nav-links a{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:0.12em;padding:7px 14px;border:1px solid transparent;border-radius:6px;transition:all 0.3s;margin:0 4px;}
+.nav-links a:hover,.nav-links a.active{color:var(--r);border-color:rgba(255,61,107,0.35);background:rgba(255,61,107,0.06);}
+.page-header{padding:120px 48px 48px;max-width:1400px;margin:0 auto;}
+.page-tag{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--r);letter-spacing:0.4em;margin-bottom:16px;}
+.page-title{font-family:'Orbitron',monospace;font-size:clamp(32px,6vw,64px);font-weight:900;line-height:1;margin-bottom:12px;background:linear-gradient(135deg,#FFF 0%,var(--r) 50%,var(--y) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;}
+.content{max-width:1400px;margin:0 auto;padding:0 48px 80px;}
+.section-title{font-family:'Orbitron',monospace;font-size:13px;color:var(--r);letter-spacing:0.2em;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+/* REVENUE COUNTER */
+.rev-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:48px;}
+.rev-counter{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:28px;text-align:center;transition:all 0.4s;}
+.rev-counter:hover{border-color:rgba(57,255,20,0.3);box-shadow:0 0 30px rgba(57,255,20,0.05);}
+.rev-val{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;margin-bottom:6px;}
+.rev-change{font-family:'Share Tech Mono',monospace;font-size:11px;margin-bottom:4px;}
+.rev-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;}
+
+/* REVENUE CHART */
+.chart-wrap{background:#020208;border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:48px;}
+#rev-chart{width:100%;height:200px;}
+
+/* INCOME STREAMS */
+.streams-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:48px;}
+.stream-card{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:all 0.4s;}
+.stream-card:hover{transform:translateY(-4px);box-shadow:0 16px 60px rgba(255,61,107,0.08);}
+.stream-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:0 20px 0 80px;background:rgba(255,255,255,0.02);}
+.stream-rank{position:absolute;top:20px;right:20px;font-family:'Orbitron',monospace;font-size:32px;font-weight:900;color:rgba(255,255,255,0.06);}
+.stream-icon{font-size:32px;margin-bottom:16px;}
+.stream-name{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;margin-bottom:8px;}
+.stream-model{font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:16px;line-height:1.6;}
+.stream-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.stream-metric{background:rgba(255,255,255,0.03);border-radius:8px;padding:10px 12px;}
+.stream-metric-val{font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:700;}
+.stream-metric-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-top:2px;}
+.stream-bar-wrap{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
+.stream-bar{height:100%;border-radius:2px;animation:barIn 1.5s ease both;}
+@keyframes barIn{from{width:0}}
+
+/* SECTOR TIMELINE */
+.timeline{position:relative;margin-bottom:48px;}
+.timeline::before{content:'';position:absolute;left:24px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,var(--r),var(--p),var(--q));}
+.tl-item{display:flex;gap:32px;margin-bottom:32px;padding-left:0;}
+.tl-dot{flex-shrink:0;width:49px;display:flex;justify-content:center;}
+.tl-dot-inner{width:12px;height:12px;border-radius:50%;margin-top:6px;border:2px solid;}
+.tl-content{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;}
+.tl-year{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;margin-bottom:8px;}
+.tl-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;margin-bottom:8px;}
+.tl-desc{font-size:14px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:12px;}
+.tl-sectors{display:flex;flex-wrap:wrap;gap:8px;}
+.tl-sector{font-family:'Share Tech Mono',monospace;font-size:10px;padding:3px 10px;border-radius:4px;border:1px solid;letter-spacing:0.1em;}
+
+/* DEFI / CRYPTO */
+.defi-section{background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.15);border-radius:20px;padding:32px;margin-bottom:48px;}
+.defi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:20px;}
+.defi-card{background:#020208;border-radius:12px;padding:20px;text-align:center;}
+.defi-icon{font-size:28px;margin-bottom:10px;}
+.defi-name{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--y);margin-bottom:6px;}
+.defi-apy{font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--g);margin-bottom:4px;}
+.defi-desc{font-size:12px;color:rgba(255,255,255,0.35);}
+
+/* FREE COST CALC */
+.cost-section{background:rgba(57,255,20,0.04);border:1px solid rgba(57,255,20,0.15);border-radius:20px;padding:32px;margin-bottom:48px;}
+.cost-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px;}
+.cost-col-title{font-family:'Orbitron',monospace;font-size:13px;margin-bottom:16px;}
+.cost-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-family:'Share Tech Mono',monospace;font-size:12px;}
+.cost-item:last-child{border:none;font-size:14px;font-weight:700;}
+.cost-key{color:rgba(255,255,255,0.4);}
+.cost-saved{color:var(--g);}
+.cost-actual{color:var(--r);}
+.cost-total-saved{font-family:'Orbitron',monospace;font-size:28px;color:var(--g);margin-top:16px;}
+
+footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.15);letter-spacing:0.15em;border-top:1px solid var(--border);}
+@media(max-width:768px){.cost-grid{grid-template-columns:1fr;}.nav-links{display:none;}.content,.page-header{padding-left:20px;padding-right:20px;}}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <div class="nav-logo">⬡ NEXUS OS</div>
+  <div class="nav-links">
+    <a href="index.html">HUB</a>
+    <a href="quantum-core.html">KUANTUM ÇEKIRDEĞI</a>
+    <a href="autonomous-swarm.html">SWARM ZEKASI</a>
+    <a href="revenue-nexus.html" class="active">GELİR ENJİNİ</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-tag">💎 MODÜL 03 — PERPETUAL REVENUE ENGINE</div>
+  <h1 class="page-title">REVENUE<br>NEXUS</h1>
+  <div class="page-sub">SIFIR MALİYET · OTO-PROJE · DeFi · SaaS · AFİLİYAT · BEYAZ ETİKET · GELECEK SEKTÖRLER</div>
+</div>
+
+<div class="content">
+
+  <!-- REVENUE COUNTERS -->
+  <div class="rev-hero">
+    <div class="rev-counter">
+      <div class="rev-val" style="color:var(--g)" id="daily-rev">$0</div>
+      <div class="rev-change" style="color:var(--g)">↑ +12.4% dün</div>
+      <div class="rev-label">GÜNLÜK GELİR</div>
+    </div>
+    <div class="rev-counter">
+      <div class="rev-val" style="color:var(--q)" id="monthly-rev">$0</div>
+      <div class="rev-change" style="color:var(--q)">↑ +34.7% geçen ay</div>
+      <div class="rev-label">AYLIK GELİR</div>
+    </div>
+    <div class="rev-counter">
+      <div class="rev-val" style="color:var(--y)" id="arpu">$0</div>
+      <div class="rev-change" style="color:var(--y)">+8.2% büyüme</div>
+      <div class="rev-label">KULLANICI BAŞI GELİR</div>
+    </div>
+    <div class="rev-counter">
+      <div class="rev-val" style="color:var(--p)" id="infra-saved">$0</div>
+      <div class="rev-change" style="color:var(--p)">Free tier optimizasyonu</div>
+      <div class="rev-label">AYLUK TASARRUF</div>
+    </div>
+    <div class="rev-counter">
+      <div class="rev-val" style="color:var(--r)" id="margin">0%</div>
+      <div class="rev-change" style="color:var(--r)">Sıfır maliyet stack</div>
+      <div class="rev-label">KAR MARJİ</div>
+    </div>
+  </div>
+
+  <!-- REVENUE CHART -->
+  <div class="chart-wrap">
+    <div class="section-title">◈ CANLI GELİR GRAFİĞİ — OTO-GÜNCELLEME</div>
+    <canvas id="rev-chart"></canvas>
+  </div>
+
+  <!-- INCOME STREAMS -->
+  <div class="section-title">◈ 8 KATMANLI GELİR AKIŞI — TAMAMEN OTONOM</div>
+  <div class="streams-grid">
+
+    <div class="stream-card">
+      <div class="stream-rank">01</div>
+      <div class="stream-icon">🤖</div>
+      <div class="stream-name">API ARBİTRAJ</div>
+      <div class="stream-model">Ucuza aldığımız AI token (Groq, Together: $0.20/M) → premium API olarak sat ($3-8/M). Margin: 15-40x. Tamamen otonom routing.</div>
+      <div class="stream-metrics">
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--g)">$8.4K</div><div class="stream-metric-label">GÜNLÜK</div></div>
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--q)">38x</div><div class="stream-metric-label">MARJİN</div></div>
+      </div>
+      <div class="stream-bar-wrap"><div class="stream-bar" style="width:82%;background:linear-gradient(90deg,var(--g),#39FF14);"></div></div>
+    </div>
+
+    <div class="stream-card">
+      <div class="stream-rank">02</div>
+      <div class="stream-icon">💻</div>
+      <div class="stream-name">SaaS PLATFORM GELİRİ</div>
+      <div class="stream-model">Ajanlar otomatik SaaS ürün çıkarır, landing page yazar, Stripe entegrasyonu yapar, kullanıcı edinir. İnsan: sıfır.</div>
+      <div class="stream-metrics">
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--q)">$5.2K</div><div class="stream-metric-label">GÜNLÜK</div></div>
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--y)">847</div><div class="stream-metric-label">KULLANICI</div></div>
+      </div>
+      <div class="stream-bar-wrap"><div class="stream-bar" style="width:65%;background:linear-gradient(90deg,var(--q),#00D4A8);"></div></div>
+    </div>
+
+    <div class="stream-card">
+      <div class="stream-rank">03</div>
+      <div class="stream-icon">⛓</div>
+      <div class="stream-name">DeFi YIELD FARMING</div>
+      <div class="stream-model">Quant ajanları en yüksek APY protokollerini anlık takip eder. Aave, Compound, Uniswap otomatik rebalance. Risk-adjusted getiri.</div>
+      <div class="stream-metrics">
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--y)">$3.1K</div><div class="stream-metric-label">GÜNLÜK</div></div>
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--g)">47%</div><div class="stream-metric-label">APY</div></div>
+      </div>
+      <div class="stream-bar-wrap"><div class="stream-bar" style="width:54%;background:linear-gradient(90deg,var(--y),#FFA500);"></div></div>
+    </div>
+
+    <div class="stream-card">
+      <div class="stream-rank">04</div>
+      <div class="stream-icon">🏷</div>
+      <div class="stream-name">WHITE-LABEL SATIŞI</div>
+      <div class="stream-model">Tüm ekosistemi başka şirketlere white-label olarak sat. Onboarding otonom, teknik destek AI ajanları, faturalama otomatik.</div>
+      <div class="stream-metrics">
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--p)">$4.7K</div><div class="stream-metric-label">GÜNLÜK</div></div>
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--r)">12</div><div class="stream-metric-label">MÜŞTERİ</div></div>
+      </div>
+      <div class="stream-bar-wrap"><div class="stream-bar" style="width:72%;background:linear-gradient(90deg,var(--p),#A855F7);"></div></div>
+    </div>
+
+    <div class="stream-card">
+      <div class="stream-rank">05</div>
+      <div class="stream-icon">🔗</div>
+      <div class="stream-name">AFİLİYAT + REFERRAL</div>
+      <div class="stream-model">AI ajanlar içerik yazar, SEO optimize eder, affiliate linkler yerleştirir. Amazon, SaaS araçlar, kripto borsa komisyonları otomatik toplanır.</div>
+      <div class="stream-metrics">
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--o)">$1.8K</div><div class="stream-metric-label">GÜNLÜK</div></div>
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--g)">340</div><div class="stream-metric-label">LİNK</div></div>
+      </div>
+      <div class="stream-bar-wrap"><div class="stream-bar" style="width:38%;background:linear-gradient(90deg,var(--o),#FF8C42);"></div></div>
+    </div>
+
+    <div class="stream-card">
+      <div class="stream-rank">06</div>
+      <div class="stream-icon">🔐</div>
+      <div class="stream-name">SİBER GÜVENLİK SERVİSİ</div>
+      <div class="stream-model">Red team ajanları şirketlere pentest hizmeti sunar. Otomatik rapor üretimi, CVE tarama, güvenlik sertifikasyonu. $500-5K/pentest.</div>
+      <div class="stream-metrics">
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--r)">$2.3K</div><div class="stream-metric-label">GÜNLÜK</div></div>
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--y)">8</div><div class="stream-metric-label">MÜŞTERİ/GÜN</div></div>
+      </div>
+      <div class="stream-bar-wrap"><div class="stream-bar" style="width:45%;background:linear-gradient(90deg,var(--r),#FF6B35);"></div></div>
+    </div>
+
+    <div class="stream-card">
+      <div class="stream-rank">07</div>
+      <div class="stream-icon">📊</div>
+      <div class="stream-name">QUANT VERİ SERVİSİ</div>
+      <div class="stream-model">Akademik seviyede finansal analiz, backtesting, risk modelleri. Hedge fonlar, bankalar, fintech şirketlere veri feed satışı. Bloomberg alternatifi.</div>
+      <div class="stream-metrics">
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--q)">$3.4K</div><div class="stream-metric-label">GÜNLÜK</div></div>
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--p)">24</div><div class="stream-metric-label">MÜŞTERİ</div></div>
+      </div>
+      <div class="stream-bar-wrap"><div class="stream-bar" style="width:58%;background:linear-gradient(90deg,var(--q),var(--p));"></div></div>
+    </div>
+
+    <div class="stream-card">
+      <div class="stream-rank">08</div>
+      <div class="stream-icon">⚛</div>
+      <div class="stream-name">KUANTUM HESAPLAMA SaaS</div>
+      <div class="stream-model">IBM Quantum erişimini API olarak sun. İlaç, malzeme, lojistik optimizasyonu için kuantum hesaplama. Kimse yapamıyor — fiyat: premium.</div>
+      <div class="stream-metrics">
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--p)">$1.9K</div><div class="stream-metric-label">GÜNLÜK</div></div>
+        <div class="stream-metric"><div class="stream-metric-val" style="color:var(--y)">5</div><div class="stream-metric-label">ENTERPRİSE</div></div>
+      </div>
+      <div class="stream-bar-wrap"><div class="stream-bar" style="width:30%;background:linear-gradient(90deg,var(--p),var(--q));"></div></div>
+    </div>
+
+  </div>
+
+  <!-- DeFi -->
+  <div class="defi-section">
+    <div class="section-title" style="color:var(--y)">◈ DeFi OTONOM STRATEJİ — QUANT AJANLAR YÖNETİYOR</div>
+    <div class="defi-grid">
+      <div class="defi-card"><div class="defi-icon">🌊</div><div class="defi-name">UNISWAP V3</div><div class="defi-apy">42% APY</div><div class="defi-desc">Konsantre likidite, AI aralık optimizasyonu</div></div>
+      <div class="defi-card"><div class="defi-icon">👻</div><div class="defi-name">AAVE V3</div><div class="defi-apy">18% APY</div><div class="defi-desc">Otomatik collateral yönetimi, flash loan arbitraj</div></div>
+      <div class="defi-card"><div class="defi-icon">🌀</div><div class="defi-name">CURVE</div><div class="defi-apy">28% APY</div><div class="defi-desc">Stablecoin LP, CRV/CVX boost otomasyonu</div></div>
+      <div class="defi-card"><div class="defi-icon">⚡</div><div class="defi-name">EIGENLAYER</div><div class="defi-apy">15% APY</div><div class="defi-desc">ETH restaking, AVS ödülleri otomatik toplama</div></div>
+      <div class="defi-card"><div class="defi-icon">🔺</div><div class="defi-name">GMX V2</div><div class="defi-apy">35% APY</div><div class="defi-desc">Perp DEX GLP, delta-neutral hedging stratejisi</div></div>
+    </div>
+  </div>
+
+  <!-- SECTOR TIMELINE -->
+  <div class="section-title">◈ 2025-2035 SEKTÖR ÖNGÖRÜ HARİTASI — GELECEĞE YATIRIM</div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-dot"><div class="tl-dot-inner" style="border-color:var(--g);background:var(--g)"></div></div>
+      <div class="tl-content">
+        <div class="tl-year" style="color:var(--g)">2025 — ŞU AN</div>
+        <div class="tl-title">AI API Ekonomisi Patlaması</div>
+        <div class="tl-desc">LLM API'larının demokratize olması arbitraj fırsatları yarattı. Ucuz inference → premium satış modeli. Platform bu dalgada. $50B pazar.</div>
+        <div class="tl-sectors">
+          <span class="tl-sector" style="border-color:rgba(57,255,20,0.3);color:var(--g)">AI APIs</span>
+          <span class="tl-sector" style="border-color:rgba(57,255,20,0.3);color:var(--g)">SaaS Automation</span>
+          <span class="tl-sector" style="border-color:rgba(57,255,20,0.3);color:var(--g)">Cybersecurity AI</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"><div class="tl-dot-inner" style="border-color:var(--q);background:rgba(0,255,212,0.3)"></div></div>
+      <div class="tl-content">
+        <div class="tl-year" style="color:var(--q)">2026-2027 — YAKLAŞIYOR</div>
+        <div class="tl-title">Ajan Ekonomisi & Fiziksel AI</div>
+        <div class="tl-desc">AI ajanlar gerçek ekonomik üretim yapıyor. Robotics + AI birleşimi. Platform: ajan marketplace + fiziksel dünya arayüzü. $400B pazar.</div>
+        <div class="tl-sectors">
+          <span class="tl-sector" style="border-color:rgba(0,255,212,0.3);color:var(--q)">Agent Economy</span>
+          <span class="tl-sector" style="border-color:rgba(0,255,212,0.3);color:var(--q)">Robotics AI</span>
+          <span class="tl-sector" style="border-color:rgba(0,255,212,0.3);color:var(--q)">Autonomous Vehicles</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"><div class="tl-dot-inner" style="border-color:var(--p);background:rgba(123,47,255,0.3)"></div></div>
+      <div class="tl-content">
+        <div class="tl-year" style="color:var(--p)">2028-2030 — HAZIRLIK</div>
+        <div class="tl-title">Kuantum Avantajı & Bio-AI</div>
+        <div class="tl-desc">İlk gerçek kuantum avantajı gösterildi. İlaç geliştirme AI ile 10x hızlanıyor. Platform: kuantum hesaplama SaaS + bio-informatics pipeline. $2T pazar.</div>
+        <div class="tl-sectors">
+          <span class="tl-sector" style="border-color:rgba(123,47,255,0.3);color:var(--p)">Quantum Computing</span>
+          <span class="tl-sector" style="border-color:rgba(123,47,255,0.3);color:var(--p)">Drug Discovery AI</span>
+          <span class="tl-sector" style="border-color:rgba(123,47,255,0.3);color:var(--p)">Synthetic Biology</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"><div class="tl-dot-inner" style="border-color:var(--y);background:rgba(255,215,0,0.2)"></div></div>
+      <div class="tl-content">
+        <div class="tl-year" style="color:var(--y)">2031-2033 — VİZYON</div>
+        <div class="tl-title">Nöromorfik AI & Beyin-Bilgisayar</div>
+        <div class="tl-desc">Nöromorfik çipler insan beyninden verimli. BCI (beyin-bilgisayar arayüzü) tıbbi uygulamalar. Platform: nöromorfik model hosting + BCI SDK. $5T pazar.</div>
+        <div class="tl-sectors">
+          <span class="tl-sector" style="border-color:rgba(255,215,0,0.3);color:var(--y)">Neuromorphic</span>
+          <span class="tl-sector" style="border-color:rgba(255,215,0,0.3);color:var(--y)">BCI Technology</span>
+          <span class="tl-sector" style="border-color:rgba(255,215,0,0.3);color:var(--y)">Neural Interface</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot"><div class="tl-dot-inner" style="border-color:var(--r);background:rgba(255,61,107,0.2)"></div></div>
+      <div class="tl-content">
+        <div class="tl-year" style="color:var(--r)">2034-2035 — UZAK VİZYON</div>
+        <div class="tl-title">AGI Ekonomisi & Post-Scarcity</div>
+        <div class="tl-desc">Yapay genel zeka ekonomik değer üretimini tamamen dönüştürüyor. Platform: AGI API orchestration + otomatik bilim keşfi motoru. Sınırsız pazar.</div>
+        <div class="tl-sectors">
+          <span class="tl-sector" style="border-color:rgba(255,61,107,0.3);color:var(--r)">AGI Systems</span>
+          <span class="tl-sector" style="border-color:rgba(255,61,107,0.3);color:var(--r)">Scientific Discovery</span>
+          <span class="tl-sector" style="border-color:rgba(255,61,107,0.3);color:var(--r)">Post-Scarcity Econ</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COST SAVINGS -->
+  <div class="cost-section">
+    <div class="section-title" style="color:var(--g)">◈ SIFIR MALİYET ALTYAPI — KLASİK VS NEXUS KARŞILAŞTIRMASI</div>
+    <div class="cost-grid">
+      <div>
+        <div class="cost-col-title" style="color:var(--r)">Klasik Startup Maliyeti (Aylık)</div>
+        <div class="cost-item"><span class="cost-key">AWS/GCP Compute</span><span class="cost-actual">$8,000</span></div>
+        <div class="cost-item"><span class="cost-key">Database (RDS)</span><span class="cost-actual">$2,400</span></div>
+        <div class="cost-item"><span class="cost-key">CDN + Bandwidth</span><span class="cost-actual">$1,200</span></div>
+        <div class="cost-item"><span class="cost-key">Security Tools</span><span class="cost-actual">$800</span></div>
+        <div class="cost-item"><span class="cost-key">Monitoring</span><span class="cost-actual">$400</span></div>
+        <div class="cost-item"><span class="cost-key">DevOps Team (3 kişi)</span><span class="cost-actual">$45,000</span></div>
+        <div class="cost-item"><span class="cost-key" style="font-weight:700">TOPLAM</span><span class="cost-actual" style="font-size:18px">$57,800/ay</span></div>
+      </div>
+      <div>
+        <div class="cost-col-title" style="color:var(--g)">NEXUS OS Maliyeti (Aylık)</div>
+        <div class="cost-item"><span class="cost-key">Vercel (free tier)</span><span class="cost-saved">$0</span></div>
+        <div class="cost-item"><span class="cost-key">Supabase (free tier)</span><span class="cost-saved">$0</span></div>
+        <div class="cost-item"><span class="cost-key">Cloudflare Workers</span><span class="cost-saved">$0</span></div>
+        <div class="cost-item"><span class="cost-key">GitHub Actions</span><span class="cost-saved">$0</span></div>
+        <div class="cost-item"><span class="cost-key">Hugging Face</span><span class="cost-saved">$0</span></div>
+        <div class="cost-item"><span class="cost-key">AI API (optimize)</span><span class="cost-saved" style="color:var(--y)">$1,200</span></div>
+        <div class="cost-item"><span class="cost-key" style="font-weight:700">TOPLAM</span><span class="cost-saved" style="font-size:18px">$1,200/ay</span></div>
+      </div>
+    </div>
+    <div class="cost-total-saved">AYLIK TASARRUF: $56,600 → YILLIK: $679,200</div>
+  </div>
+
+</div>
+
+<footer>REVENUE NEXUS — NEXUS OS © 2099 — PERPETUAL INCOME · ZERO COST · FUTURE SECTORS · ∞</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';});
+function animRing(){rx+=(mx-rx-16)*0.12;ry+=(my-ry-16)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}animRing();
+
+// Revenue counters animation
+function animCount(el,target,prefix='',suffix='',dur=2200){
+  let s=0,step=target/dur*16;
+  const id=setInterval(()=>{s+=step;if(s>=target){s=target;clearInterval(id);}
+  el.textContent=prefix+(s>=1000?Math.floor(s/1000).toLocaleString()+'K':Math.floor(s).toLocaleString())+suffix;},16);
+}
+animCount(document.getElementById('daily-rev'),31100,'$');
+animCount(document.getElementById('monthly-rev'),847000,'$');
+animCount(document.getElementById('arpu'),36,'$','.40');
+animCount(document.getElementById('infra-saved'),56600,'$');
+
+let margin=0;
+const marginEl=document.getElementById('margin');
+const mid=setInterval(()=>{margin+=2.1;if(margin>=94){margin=94;clearInterval(mid);}marginEl.textContent=Math.floor(margin)+'%';},40);
+
+// Revenue chart
+const canvas=document.getElementById('rev-chart');
+const ctx=canvas.getContext('2d');
+function resizeChart(){canvas.width=canvas.parentElement.offsetWidth-48;canvas.height=200;}
+resizeChart();window.addEventListener('resize',resizeChart);
+
+const revenueData=[8400,9100,7800,11200,10400,13800,12100,15600,14200,18900,17400,21300,19800,24700,22100,28400,26800,31100];
+const labels=['6h','5.5h','5h','4.5h','4h','3.5h','3h','2.5h','2h','1.5h','1h','45m','30m','20m','15m','10m','5m','şimdi'];
+
+function drawChart(){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const max=Math.max(...revenueData)*1.15,min=Math.min(...revenueData)*0.85;
+  const xStep=W/(revenueData.length-1);
+  const yScale=H/(max-min);
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=0.5;
+  for(let i=0;i<=4;i++){const y=H*(i/4);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // Fill
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(57,255,20,0.2)');grad.addColorStop(1,'rgba(57,255,20,0)');
+  ctx.beginPath();
+  revenueData.forEach((v,i)=>{const x=i*xStep,y=H-(v-min)*yScale;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  // Line
+  ctx.beginPath();ctx.strokeStyle='rgba(57,255,20,0.8)';ctx.lineWidth=2;
+  revenueData.forEach((v,i)=>{const x=i*xStep,y=H-(v-min)*yScale;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+  // Last point
+  const lastX=(revenueData.length-1)*xStep,lastY=H-(revenueData[revenueData.length-1]-min)*yScale;
+  ctx.beginPath();ctx.arc(lastX,lastY,5,0,Math.PI*2);ctx.fillStyle='#39FF14';ctx.fill();
+  ctx.beginPath();ctx.arc(lastX,lastY,10,0,Math.PI*2);ctx.fillStyle='rgba(57,255,20,0.3)';ctx.fill();
+}
+drawChart();
+
+// Live update
+setInterval(()=>{
+  revenueData.shift();
+  revenueData.push(25000+Math.random()*8000);
+  drawChart();
+},4000);
+</script>
+</body>
+</html>
