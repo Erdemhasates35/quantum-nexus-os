@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANTUM NEXUS OS — Ana Merkez</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
+
+:root {
+  --q: #00FFD4;
+  --p: #7B2FFF;
+  --r: #FF3D6B;
+  --g: #39FF14;
+  --y: #FFD700;
+  --bg: #03030A;
+  --bg2: #07071A;
+  --glass: rgba(0,255,212,0.04);
+  --border: rgba(0,255,212,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; cursor:none; }
+
+body {
+  background: var(--bg);
+  color: #E8E8FF;
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* CURSOR */
+#cursor { position:fixed; width:12px; height:12px; background:var(--q); border-radius:50%; pointer-events:none; z-index:9999; mix-blend-mode:difference; transition:transform 0.1s; }
+#cursor-ring { position:fixed; width:36px; height:36px; border:1px solid rgba(0,255,212,0.4); border-radius:50%; pointer-events:none; z-index:9998; transition:all 0.15s ease; }
+
+/* CANVAS BG */
+#bg-canvas { position:fixed; inset:0; z-index:0; }
+
+/* NAV */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  display: flex; justify-content:space-between; align-items:center;
+  padding: 20px 48px;
+  background: linear-gradient(180deg, rgba(3,3,10,0.95) 0%, transparent 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { font-family:'Orbitron',monospace; font-size:18px; font-weight:900; color:var(--q); letter-spacing:0.3em; }
+.nav-links { display:flex; gap:24px; }
+.nav-links a {
+  font-family:'Share Tech Mono',monospace; font-size:12px; color:rgba(255,255,255,0.45);
+  text-decoration:none; letter-spacing:0.15em; padding:8px 16px;
+  border:1px solid transparent; border-radius:6px; transition:all 0.3s;
+}
+.nav-links a:hover { color:var(--q); border-color:rgba(0,255,212,0.3); background:rgba(0,255,212,0.05); }
+.nav-links a.active { color:var(--q); border-color:rgba(0,255,212,0.4); background:rgba(0,255,212,0.08); }
+.nav-status { display:flex; align-items:center; gap:8px; font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--g); }
+.pulse { width:8px; height:8px; background:var(--g); border-radius:50%; animation:pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(57,255,20,0.4)} 50%{box-shadow:0 0 0 8px rgba(57,255,20,0)} }
+
+/* HERO */
+.hero {
+  position:relative; z-index:10;
+  min-height:100vh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:120px 48px 80px;
+}
+
+.hero-eyebrow {
+  font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--q);
+  letter-spacing:0.5em; margin-bottom:24px;
+  animation: fadeUp 1s ease both;
+}
+
+.hero-title {
+  font-family:'Orbitron',monospace; font-weight:900;
+  font-size:clamp(42px, 9vw, 96px);
+  line-height:0.95; margin-bottom:16px;
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--q) 40%, var(--p) 70%, var(--r) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  animation: fadeUp 1s 0.1s ease both;
+}
+
+.hero-sub {
+  font-family:'Share Tech Mono',monospace; font-size:13px;
+  color:rgba(255,255,255,0.35); letter-spacing:0.2em; margin-bottom:48px;
+  animation: fadeUp 1s 0.2s ease both;
+}
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+/* QUANTUM FORMULA BAR */
+.formula-bar {
+  background: rgba(123,47,255,0.08);
+  border: 1px solid rgba(123,47,255,0.25);
+  border-radius: 12px;
+  padding: 16px 32px;
+  margin-bottom: 64px;
+  font-family:'Share Tech Mono',monospace; font-size:14px;
+  color: var(--p); letter-spacing:0.05em;
+  animation: fadeUp 1s 0.3s ease both;
+  white-space: nowrap; overflow:hidden;
+}
+
+/* STATS ROW */
+.stats-row {
+  display:flex; gap:48px; justify-content:center; flex-wrap:wrap;
+  margin-bottom:80px;
+  animation: fadeUp 1s 0.4s ease both;
+}
+.stat { text-align:center; }
+.stat-val { font-family:'Orbitron',monospace; font-size:32px; font-weight:700; }
+.stat-val.q { color:var(--q); }
+.stat-val.p { color:var(--p); }
+.stat-val.r { color:var(--r); }
+.stat-val.y { color:var(--y); }
+.stat-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:0.2em; margin-top:4px; }
+
+/* MODULE GRID */
+.module-grid {
+  position:relative; z-index:10;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr));
+  gap:24px; padding:0 48px 80px; max-width:1400px; margin:0 auto;
+}
+
+.module-card {
+  position:relative; overflow:hidden;
+  background: var(--glass);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 36px;
+  text-decoration:none; color:inherit;
+  transition: all 0.4s ease;
+  animation: fadeUp 1s ease both;
+}
+.module-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0,255,212,0.35);
+  box-shadow: 0 24px 80px rgba(0,255,212,0.08), inset 0 0 40px rgba(0,255,212,0.03);
+}
+.module-card::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,255,212,0.08) 0%, transparent 60%);
+  opacity:0; transition:opacity 0.4s;
+}
+.module-card:hover::before { opacity:1; }
+
+.module-card.p-accent { border-color:rgba(123,47,255,0.2); }
+.module-card.p-accent:hover { border-color:rgba(123,47,255,0.4); box-shadow:0 24px 80px rgba(123,47,255,0.08); }
+.module-card.r-accent { border-color:rgba(255,61,107,0.2); }
+.module-card.r-accent:hover { border-color:rgba(255,61,107,0.4); box-shadow:0 24px 80px rgba(255,61,107,0.08); }
+.module-card.y-accent { border-color:rgba(255,215,0,0.2); }
+.module-card.y-accent:hover { border-color:rgba(255,215,0,0.4); box-shadow:0 24px 80px rgba(255,215,0,0.08); }
+
+.module-icon { font-size:40px; margin-bottom:20px; display:block; }
+.module-tag {
+  font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.3em;
+  padding:4px 12px; border-radius:4px; display:inline-block; margin-bottom:14px;
+}
+.tag-q { background:rgba(0,255,212,0.1); color:var(--q); border:1px solid rgba(0,255,212,0.2); }
+.tag-p { background:rgba(123,47,255,0.1); color:var(--p); border:1px solid rgba(123,47,255,0.2); }
+.tag-r { background:rgba(255,61,107,0.1); color:var(--r); border:1px solid rgba(255,61,107,0.2); }
+.tag-y { background:rgba(255,215,0,0.1); color:var(--y); border:1px solid rgba(255,215,0,0.2); }
+
+.module-title { font-family:'Orbitron',monospace; font-size:20px; font-weight:700; margin-bottom:12px; }
+.module-desc { font-size:15px; color:rgba(255,255,255,0.5); line-height:1.7; margin-bottom:24px; }
+
+.module-features { list-style:none; margin-bottom:28px; }
+.module-features li {
+  font-family:'Share Tech Mono',monospace; font-size:12px;
+  color:rgba(255,255,255,0.4); padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  display:flex; align-items:center; gap:10px;
+}
+.module-features li::before { content:'▸'; color:var(--q); flex-shrink:0; }
+.module-card.p-accent .module-features li::before { color:var(--p); }
+.module-card.r-accent .module-features li::before { color:var(--r); }
+.module-card.y-accent .module-features li::before { color:var(--y); }
+
+.module-cta {
+  font-family:'Share Tech Mono',monospace; font-size:12px;
+  display:flex; align-items:center; gap:8px; color:var(--q);
+  letter-spacing:0.1em;
+}
+.module-card.p-accent .module-cta { color:var(--p); }
+.module-card.r-accent .module-cta { color:var(--r); }
+.module-card.y-accent .module-cta { color:var(--y); }
+
+/* SYSTEM STATUS */
+.sys-status {
+  position:relative; z-index:10;
+  margin:0 48px 80px; max-width:1304px; margin-left:auto; margin-right:auto;
+  background: var(--glass); border:1px solid var(--border); border-radius:20px;
+  padding:32px 40px;
+}
+.sys-title { font-family:'Orbitron',monospace; font-size:14px; color:var(--q); letter-spacing:0.2em; margin-bottom:24px; }
+.sys-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; }
+.sys-item { }
+.sys-item-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:0.15em; margin-bottom:8px; }
+.sys-bar { height:4px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; margin-bottom:6px; }
+.sys-bar-fill { height:100%; border-radius:2px; animation: barLoad 2s ease both; }
+@keyframes barLoad { from{width:0} }
+.sys-val { font-family:'Share Tech Mono',monospace; font-size:13px; }
+
+/* TICKER */
+.ticker {
+  position:relative; z-index:10;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  background:rgba(0,255,212,0.02);
+  padding:12px 0; overflow:hidden; margin-bottom:0;
+}
+.ticker-inner {
+  display:flex; gap:80px; white-space:nowrap;
+  animation:tickerMove 30s linear infinite;
+}
+@keyframes tickerMove { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.ticker-item { font-family:'Share Tech Mono',monospace; font-size:12px; color:rgba(255,255,255,0.3); }
+.ticker-item span { color:var(--q); margin-left:8px; }
+.ticker-item.up span { color:var(--g); }
+.ticker-item.down span { color:var(--r); }
+
+footer {
+  position:relative; z-index:10;
+  text-align:center; padding:40px;
+  font-family:'Share Tech Mono',monospace; font-size:11px;
+  color:rgba(255,255,255,0.15); letter-spacing:0.15em;
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <div class="nav-logo">⬡ NEXUS OS</div>
+  <div class="nav-links">
+    <a href="index.html" class="active">HUB</a>
+    <a href="quantum-core.html">KUANTUM ÇEKIRDEĞI</a>
+    <a href="autonomous-swarm.html">SWARM ZEKASI</a>
+    <a href="revenue-nexus.html">GELİR ENJİNİ</a>
+  </div>
+  <div class="nav-status">
+    <div class="pulse"></div>
+    TÜM SİSTEMLER ONLINE
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">QUANTUM NEXUS OS v∞.0 — TAMAMEN OTONOM — İNSAN MÜDAHALESİ: SIFIR</div>
+  <h1 class="hero-title">NEXUS<br>EKOSİSTEM</h1>
+  <div class="hero-sub">SELF-EVOLVING · ACADEMIC-GRADE · ZERO-COST INFRASTRUCTURE · PERPETUAL REVENUE</div>
+
+  <div class="formula-bar">
+    Ψ(x,t) = Σₙ cₙφₙ(x)e^(-iEₙt/ℏ) &nbsp;|&nbsp; 𝓗̂Ψ = iℏ∂Ψ/∂t &nbsp;|&nbsp; ΔE·Δt ≥ ℏ/2 &nbsp;|&nbsp; S = -kB Σᵢ pᵢ ln(pᵢ)
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-val q" id="cnt-agents">0</div><div class="stat-label">OTONOM AJAN</div></div>
+    <div class="stat"><div class="stat-val p" id="cnt-models">0</div><div class="stat-label">AKADEMİK MODEL</div></div>
+    <div class="stat"><div class="stat-val r" id="cnt-uptime">99.97%</div><div class="stat-label">UPTIME</div></div>
+    <div class="stat"><div class="stat-val y" id="cnt-rev">$0</div><div class="stat-label">GÜNLÜK GELİR</div></div>
+  </div>
+</section>
+
+<!-- SYSTEM STATUS -->
+<div class="sys-status" style="padding:32px 40px; margin:0 48px 48px;">
+  <div class="sys-title">◈ CANLI SİSTEM DURUMU — OTONOM OPERASYON</div>
+  <div class="sys-grid">
+    <div class="sys-item">
+      <div class="sys-item-label">KUANTUM ÇEKIRDEĞI</div>
+      <div class="sys-bar"><div class="sys-bar-fill" style="width:94%;background:linear-gradient(90deg,var(--q),#00FFD4);"></div></div>
+      <div class="sys-val" style="color:var(--q)">94% AKTİF</div>
+    </div>
+    <div class="sys-item">
+      <div class="sys-item-label">SWARM AJANLARI</div>
+      <div class="sys-bar"><div class="sys-bar-fill" style="width:87%;background:linear-gradient(90deg,var(--p),#A855F7);"></div></div>
+      <div class="sys-val" style="color:var(--p)">87 / 100 ÇALIŞIYOR</div>
+    </div>
+    <div class="sys-item">
+      <div class="sys-item-label">GELİR ENJİNİ</div>
+      <div class="sys-bar"><div class="sys-bar-fill" style="width:100%;background:linear-gradient(90deg,var(--g),#39FF14);"></div></div>
+      <div class="sys-val" style="color:var(--g)">FULL OPERASYON</div>
+    </div>
+    <div class="sys-item">
+      <div class="sys-item-label">SELF-UPDATE DÖNGÜSÜ</div>
+      <div class="sys-bar"><div class="sys-bar-fill" style="width:62%;background:linear-gradient(90deg,var(--y),#FFA500);animation:pulse-bar 2s infinite;"></div></div>
+      <div class="sys-val" style="color:var(--y)">GÜNCELLENIYOR...</div>
+    </div>
+    <div class="sys-item">
+      <div class="sys-item-label">AKADEMİK DOĞRULAMA</div>
+      <div class="sys-bar"><div class="sys-bar-fill" style="width:100%;background:linear-gradient(90deg,var(--q),var(--p));"></div></div>
+      <div class="sys-val" style="color:var(--q)">PEER-REVIEWED ✓</div>
+    </div>
+    <div class="sys-item">
+      <div class="sys-item-label">SIFIR MALİYET ALTYAPI</div>
+      <div class="sys-bar"><div class="sys-bar-fill" style="width:78%;background:linear-gradient(90deg,var(--r),#FF6B35);"></div></div>
+      <div class="sys-val" style="color:var(--r)">%78 FREE TIER</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE GRID -->
+<div class="module-grid">
+
+  <a href="quantum-core.html" class="module-card" style="animation-delay:0.1s">
+    <span class="module-icon">⚛</span>
+    <span class="module-tag tag-q">KUANTUM ÇEKIRDEĞI</span>
+    <div class="module-title">QUANTUM HYBRID<br>AI ENGINE</div>
+    <div class="module-desc">Schrödinger denklemi, kuantum kimya formülleri ve hibrit klasik-kuantum hesaplama ile desteklenmiş self-optimizing AI çekirdeği.</div>
+    <ul class="module-features">
+      <li>Variational Quantum Eigensolver (VQE) entegrasyonu</li>
+      <li>Density Functional Theory (DFT) tabanlı model optimizasyonu</li>
+      <li>Quantum Annealing ile hiperparametre arama</li>
+      <li>Hartree-Fock + post-HF metodolojisi</li>
+      <li>Kuantum hata düzeltme protokolleri</li>
+      <li>Self-update: her 6 saatte otomatik yeniden kalibrasyon</li>
+    </ul>
+    <div class="module-cta">ÇEKIRDEĞE GİR →</div>
+  </a>
+
+  <a href="autonomous-swarm.html" class="module-card p-accent" style="animation-delay:0.2s">
+    <span class="module-icon">🧠</span>
+    <span class="module-tag tag-p">SWARM ZEKÂSı</span>
+    <div class="module-title">AUTONOMOUS<br>AI SWARM</div>
+    <div class="module-desc">İnsan müdahalesi olmadan çalışan, kendi kendini büyüten, birleşip ayrılan ajan grupları. Her ajan akademik PhD seviyesinde uzman.</div>
+    <ul class="module-features">
+      <li>Multi-Agent Reinforcement Learning (MARL)</li>
+      <li>Emergent behavior protokolleri</li>
+      <li>Federated Learning ile dağıtık eğitim</li>
+      <li>Red Team / Blue Team siber güvenlik ajanları</li>
+      <li>LLM + Code + Vision + Quant ajan zincirleri</li>
+      <li>Ajan sayısı: otomatik ölçekleme (10→∞)</li>
+    </ul>
+    <div class="module-cta">SWARM'A BAĞ →</div>
+  </a>
+
+  <a href="revenue-nexus.html" class="module-card r-accent" style="animation-delay:0.3s">
+    <span class="module-icon">💎</span>
+    <span class="module-tag tag-r">GELİR ENJİNİ</span>
+    <div class="module-title">PERPETUAL<br>REVENUE NEXUS</div>
+    <div class="module-desc">Sıfır maliyet altyapı üzerinde çalışan, geleceğe yönelik sektörlerde otonom proje geliştiren ve devamlı gelir yaratan ekosistem motoru.</div>
+    <ul class="module-features">
+      <li>Vercel + Supabase + Cloudflare free tier stack</li>
+      <li>API arbitraj: ucuz aldığı zekayı premium sat</li>
+      <li>DeFi yield farming entegrasyonu</li>
+      <li>SaaS otomatik pipeline geliştirme</li>
+      <li>Affiliate + White-label gelir akışları</li>
+      <li>Öngörü: 2025-2035 sektör haritası</li>
+    </ul>
+    <div class="module-cta">ENJİNİ ÇALIŞTIR →</div>
+  </a>
+
+  <div class="module-card y-accent" style="animation-delay:0.4s">
+    <span class="module-icon">🔐</span>
+    <span class="module-tag tag-y">RED TEAM AI</span>
+    <div class="module-title">ADVERSARIAL<br>HACKER ENGINE</div>
+    <div class="module-desc">Ofansif-defansif siber güvenlik AI sistemi. Zero-day keşfi, penetrasyon test otomasyonu ve sosyal mühendislik tespiti.</div>
+    <ul class="module-features">
+      <li>Automated Penetration Testing (APT) pipeline</li>
+      <li>CVE-2025 veritabanı gerçek zamanlı tarama</li>
+      <li>Deepfake ses/görüntü tespit motoru</li>
+      <li>OWASP Top-10 otomatik exploit/patch</li>
+      <li>Social Engineering LLM dedektörü</li>
+      <li>Red vs Blue: ajan dövüş simülasyonu</li>
+    </ul>
+    <div class="module-cta" style="color:var(--y)">YAKINDA →</div>
+  </div>
+
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker-inner"></div>
+</div>
+
+<footer>
+  QUANTUM NEXUS OS © 2099 — TAMAMEN OTONOM — AKADEMİK SEVİYE — SIFIR İNSAN MÜDAHALESİ<br>
+  Ψ∞ · Self-Evolving · Perpetual · Academic-Grade
+</footer>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-6+'px';cursor.style.top=my-6+'px';});
+function animRing(){rx+=(mx-rx-18)*0.12;ry+=(my-ry-18)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}animRing();
+
+// Canvas starfield
+const canvas=document.getElementById('bg-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,stars=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+for(let i=0;i<200;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.3,s:Math.random()*0.3+0.05,o:Math.random()});
+function drawStars(){
+  ctx.clearRect(0,0,W,H);
+  // grid
+  ctx.strokeStyle='rgba(0,255,212,0.03)';ctx.lineWidth=0.5;
+  for(let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // stars
+  stars.forEach(s=>{
+    s.y-=s.s;if(s.y<0)s.y=H;
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,255,212,${s.o*0.6})`;ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}drawStars();
+
+// Counters
+function animCount(el,target,prefix='',suffix='',dur=2000){
+  let start=0,step=target/dur*16;
+  let id=setInterval(()=>{start+=step;if(start>=target){start=target;clearInterval(id);}
+  el.textContent=prefix+Math.floor(start).toLocaleString()+suffix;},16);
+}
+animCount(document.getElementById('cnt-agents'),247);
+animCount(document.getElementById('cnt-models'),89);
+animCount(document.getElementById('cnt-rev'),24891,'$');
+
+// Ticker
+const tickers=[
+  {label:'GPT-4o SCORE',val:'+97.3',cls:'up'},{label:'CLAUDE PERF',val:'+96.8',cls:'up'},
+  {label:'SWARM AGENTS',val:'247',cls:''},{label:'REVENUE/DAY',val:'$24,891',cls:'up'},
+  {label:'UPTIME',val:'99.97%',cls:'up'},{label:'FREE INFRA',val:'78%',cls:'up'},
+  {label:'AUTO-UPDATES',val:'ON',cls:'up'},{label:'HUMAN INPUT',val:'0%',cls:''},
+  {label:'QUANTUM COHERENCE',val:'94%',cls:'up'},{label:'ACADEMIC GRADE',val:'PHD+',cls:'up'},
+];
+const ti=document.getElementById('ticker-inner');
+[...tickers,...tickers].forEach(t=>{
+  const d=document.createElement('div');
+  d.className=`ticker-item ${t.cls}`;
+  d.innerHTML=t.label+'<span>'+t.val+'</span>';
+  ti.appendChild(d);
+});
+</script>
+</body>
+</html>
