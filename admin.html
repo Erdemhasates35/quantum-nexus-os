@@ -1,27 +1,112 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Page</title>
+    <title>ADMIN DASHBOARD — Nexus OS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #03030A;
+            color: #E8E8FF;
+            font-family: 'Rajdhani', sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 { color: #FFD700; margin-bottom: 20px; }
+        .ai-section {
+            background: rgba(123, 47, 255, 0.1);
+            border: 1px solid rgba(123, 47, 255, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        input, button {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(123, 47, 255, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+            color: #E8E8FF;
+            font-family: monospace;
+        }
+        button {
+            background: linear-gradient(135deg, #7B2FFF, #5B41DF);
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { opacity: 0.9; }
+        #output {
+            background: #020208;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+            min-height: 100px;
+            font-family: monospace;
+            color: #39FF14;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to the Admin Page</h1>
-    <p>This page now utilizes a proper backend architecture instead of browser-side API access.</p>
+    <div class="container">
+        <h1>⚡ ADMIN KONTROL MERKEZİ</h1>
+        
+        <div class="ai-section">
+            <h2 style="margin-bottom: 16px;">Claude AI Asistan</h2>
+            <input 
+                id="prompt" 
+                type="text" 
+                placeholder="Admin komutu veya soru yaz..." 
+                style="width: 100%; padding: 12px; margin-bottom: 10px;"
+                onkeypress="if(event.key==='Enter') sendPrompt()"
+            />
+            <button onclick="sendPrompt()">ÇALIŞTI 🚀</button>
+            <div id="output">Komut girmek için yukarı yaz...</div>
+        </div>
+
+        <div class="ai-section">
+            <h2 style="margin-bottom: 16px;">Hızlı Komutlar</h2>
+            <button onclick="sendPrompt('Sistem durumunu kontrol et')">📊 Sistem Durumu</button>
+            <button onclick="sendPrompt('Bugünkü gelir raporu ver')">💰 Gelir Raporu</button>
+            <button onclick="sendPrompt('Hangi ajan grubu en iyi performans gösterdi?')">🤖 Ajan Analizi</button>
+            <button onclick="sendPrompt('Conversion rate neden düştü?')">📈 Oto-İterasyon</button>
+        </div>
+    </div>
+
     <script>
-        async function fetchData() {
+        async function sendPrompt(msg = null) {
+            const input = document.getElementById('prompt');
+            const message = msg || input.value.trim();
+            
+            if (!message) return;
+            
+            input.value = '';
+            const output = document.getElementById('output');
+            output.textContent = '⏳ Claude işleniyor...';
+
             try {
-                const response = await fetch('/api/data'); // Fetch data from backend
+                const response = await fetch('http://localhost:3001/api/admin-ai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
                 const data = await response.json();
-                console.log(data);
+                const result = data.content ? data.content[0].text : 'Yanıt alınamadı';
+                output.textContent = result;
             } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
+                output.textContent = `❌ Hata: ${error.message}\n\nSunucunun çalıştığını kontrol et: node api.js`;
             }
         }
-        fetchData();
     </script>
 </body>
 </html>
