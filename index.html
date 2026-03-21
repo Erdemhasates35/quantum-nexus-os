@@ -1,2 +1,136 @@
-# quantum-nexus-os
-AI Tools Directory Platform
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Nexus OS - Ana Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #03030A 0%, #1a0033 100%);
+            color: #E8E8FF;
+            font-family: 'Orbitron', monospace;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        h1 {
+            font-size: 48px;
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .card:hover {
+            border-color: rgba(255, 215, 0, 0.6);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+            transform: translateY(-5px);
+        }
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .card-title {
+            font-size: 24px;
+            margin-bottom: 12px;
+            color: #FFD700;
+        }
+        .card-desc {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+        }
+        footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⬡ QUANTUM NEXUS OS</h1>
+            <p style="color: rgba(255, 255, 255, 0.5); font-family: monospace;">AI Tools Directory Platform</p>
+        </header>
+
+        <div class="grid">
+            <a href="admin.html" class="card">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">ADMIN</div>
+                <div class="card-desc">Kontrol merkezi ve AI asistan. Sistem yönetimi ve analiz.</div>
+            </a>
+
+            <a href="quantum-core.html" class="card">
+                <div class="card-icon">⚛</div>
+                <div class="card-title">Kuantum Çekirdeği</div>
+                <div class="card-desc">Temel işleme motoru ve hesaplama altyapısı.</div>
+            </a>
+
+            <a href="autonomous-swarm.html" class="card">
+                <div class="card-icon">🧠</div>
+                <div class="card-title">Otonom Swarm</div>
+                <div class="card-desc">Multi-ajan sistem ve dağıtılmış zeka.</div>
+            </a>
+
+            <a href="revenue-nexus.html" class="card">
+                <div class="card-icon">💎</div>
+                <div class="card-title">Revenue Nexus</div>
+                <div class="card-desc">Gelir akışı, monetizasyon ve finansal analiz.</div>
+            </a>
+
+            <a href="red-team-1.html" class="card">
+                <div class="card-icon">🔐</div>
+                <div class="card-title">Red Team</div>
+                <div class="card-desc">Güvenlik testleri ve sızma testleri.</div>
+            </a>
+        </div>
+
+        <footer>
+            <p>© 2026 Quantum Nexus OS | Powered by Claude AI & Node.js</p>
+            <p>Server Status: <span id="status" style="color: #39FF14;">●</span> Online</p>
+        </footer>
+    </div>
+
+    <script>
+        // Server durumunu kontrol et
+        async function checkStatus() {
+            try {
+                const response = await fetch('http://localhost:3001/health');
+                if (response.ok) {
+                    document.getElementById('status').style.color = '#39FF14';
+                }
+            } catch (e) {
+                document.getElementById('status').style.color = '#FF3D6B';
+            }
+        }
+        checkStatus();
+        setInterval(checkStatus, 5000);
+    </script>
+</body>
+</html>
