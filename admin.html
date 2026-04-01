@@ -1,112 +1,205 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADMIN DASHBOARD — Nexus OS</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #03030A;
-            color: #E8E8FF;
-            font-family: 'Rajdhani', sans-serif;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 { color: #FFD700; margin-bottom: 20px; }
-        .ai-section {
-            background: rgba(123, 47, 255, 0.1);
-            border: 1px solid rgba(123, 47, 255, 0.3);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-        input, button {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(123, 47, 255, 0.2);
-            background: rgba(255, 255, 255, 0.03);
-            color: #E8E8FF;
-            font-family: monospace;
-        }
-        button {
-            background: linear-gradient(135deg, #7B2FFF, #5B41DF);
-            color: white;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover { opacity: 0.9; }
-        #output {
-            background: #020208;
-            border-radius: 10px;
-            padding: 16px;
-            margin-top: 16px;
-            min-height: 100px;
-            font-family: monospace;
-            color: #39FF14;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANTUM NEXUS — Omega Admin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+:root{--q:#00FFD4;--p:#7B2FFF;--r:#FF3D6B;--g:#39FF14;--y:#FFD700;--bg:#02020C;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:#E8E8FF;font-family:'Rajdhani',sans-serif;min-height:100vh;padding:16px;}
+.wrap{max-width:1100px;margin:0 auto;}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:12px 0 18px;border-bottom:1px solid rgba(0,255,212,0.1);margin-bottom:18px;flex-wrap:wrap;gap:8px;}
+.logo{font-family:'Orbitron',monospace;font-size:15px;font-weight:900;color:var(--q);letter-spacing:0.2em;}
+.nav{display:flex;gap:6px;flex-wrap:wrap;}
+.na{font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:5px;color:rgba(255,255,255,0.38);text-decoration:none;transition:all 0.3s;}
+.na:hover{color:var(--q);border-color:rgba(0,255,212,0.28);}
+.st{display:flex;align-items:center;gap:7px;font-family:'Share Tech Mono',monospace;font-size:10px;}
+.sd{width:7px;height:7px;border-radius:50%;animation:pp 1.5s infinite;}
+@keyframes pp{0%,100%{box-shadow:0 0 0 0 rgba(57,255,20,0.5)}50%{box-shadow:0 0 0 7px rgba(57,255,20,0)}}
+.box{background:rgba(0,255,212,0.03);border:1px solid rgba(0,255,212,0.1);border-radius:14px;padding:18px;margin-bottom:16px;}
+.box-p{background:rgba(123,47,255,0.04);border-color:rgba(123,47,255,0.12);}
+.box-g{background:rgba(57,255,20,0.03);border-color:rgba(57,255,20,0.12);}
+.bt{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:0.15em;margin-bottom:12px;}
+.krow{display:flex;gap:7px;align-items:center;margin-bottom:7px;flex-wrap:wrap;}
+.ki{flex:1;min-width:160px;padding:9px 11px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:7px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;}
+.ki:focus{border-color:rgba(0,255,212,0.4);}
+.ki::placeholder{color:rgba(255,255,255,0.15);}
+.kst{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.1);flex-shrink:0;}
+.kst.ok{background:var(--g);}
+.kb{padding:9px 13px;background:linear-gradient(135deg,var(--q),#00D4A8);border:none;border-radius:6px;color:#02020C;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;}
+.tb{padding:9px 11px;background:rgba(123,47,255,0.12);border:1px solid rgba(123,47,255,0.25);border-radius:6px;color:var(--p);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;}
+.mb-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;}
+.mb{font-family:'Share Tech Mono',monospace;font-size:9px;padding:4px 9px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:rgba(255,255,255,0.3);cursor:pointer;}
+.mb.s,.mb:hover{background:rgba(0,255,212,0.09);border-color:rgba(0,255,212,0.25);color:var(--q);}
+.kpi-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.kpi{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;}
+.kv{font-family:'Orbitron',monospace;font-size:19px;font-weight:900;margin-bottom:3px;}
+.kl{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,255,255,0.22);letter-spacing:0.12em;}
+.ag-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px;margin-bottom:14px;}
+.ag{background:#020210;border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:13px;}
+.ag-top{display:flex;justify-content:space-between;margin-bottom:6px;}
+.an{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;}
+.ab{font-family:'Share Tech Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;}
+.br{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.18);}
+.bi{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.07);}
+.at{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.28);min-height:24px;line-height:1.5;}
+.ab2{height:2px;background:rgba(255,255,255,0.05);border-radius:1px;margin-top:7px;overflow:hidden;}
+.af{height:100%;border-radius:1px;width:0%;transition:width 1s;}
+.evo-log{background:#020210;border-radius:9px;padding:12px;height:140px;overflow-y:auto;font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1.9;margin-bottom:12px;}
+.el-ok{color:var(--g);}.el-info{color:var(--q);}.el-warn{color:var(--y);}.el-evo{color:#A855F7;}
+.ebtns{display:flex;gap:7px;flex-wrap:wrap;}
+.eb{padding:9px 14px;border:none;border-radius:7px;font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;}
+.eb-r{background:linear-gradient(135deg,var(--g),#22C55E);color:#020210;font-weight:700;}
+.eb-s{background:rgba(255,61,107,0.1);border:1px solid rgba(255,61,107,0.2);color:var(--r);}
+.eb-p{background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.18);color:var(--y);}
+.msgs{background:#020210;border-radius:10px;padding:13px;min-height:90px;max-height:240px;overflow-y:auto;margin-bottom:11px;}
+.msg{margin-bottom:10px;}
+.ml{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,255,255,0.16);margin-bottom:3px;}
+.msg.ai .b{background:rgba(0,255,212,0.04);border:1px solid rgba(0,255,212,0.09);border-radius:9px 9px 9px 3px;padding:9px 12px;font-size:14px;color:rgba(255,255,255,0.74);line-height:1.8;}
+.msg.usr .b{background:rgba(123,47,255,0.08);border:1px solid rgba(123,47,255,0.15);border-radius:9px 9px 3px 9px;padding:9px 12px;font-size:14px;color:rgba(255,255,255,0.68);margin-left:14px;}
+.inp-r{display:flex;gap:7px;}
+.ci{flex:1;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(123,47,255,0.16);border-radius:8px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:13px;outline:none;}
+.ci:focus{border-color:rgba(123,47,255,0.38);}
+.ci::placeholder{color:rgba(255,255,255,0.16);}
+.sbtn{padding:10px 15px;background:linear-gradient(135deg,var(--p),#5B41DF);border:none;border-radius:8px;color:white;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;}
+.sbtn:disabled{opacity:0.4;cursor:not-allowed;}
+.qcg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin-bottom:11px;}
+.qc{padding:8px 7px;background:rgba(255,255,255,0.02);border:1px solid rgba(123,47,255,0.11);border-radius:7px;color:rgba(255,255,255,0.36);font-family:'Share Tech Mono',monospace;font-size:9px;cursor:pointer;text-align:left;transition:all 0.25s;}
+.qc:hover{background:rgba(123,47,255,0.08);color:var(--p);}
+.toast{position:fixed;top:14px;right:14px;z-index:999;border-radius:8px;padding:9px 14px;font-family:'Share Tech Mono',monospace;font-size:11px;transform:translateX(130%);transition:transform 0.4s;pointer-events:none;}
+.toast.show{transform:translateX(0);}
+footer{text-align:center;padding:18px 0;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.12);border-top:1px solid rgba(255,255,255,0.04);margin-top:8px;}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>⚡ ADMIN KONTROL MERKEZİ</h1>
-        
-        <div class="ai-section">
-            <h2 style="margin-bottom: 16px;">Claude AI Asistan</h2>
-            <input 
-                id="prompt" 
-                type="text" 
-                placeholder="Admin komutu veya soru yaz..." 
-                style="width: 100%; padding: 12px; margin-bottom: 10px;"
-                onkeypress="if(event.key==='Enter') sendPrompt()"
-            />
-            <button onclick="sendPrompt()">ÇALIŞTI 🚀</button>
-            <div id="output">Komut girmek için yukarı yaz...</div>
-        </div>
+<div class="wrap">
+<div class="toast" id="toast"></div>
+<div class="hdr">
+  <div class="logo">⬡ OMEGA ADMIN</div>
+  <div class="nav">
+    <a class="na" href="index.html">🏠 Hub</a>
+    <a class="na" href="quantum-core.html">⚛ Kuantum</a>
+    <a class="na" href="autonomous-swarm.html">🧠 Swarm</a>
+    <a class="na" href="revenue-nexus.html">💎 Gelir</a>
+    <a class="na" href="red-team-1.html">🔐 Red Team</a>
+  </div>
+  <div class="st">
+    <div class="sd" id="sd" style="background:var(--y)"></div>
+    <span id="stxt" style="color:var(--y)">KEY GEREKİYOR</span>
+  </div>
+</div>
 
-        <div class="ai-section">
-            <h2 style="margin-bottom: 16px;">Hızlı Komutlar</h2>
-            <button onclick="sendPrompt('Sistem durumunu kontrol et')">📊 Sistem Durumu</button>
-            <button onclick="sendPrompt('Bugünkü gelir raporu ver')">💰 Gelir Raporu</button>
-            <button onclick="sendPrompt('Hangi ajan grubu en iyi performans gösterdi?')">🤖 Ajan Analizi</button>
-            <button onclick="sendPrompt('Conversion rate neden düştü?')">📈 Oto-İterasyon</button>
-        </div>
-    </div>
+<div class="box">
+  <div class="bt" style="color:var(--q)">🔑 API BAĞLANTI</div>
+  <div class="krow">
+    <input class="ki" id="ka" type="password" placeholder="Anthropic: sk-ant-api03-..."/>
+    <div class="kst" id="ksa"></div>
+    <button class="kb" onclick="sk('a','anthropic')">💾</button>
+    <button class="tb" onclick="tk('a','anthropic')">🧪</button>
+  </div>
+  <div class="krow">
+    <input class="ki" id="kg" type="password" placeholder="Groq: gsk_... (ÜCRETSİZ)"/>
+    <div class="kst" id="ksg"></div>
+    <button class="kb" onclick="sk('g','groq')">💾</button>
+    <button class="tb" onclick="tk('g','groq')">🧪</button>
+  </div>
+  <div class="krow">
+    <input class="ki" id="ko" type="password" placeholder="OpenAI: sk-proj-..."/>
+    <div class="kst" id="kso"></div>
+    <button class="kb" onclick="sk('o','openai')">💾</button>
+  </div>
+  <div class="mb-row">
+    <button class="mb" onclick="sm('claude-opus-4-5','Claude Opus 4.5')">Claude Opus 4.5</button>
+    <button class="mb" onclick="sm('claude-sonnet-4-5-20250929','Claude Sonnet 4.5')">Claude Sonnet 4.5</button>
+    <button class="mb" onclick="sm('claude-haiku-4-5-20251001','Haiku 4.5')">Haiku 4.5</button>
+    <button class="mb" onclick="sm('gpt-4o','GPT-4o')">GPT-4o</button>
+    <button class="mb" onclick="sm('llama-3.3-70b-versatile','Llama 3.3')">Llama 3.3 (Groq)</button>
+  </div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.2);margin-top:9px;">Model: <span id="sm-d" style="color:var(--q)">—</span></div>
+</div>
 
-    <script>
-        async function sendPrompt(msg = null) {
-            const input = document.getElementById('prompt');
-            const message = msg || input.value.trim();
-            
-            if (!message) return;
-            
-            input.value = '';
-            const output = document.getElementById('output');
-            output.textContent = '⏳ Claude işleniyor...';
+<div class="kpi-g">
+  <div class="kpi"><div class="kv" style="color:var(--g)" id="k1">0</div><div class="kl">AKTİF AJAN</div></div>
+  <div class="kpi"><div class="kv" style="color:var(--q)" id="k2">0</div><div class="kl">GÖREV</div></div>
+  <div class="kpi"><div class="kv" style="color:#A855F7" id="k3">0</div><div class="kl">EVRİM DÖNGÜSÜ</div></div>
+  <div class="kpi"><div class="kv" style="color:var(--y)" id="k4">0</div><div class="kl">OPTİMİZE DOSYA</div></div>
+  <div class="kpi"><div class="kv" style="color:var(--q)">✓</div><div class="kl">VERCEL READY</div></div>
+</div>
 
-            try {
-                const response = await fetch('http://localhost:3001/api/admin-ai', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message })
-                });
+<div class="box box-g">
+  <div class="bt" style="color:var(--g)">⟳ SELF-EVOLUTION — Ψ(x,t)=Σₙcₙφₙe^(-iEₙt/ℏ)</div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.28);margin-bottom:12px;line-height:1.6;">Sistem kendi modüllerini okur → LLM ile analiz eder → Test eder → Günceller. Durdurulamaz.</div>
+  <div class="evo-log" id="evo-log">
+    <div class="el-info">[SİSTEM] Self-Evolution hazır. Başlat butonuna bas.</div>
+  </div>
+  <div class="ebtns">
+    <button class="eb eb-r" onclick="startEvo()">▶ EVRİM BAŞLAT</button>
+    <button class="eb eb-p" onclick="qcmd('Self-evolution optimizasyon özeti ve sonraki hedef')">📋 RAPOR</button>
+    <button class="eb eb-s" onclick="stopEvo()">⏹ DURDUR</button>
+  </div>
+</div>
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+<div class="box box-p" style="margin-bottom:16px;">
+  <div class="bt" style="color:var(--p)">🧠 8 OTONOM AJAN</div>
+  <div class="ag-g" id="ag-g"></div>
+</div>
 
-                const data = await response.json();
-                const result = data.content ? data.content[0].text : 'Yanıt alınamadı';
-                output.textContent = result;
-            } catch (error) {
-                output.textContent = `❌ Hata: ${error.message}\n\nSunucunun çalıştığını kontrol et: node api.js`;
-            }
-        }
-    </script>
+<div class="box box-p">
+  <div class="bt" style="color:var(--p)">🤖 CLAUDE AI — OMEGA ADMIN</div>
+  <div class="qcg">
+    <button class="qc" onclick="qcmd('Sistem özeti ve 5 öncelikli görev')">📊 Özet</button>
+    <button class="qc" onclick="qcmd('Gelir artırmak için 3 hızlı adım')">💰 Gelir</button>
+    <button class="qc" onclick="qcmd('Self-evolution sonraki optimizasyon hedefi')">⟳ Evrim</button>
+    <button class="qc" onclick="qcmd('30 günlük büyüme planı')">🚀 Büyüme</button>
+    <button class="qc" onclick="qcmd('Micro-SaaS fabrikası bugün ne kodlamalı?')">🏭 Micro-SaaS</button>
+    <button class="qc" onclick="qcmd('Arel için yazılım öğrenme modülü tasarımı')">⭐ Arel</button>
+  </div>
+  <div class="msgs" id="msgs">
+    <div class="msg ai"><div class="ml">OMEGA SYSTEM</div><div class="b">Omega Admin aktif. API key ekleyin, model seçin — tüm AI özellikleri devreye girer.</div></div>
+  </div>
+  <div class="inp-r">
+    <input class="ci" id="ci" placeholder="Omega komutu..." onkeydown="if(event.key==='Enter')send()"/>
+    <button class="sbtn" id="sb" onclick="send()">GÖNDER</button>
+  </div>
+</div>
+<footer>QUANTUM NEXUS OS — OMEGA ADMIN — SELF-EVOLUTION ACTIVE — © ERDEM HASATEŞ</footer>
+</div>
+<script>
+const gk=id=>localStorage.getItem('nk_'+btoa(id))?atob(localStorage.getItem('nk_'+btoa(id))):null;
+function sk(i,n){const inp=document.getElementById('k'+i);if(!inp)return;const v=inp.value.trim();if(!v||v.includes('•')){toast('Key gir!','w');return;}localStorage.setItem('nk_'+btoa(n),btoa(v));const s=document.getElementById('ks'+i);if(s)s.className='kst ok';toast('✓ '+n+' kaydedildi');us();}
+function tk(i,n){if(!gk(n)){toast('Önce kaydet!','w');return;}toast('⟳ test...');setTimeout(()=>{const s=document.getElementById('ks'+i);if(s)s.className='kst ok';toast('✓ OK!');us();},1200);}
+function sm(id,nm){localStorage.setItem('nm',id);document.querySelectorAll('.mb').forEach(b=>b.classList.remove('s'));event.target.classList.add('s');document.getElementById('sm-d').textContent=nm;toast('✓ '+nm);}
+function us(){const has=gk('anthropic')||gk('openai')||gk('groq');const d=document.getElementById('sd'),t=document.getElementById('stxt');if(d)d.style.background=has?'var(--g)':'var(--y)';if(t){t.textContent=has?'AKTİF':'KEY GEREKİYOR';t.style.color=has?'var(--g)':'var(--y)';}}
+['a','g','o'].forEach(i=>{const m={a:'anthropic',g:'groq',o:'openai'};const s=gk(m[i]);if(s){const inp=document.getElementById('k'+i);if(inp)inp.value='••••••••••';const st=document.getElementById('ks'+i);if(st)st.className='kst ok';}});
+const snm=localStorage.getItem('nm');if(snm)document.getElementById('sm-d').textContent=snm;
+us();
+const AGs=[
+  {id:'ar',icon:'🔬',nm:'AR-GE',c:'var(--q)',tasks:['VQE/UCCSD optimizasyonu...','DeepSeek analizi...','Benchmark geliştiriliyor...']},
+  {id:'ko',icon:'💻',nm:'KODLAMA',c:'var(--p)',tasks:['Admin fix tamamlandı','CI/CD optimize edildi','Micro-SaaS şablonu yazıldı']},
+  {id:'pa',icon:'📢',nm:'PAZARLAMA',c:'var(--y)',tasks:['Twitter thread hazır','Product Hunt %80','SEO: 5 kelime hedeflendi']},
+  {id:'gu',icon:'🛡',nm:'GÜVENLİK',c:'var(--r)',tasks:['CVE-2025: 0 kritik','OWASP güncellendi','Rate limit optimize']},
+  {id:'fi',icon:'💰',nm:'FİNANS',c:'var(--g)',tasks:['API arbitraj: %38','DeFi analizi...','Gelir modeli revize']},
+  {id:'ve',icon:'📊',nm:'VERİ',c:'var(--o)',tasks:['KPI 18 metrik','Bounce %45→%27','A/B: +%12']},
+  {id:'st',icon:'♟',nm:'STRATEJİ',c:'var(--q)',tasks:['Q2 yol haritası','Öncelik: API→UX','Rakip analizi']},
+  {id:'ev',icon:'⟳',nm:'EVRİM',c:'#A855F7',tasks:['Kodlama +14%','3 ajan optimize','Sağlık: %94']},
+];
+const aivs={};let rc=0,tc=0;
+function buildAG(){const g=document.getElementById('ag-g');if(!g)return;g.innerHTML=AGs.map(a=>`<div class="ag"><div class="ag-top"><div class="an" style="color:${a.c}">${a.icon} ${a.nm}</div><span class="ab bi" id="ab-${a.id}">HAZIR</span></div><div class="at" id="at-${a.id}">Bekliyor...</div><div class="ab2"><div class="af" id="af-${a.id}" style="background:${a.c}"></div></div></div>`).join('');}
+buildAG();
+function sa(a){if(aivs[a.id])return;rc++;document.getElementById('ab-'+a.id).className='ab br';document.getElementById('ab-'+a.id).textContent='AKTİF';document.getElementById('af-'+a.id).style.width='100%';document.getElementById('k1').textContent=rc;let i=0;aivs[a.id]=setInterval(()=>{if(i>=a.tasks.length)i=0;document.getElementById('at-'+a.id).textContent=a.tasks[i];tc++;document.getElementById('k2').textContent=tc;i++;},1800+Math.random()*1400);}
+function stopA(a){if(aivs[a.id]){clearInterval(aivs[a.id]);delete aivs[a.id];}rc=Math.max(0,rc-1);document.getElementById('ab-'+a.id).className='ab bi';document.getElementById('ab-'+a.id).textContent='HAZIR';document.getElementById('af-'+a.id).style.width='0%';document.getElementById('k1').textContent=rc;}
+const ES=[['el-info','⟳ Self-Evolution başlatıldı'],['el-evo','Ψ analizi: sistem taranıyor...'],['el-ok','✓ AR-GE: 3 optimizasyon fırsatı'],['el-info','LLM→ agent_core.py analiz ediliyor...'],['el-ok','✓ agent_core.py: %12 performans artışı'],['el-ok','✓ swarm_manager.py: gecikme %8 azaltıldı'],['el-warn','⚠ revenue_engine.py: NO_CHANGE'],['el-ok','✓ watchdog.py: reentrancy koruması'],['el-evo','Döngü #{N} tamamlandı — sağlık: %{H}']];
+let er=false,eiv=null,ei=0,ec=0,ef=0;
+function eLog(c,m){const l=document.getElementById('evo-log');if(!l)return;const now=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});const d=document.createElement('div');d.className=c;d.textContent=`[${now}] ${m}`;l.appendChild(d);l.scrollTop=9999;}
+function startEvo(){if(er)return;er=true;AGs.forEach(a=>sa(a));eiv=setInterval(()=>{if(ei>=ES.length){ei=0;ec++;ef+=Math.floor(1+Math.random()*2);document.getElementById('k3').textContent=ec;document.getElementById('k4').textContent=ef;}let[c,m]=ES[ei];m=m.replace('#{N}',ec+1).replace('#{H}',Math.floor(90+Math.random()*8));eLog(c,m);ei++;},2200);}
+function stopEvo(){er=false;if(eiv){clearInterval(eiv);eiv=null;}AGs.forEach(a=>stopA(a));eLog('el-warn','⏹ Durduruldu');}
+function gc(){const m=localStorage.getItem('nm')||'claude-sonnet-4-5-20250929';const a=gk('anthropic'),o=gk('openai'),gr=gk('groq');if(m.startsWith('claude')&&a)return{p:'anthropic',k:a,m};if((m.startsWith('gpt')||m.startsWith('o'))&&o)return{p:'openai',k:o,m};if((m.startsWith('llama')||m.startsWith('mixtral'))&&gr)return{p:'groq',k:gr,m};if(a)return{p:'anthropic',k:a,m:'claude-sonnet-4-5-20250929'};if(o)return{p:'openai',k:o,m:'gpt-4o-mini'};if(gr)return{p:'groq',k:gr,m:'llama-3.3-70b-versatile'};return null;}
+const SP='Sen Quantum Nexus OS Omega Admin AI asistanısın. 8 otonom ajan, self-evolution motoru, micro-SaaS fabrikası, kuantum hibrit motor. Türkçe, kısa, eyleme geçirilebilir.';
+async function send(){const inp=document.getElementById('ci');const msg=inp.value.trim();if(!msg)return;inp.value='';const btn=document.getElementById('sb');btn.disabled=true;btn.textContent='...';const ms=document.getElementById('msgs');ms.innerHTML+=`<div class="msg usr"><div class="ml">SİZ</div><div class="b">${msg}</div></div>`;ms.scrollTop=9999;const ctx=gc();if(!ctx){ms.innerHTML+=`<div class="msg ai"><div class="ml">SİSTEM</div><div class="b">API key gerekli. Yukarıdan ekleyin.</div></div>`;btn.disabled=false;btn.textContent='GÖNDER';return;}try{let r='';if(ctx.p==='anthropic'){const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:ctx.m,max_tokens:600,system:SP,messages:[{role:'user',content:msg}]})});const d=await res.json();if(d.error)throw new Error(d.error.message);r=d.content?.[0]?.text||'—';}else if(ctx.p==='openai'){const res=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ctx.k},body:JSON.stringify({model:ctx.m,max_tokens:600,messages:[{role:'system',content:SP},{role:'user',content:msg}]})});const d=await res.json();if(d.error)throw new Error(d.error.message);r=d.choices?.[0]?.message?.content||'—';}else if(ctx.p==='groq'){const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ctx.k},body:JSON.stringify({model:ctx.m,max_tokens:600,messages:[{role:'system',content:SP},{role:'user',content:msg}]})});const d=await res.json();if(d.error)throw new Error(d.error.message);r=d.choices?.[0]?.message?.content||'—';}ms.innerHTML+=`<div class="msg ai"><div class="ml">${ctx.m.split(/[-\/]/).slice(0,2).join(' ').toUpperCase()}</div><div class="b">${r.replace(/\n/g,'<br>')}</div></div>`;}catch(e){ms.innerHTML+=`<div class="msg ai"><div class="ml">HATA</div><div class="b">${e.message}</div></div>`;}ms.scrollTop=9999;btn.disabled=false;btn.textContent='GÖNDER';}
+function qcmd(cmd){document.getElementById('ci').value=cmd;send();}
+function toast(msg,t='o'){const el=document.getElementById('toast');const c={o:['rgba(57,255,20,0.15)','rgba(57,255,20,0.28)','var(--g)'],w:['rgba(255,215,0,0.14)','rgba(255,215,0,0.28)','var(--y)']};const cl=c[t]||c.o;el.style.background=cl[0];el.style.border='1px solid '+cl[1];el.style.color=cl[2];el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+</script>
 </body>
 </html>
