@@ -1,1 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Todo — Local Storage App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>Todo</h1>
+      <p class="subtitle">Small todo app with localStorage persistence</p>
+    </header>
 
+    <section class="new-todo">
+      <input id="newTodoInput" type="text" placeholder="Add a new task and press Enter" aria-label="Add new todo">
+      <select id="prioritySelect" aria-label="Priority">
+        <option value="normal">Normal</option>
+        <option value="high">High</option>
+        <option value="low">Low</option>
+      </select>
+      <button id="addBtn" aria-label="Add todo">Add</button>
+    </section>
+
+    <section class="controls">
+      <div class="left">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="active">Active</button>
+        <button class="filter-btn" data-filter="completed">Completed</button>
+      </div>
+
+      <div class="right">
+        <input id="searchInput" type="search" placeholder="Search tasks..." aria-label="Search todos">
+        <button id="clearCompleted">Clear completed</button>
+      </div>
+    </section>
+
+    <section id="todoList" class="todo-list" aria-live="polite" aria-label="Todo list">
+      <!-- Items inserted here -->
+    </section>
+
+    <footer class="footer">
+      <span id="countText">0 items</span>
+      <small>Saved locally in your browser</small>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
