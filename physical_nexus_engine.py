@@ -3,9 +3,9 @@ import json
 import time
 
 class NexusPhysicalEngine:
-    """
+    "
     Wi-Fi CSI ve GSM Sinyal Analiz Motoru - v12
-    """
+    "
     def __init__(self):
         self.status = "ACTIVE"
         self.modes = ["Wall-Sensing", "Biometric", "GSM-Trilateration"]

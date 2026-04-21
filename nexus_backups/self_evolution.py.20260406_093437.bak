@@ -1,8 +1,8 @@
-"
+"""
 QUANTUM NEXUS OS — SELF-EVOLUTION ENGINE
 Sistem kendi kodunu okur, LLM ile optimize eder, test eder, günceller.
 Termux/Android uyumlu. Python 3.10+
-"
+"""
 
 import os
 import sys
@@ -30,13 +30,13 @@ def log(msg, level='INFO'):
     print(f"{col}[{ts}] [{level}]{E} {msg}")
 
 def banner():
-    print(f"
+    print(f"""
 {C}{BOLD}
 ╔══════════════════════════════════════════════════╗
 ║     QUANTUM NEXUS — SELF-EVOLUTION ENGINE       ║
 ║     Ψ(x,t) = Σₙ cₙφₙ e^(-iEₙt/ℏ)             ║
 ╚══════════════════════════════════════════════════╝
-{E}")
+{E}""")
 
 # ── Konfigürasyon ──
 CONFIG = {
@@ -64,16 +64,16 @@ class EvolutionEngine:
         os.makedirs(CONFIG["backup_dir"], exist_ok=True)
 
     def read_file(self, filepath: str) -> str:
-        "Hedef dosyayı oku"
+        """Hedef dosyayı oku"""
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 return f.read()
         except FileNotFoundError:
             log(f"Dosya bulunamadı: {filepath}", "WARN")
-            return "
+            return ""
 
     def backup_file(self, filepath: str):
-        "Orijinal dosyayı yedekle"
+        """Orijinal dosyayı yedekle"""
         ts = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = Path(filepath).name
         backup_path = f"{CONFIG['backup_dir']}/{filename}.{ts}.bak"
@@ -86,12 +86,12 @@ class EvolutionEngine:
         return hashlib.md5(code.encode()).hexdigest()[:8]
 
     def call_llm(self, code: str, filename: str) -> str:
-        "LLM'e kodu gönder, optimize edilmiş halini al"
+        """LLM'e kodu gönder, optimize edilmiş halini al"""
         if not self.api_key:
             log("API key bulunamadı! ANTHROPIC_API_KEY veya GROQ_API_KEY ayarlayın.", "ERR")
-            return "
+            return ""
 
-        prompt = f"Sen bir Python kod optimizasyon uzmanısın.
+        prompt = f"""Sen bir Python kod optimizasyon uzmanısın.
 Aşağıdaki Python kodunu analiz et ve şu açılardan iyileştir:
 
 1. Performans optimizasyonu
@@ -113,7 +113,7 @@ KOD:
 {code}
 ```
 
-Optimize edilmiş kod:"
+Optimize edilmiş kod:"""
 
         try:
             import urllib.request
@@ -158,12 +158,12 @@ Optimize edilmiş kod:"
 
         except Exception as e:
             log(f"LLM çağrısı başarısız: {e}", "ERR")
-            return "
+            return ""
 
     def extract_code(self, llm_response: str) -> str:
-        "LLM yanıtından Python kodunu çıkar"
+        """LLM yanıtından Python kodunu çıkar"""
         if not llm_response or "NO_CHANGE" in llm_response:
-            return "
+            return ""
 
         # ```python ... ``` bloğunu çıkar
         if "```python" in llm_response:
@@ -183,10 +183,10 @@ Optimize edilmiş kod:"
         if llm_response.startswith("def ") or llm_response.startswith("import ") or llm_response.startswith("#"):
             return llm_response.strip()
 
-        return "
+        return ""
 
     def test_code(self, code: str, filepath: str) -> tuple[bool, str]:
-        "Kodu geçici dosyaya yaz ve syntax/import testini çalıştır"
+        """Kodu geçici dosyaya yaz ve syntax/import testini çalıştır"""
         tmp_path = f"/tmp/nexus_test_{int(time.time())}.py"
         try:
             with open(tmp_path, 'w', encoding='utf-8') as f:
@@ -221,13 +221,13 @@ Optimize edilmiş kod:"
                 os.remove(tmp_path)
 
     def write_code(self, code: str, filepath: str):
-        "Optimize edilmiş kodu dosyaya yaz"
+        """Optimize edilmiş kodu dosyaya yaz"""
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(code)
         log(f"Dosya güncellendi: {filepath}", "OK")
 
     def log_evolution(self, filepath: str, before_hash: str, after_hash: str, success: bool, details: str):
-        "Evrim kaydını tut"
+        """Evrim kaydını tut"""
         entry = {
             "timestamp": datetime.now().isoformat(),
             "file": filepath,
@@ -242,7 +242,7 @@ Optimize edilmiş kod:"
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
     def evolve_file(self, filepath: str) -> bool:
-        "Tek bir dosyayı evolve et"
+        """Tek bir dosyayı evolve et"""
         log(f"Evolving: {filepath}", "EVOLVE")
 
         # Dosyayı oku
@@ -292,7 +292,7 @@ Optimize edilmiş kod:"
             return False
 
     def run(self, target_files: list = None):
-        "Ana evrim döngüsü"
+        """Ana evrim döngüsü"""
         banner()
 
         if not self.api_key:
@@ -334,7 +334,7 @@ Optimize edilmiş kod:"
 
 
 class SwarmCoordinator:
-    "8 Ajan koordinasyonu — her ajan bir görevi paralel yürütür"
+    """8 Ajan koordinasyonu — her ajan bir görevi paralel yürütür"""
 
     AGENTS = {
         "ar_ge":     {"icon": "🔬", "role": "Teknoloji araştırma, yeni model değerlendirme"},
@@ -368,7 +368,7 @@ class SwarmCoordinator:
 
 
 def main():
-    "Ana giriş noktası"
+    """Ana giriş noktası"""
     import argparse
 
     parser = argparse.ArgumentParser(

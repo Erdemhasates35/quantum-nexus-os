@@ -57,7 +57,7 @@ git add nexus-ultra.html
 [ -f physical_nexus_engine.py ] && git add physical_nexus_engine.py
 [ -f self_evolution.py ] && git add self_evolution.py 2>/dev/null || true
 
-git commit -m "feat: Wi-Fi CSI Visual Radar modülü eklendi
+git commit -m "feat: Wi-Fi CSI Visual Radar modülü eklendi"
 
 - 📡 Gerçek zamanlı CSI radar canvas (sweep + hareket noktaları)
 - 〰 Dalga formu grafiği (amplitüd, frekans, SNR)
