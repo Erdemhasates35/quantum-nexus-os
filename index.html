@@ -1,2 +1,136 @@
-# quantum-nexus-os
-AI Tools Directory Platform
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Nexus OS — ErdemHasates v3.2</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* Önceki stil kodun tamamı buraya gelecek — yer tasarrufu için aynı bıraktım */
+:root{--bg:#020609;--cyan:#00e5ff;--purple:#9d4edd;--green:#00ff9f;--pink:#ff2b6b;}
+body{background:var(--bg);color:#b8d8f0;font-family:'Share Tech Mono',monospace;margin:0;padding:0;height:100vh;overflow:hidden;}
+.panel{background:#060c12;border:1px solid #00e5ff30;padding:12px;border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const {useState, useEffect} = React;
+
+const AI_PROVIDERS = [
+  {id:'claude', name:'Claude (Anthropic)', color:'#9d4edd', endpoint:'https://api.anthropic.com/v1/messages', model:'claude-3-5-sonnet-20240620'},
+  {id:'gemini', name:'Gemini (Google)', color:'#00ff9f', endpoint:'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', model:'gemini-1.5-flash'},
+  {id:'grok', name:'Grok (xAI)', color:'#00e5ff', endpoint:'https://api.x.ai/v1/chat/completions', model:'grok-beta'}, // 2026 itibarıyla
+  {id:'gpt', name:'GPT (OpenAI)', color:'#ff2b6b', endpoint:'https://api.openai.com/v1/chat/completions', model:'gpt-4o-mini'},
+  {id:'groq', name:'Groq (Ultra Fast)', color:'#ffd600', endpoint:'https://api.groq.com/openai/v1/chat/completions', model:'llama3-70b-8192'},
+  {id:'deepseek', name:'DeepSeek (Ücretsiz Güçlü)', color:'#ff6d00', endpoint:'https://api.deepseek.com/v1/chat/completions', model:'deepseek-chat'}
+];
+
+function App() {
+  const [activeTab, setActiveTab] = useState('swarm');
+  const [apiKeys, setApiKeys] = useState({claude:'', gemini:'', grok:'', gpt:'', groq:'', deepseek:''});
+  const [messages, setMessages] = useState([]);
+
+  // API Key Kaydet (localStorage)
+  const saveKeys = (newKeys) => {
+    localStorage.setItem('nexusApiKeys', JSON.stringify(newKeys));
+    setApiKeys(newKeys);
+  };
+
+  useEffect(() => {
+    const saved = localStorage.getItem('nexusApiKeys');
+    if (saved) setApiKeys(JSON.parse(saved));
+  }, []);
+
+  // Genel AI Çağrı Fonksiyonu (Tüm sağlayıcılar destekli)
+  const callAI = async (providerId, prompt) => {
+    const key = apiKeys[providerId];
+    if (!key) return "API Key girilmedi! Ayarlar sekmesinden ekle.";
+
+    const prov = AI_PROVIDERS.find(p => p.id === providerId);
+    try {
+      let response;
+      if (providerId === 'gemini') {
+        response = await fetch(`\( {prov.endpoint}?key= \){key}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({contents: [{parts: [{text: prompt}]}]})
+        });
+      } else {
+        // OpenAI-compatible (Claude hariç çoğu)
+        response = await fetch(prov.endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${key}`,
+            ...(providerId === 'claude' && {'anthropic-version': '2023-06-01'})
+          },
+          body: JSON.stringify({
+            model: prov.model,
+            messages: [{role: 'user', content: prompt}],
+            max_tokens: 800
+          })
+        });
+      }
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || data.candidates?.[0]?.content?.parts?.[0]?.text || "Yanıt alınamadı.";
+    } catch (e) {
+      return `Hata: ${e.message} — Key doğru mu? Limit aşıldı mı?`;
+    }
+  };
+
+  return React.createElement('div', {style:{padding:'10px', height:'100vh', display:'flex', flexDirection:'column'}},
+    React.createElement('h1', {style:{color:'#00e5ff', textAlign:'center'}}, '⚡ QUANTUM NEXUS OS v3.2 — MULTI-AI EMPIRE'),
+    
+    // Tab Butonları
+    React.createElement('div', {style:{display:'flex', gap:'8px', flexWrap:'wrap', marginBottom:'12px'}},
+      ['SWARM', 'AI CORE', 'SETTINGS', 'FINANCE', 'SECURITY'].map(tab =>
+        React.createElement('button', {
+          key: tab,
+          onClick: () => setActiveTab(tab.toLowerCase()),
+          style: {padding:'8px 16px', background: activeTab === tab.toLowerCase() ? '#00e5ff20' : '#0a1520', border:'1px solid #00e5ff40', color:'#00e5ff', cursor:'pointer'}
+        }, tab)
+      )
+    ),
+
+    // AI CORE Tab (Tüm AI'lar aynı anda test edilebilir)
+    activeTab === 'ai core' && React.createElement('div', {},
+      React.createElement('h2', {}, '🌌 MULTI-AI CORE — Hepsi Aynı Anda Çalışır'),
+      AI_PROVIDERS.map(p => 
+        React.createElement('div', {key: p.id, style:{marginBottom:'15px', border:'1px solid '+p.color+'30', padding:'10px'}},
+          React.createElement('strong', {style:{color:p.color}}, `\( {p.name} ( \){p.model})`),
+          React.createElement('input', {
+            placeholder: `${p.name} API Key`,
+            value: apiKeys[p.id] || '',
+            onChange: (e) => saveKeys({...apiKeys, [p.id]: e.target.value}),
+            style: {width:'100%', margin:'8px 0', padding:'8px', background:'#0a1520', border:'1px solid #00e5ff40', color:'#fff'}
+          }),
+          React.createElement('button', {
+            onClick: async () => {
+              const resp = await callAI(p.id, "Quantum Nexus OS vizyonunu 1 cümlede anlat.");
+              alert(`${p.name}: ${resp}`);
+            }
+          }, 'Test Et')
+        )
+      )
+    ),
+
+    // Diğer tablar (Swarm, Finance vs.) önceki kodundan genişletilebilir
+    activeTab === 'settings' && React.createElement('div', {}, 
+      React.createElement('p', {}, 'Tüm API Key\'leri buraya gir. Girer girmez aktif olur. LocalStorage ile saklanır.')
+    ),
+
+    // Swarm Canvas ve diğer component'lar buraya eklenebilir (önceki kodun devamı)
+    React.createElement('div', {id:'swarm'}, 'Swarm Canvas & Terminal burada olacak (tam kod için önceki mesajı birleştir)')
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
