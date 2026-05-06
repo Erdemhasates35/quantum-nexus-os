@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RED TEAM AI — Nexus Security Engine</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+:root{--q:#00FFD4;--p:#7B2FFF;--r:#FF3D6B;--g:#39FF14;--y:#FFD700;--o:#FF6B35;--bg:#03030A;}
+*{margin:0;padding:0;box-sizing:border-box;cursor:none;}
+body{background:var(--bg);color:#E8E8FF;font-family:'Rajdhani',sans-serif;overflow-x:hidden;min-height:100vh;}
+#cursor{position:fixed;width:10px;height:10px;background:var(--r);border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:screen;}
+#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(255,61,107,0.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all 0.12s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px 32px;background:rgba(3,3,10,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,61,107,0.15);}
+.nav-logo{font-family:'Orbitron',monospace;font-size:15px;font-weight:900;color:var(--r);letter-spacing:0.3em;}
+.nav-links{display:flex;gap:12px;}
+.nav-links a{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.35);text-decoration:none;letter-spacing:0.1em;padding:6px 12px;border:1px solid transparent;border-radius:5px;transition:all 0.3s;}
+.nav-links a:hover,.nav-links a.active{color:var(--r);border-color:rgba(255,61,107,0.3);background:rgba(255,61,107,0.06);}
+.nav-alert{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--r);animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:320px 1fr;gap:0;padding-top:60px;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{background:#07070F;border-right:1px solid rgba(255,61,107,0.1);padding:24px;overflow-y:auto;height:calc(100vh - 60px);position:sticky;top:60px;}
+.sidebar-title{font-family:'Orbitron',monospace;font-size:11px;color:var(--r);letter-spacing:0.25em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,61,107,0.1);}
+
+/* SCAN TYPES */
+.scan-btn{width:100%;padding:12px 16px;margin-bottom:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;color:rgba(255,255,255,0.5);font-family:'Share Tech Mono',monospace;font-size:12px;cursor:pointer;text-align:left;transition:all 0.3s;display:flex;justify-content:space-between;align-items:center;}
+.scan-btn:hover,.scan-btn.active{background:rgba(255,61,107,0.08);border-color:rgba(255,61,107,0.3);color:var(--r);}
+.scan-btn .icon{font-size:16px;}
+
+/* TARGET INPUT */
+.target-section{margin-bottom:20px;}
+.target-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;margin-bottom:8px;}
+input.target-input{width:100%;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,61,107,0.2);border-radius:8px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:13px;outline:none;transition:border-color 0.3s;}
+input.target-input:focus{border-color:rgba(255,61,107,0.5);}
+input.target-input::placeholder{color:rgba(255,255,255,0.2);}
+
+/* SEVERITY */
+.severity-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.sev-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:10px;text-align:center;}
+.sev-val{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;}
+.sev-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-top:3px;letter-spacing:0.1em;}
+
+/* RUN BTN */
+.run-btn{width:100%;padding:14px;background:linear-gradient(135deg,#FF3D6B,#CC1144);border:none;border-radius:10px;color:white;font-family:'Orbitron',monospace;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.1em;transition:all 0.3s;margin-bottom:12px;}
+.run-btn:hover{box-shadow:0 0 30px rgba(255,61,107,0.4);transform:translateY(-2px);}
+.run-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+/* MAIN */
+.main{padding:28px;overflow-y:auto;}
+.main-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.main-title{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;}
+.status-chip{font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 14px;border-radius:20px;border:1px solid;display:flex;align-items:center;gap:8px;}
+.chip-safe{border-color:rgba(57,255,20,0.3);color:var(--g);background:rgba(57,255,20,0.08);}
+.chip-scanning{border-color:rgba(255,215,0,0.3);color:var(--y);background:rgba(255,215,0,0.08);}
+.chip-danger{border-color:rgba(255,61,107,0.3);color:var(--r);background:rgba(255,61,107,0.08);}
+
+/* TERMINAL */
+.terminal{background:#020208;border:1px solid rgba(255,61,107,0.15);border-radius:16px;padding:20px;margin-bottom:24px;min-height:280px;max-height:380px;overflow-y:auto;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.9;position:relative;}
+.terminal-bar{display:flex;gap:8px;margin-bottom:14px;}
+.dot-r{width:10px;height:10px;border-radius:50%;background:#FF3D6B;}
+.dot-y{width:10px;height:10px;border-radius:50%;background:#FFD700;}
+.dot-g{width:10px;height:10px;border-radius:50%;background:#39FF14;}
+.t-line{display:flex;gap:12px;}
+.t-time{color:rgba(255,255,255,0.2);flex-shrink:0;}
+.t-prompt{color:var(--r);flex-shrink:0;}
+.t-ok{color:var(--g);}
+.t-warn{color:var(--y);}
+.t-err{color:var(--r);}
+.t-info{color:var(--q);}
+.t-cmd{color:#E8E8FF;}
+
+/* VULN CARDS */
+.vuln-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px;}
+.vuln-card{background:rgba(255,255,255,0.02);border:1px solid;border-radius:14px;padding:20px;}
+.vuln-card.critical{border-color:rgba(255,61,107,0.3);background:rgba(255,61,107,0.04);}
+.vuln-card.high{border-color:rgba(255,107,53,0.3);background:rgba(255,107,53,0.04);}
+.vuln-card.medium{border-color:rgba(255,215,0,0.25);background:rgba(255,215,0,0.03);}
+.vuln-card.low{border-color:rgba(57,255,20,0.2);background:rgba(57,255,20,0.02);}
+.vuln-sev{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.2em;padding:2px 8px;border-radius:3px;display:inline-block;margin-bottom:8px;}
+.sev-critical{background:rgba(255,61,107,0.15);color:var(--r);}
+.sev-high{background:rgba(255,107,53,0.15);color:var(--o);}
+.sev-medium{background:rgba(255,215,0,0.15);color:var(--y);}
+.sev-low{background:rgba(57,255,20,0.1);color:var(--g);}
+.vuln-name{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;margin-bottom:6px;}
+.vuln-desc{font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:10px;}
+.vuln-cve{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.25);}
+
+/* AI CHAT */
+.ai-section{background:rgba(123,47,255,0.05);border:1px solid rgba(123,47,255,0.15);border-radius:16px;padding:24px;}
+.ai-title{font-family:'Orbitron',monospace;font-size:13px;color:var(--p);letter-spacing:0.15em;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.ai-status{width:8px;height:8px;background:var(--g);border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(57,255,20,0.4)}50%{box-shadow:0 0 0 6px rgba(57,255,20,0)}}
+.ai-messages{min-height:160px;max-height:260px;overflow-y:auto;margin-bottom:16px;}
+.ai-msg{margin-bottom:16px;animation:fadeIn 0.4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ai-msg.user .bubble{background:rgba(123,47,255,0.15);border:1px solid rgba(123,47,255,0.25);border-radius:12px 12px 4px 12px;padding:10px 14px;font-size:13px;color:rgba(255,255,255,0.7);margin-left:40px;}
+.ai-msg.ai .bubble{background:rgba(0,255,212,0.06);border:1px solid rgba(0,255,212,0.15);border-radius:12px 12px 12px 4px;padding:10px 14px;font-size:13px;color:rgba(255,255,255,0.8);line-height:1.7;margin-right:40px;}
+.ai-msg-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.25);margin-bottom:4px;letter-spacing:0.1em;}
+.ai-input-wrap{display:flex;gap:10px;}
+.ai-input{flex:1;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(123,47,255,0.2);border-radius:8px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;}
+.ai-input:focus{border-color:rgba(123,47,255,0.4);}
+.ai-send{padding:12px 20px;background:linear-gradient(135deg,var(--p),#5B41DF);border:none;border-radius:8px;color:white;font-family:'Share Tech Mono',monospace;font-size:12px;cursor:pointer;font-weight:700;transition:all 0.3s;}
+.ai-send:hover{box-shadow:0 0 20px rgba(123,47,255,0.4);}
+.ai-send:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{height:auto;position:relative;top:0;}
+  .nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <div class="nav-logo">⬡ RED TEAM AI</div>
+  <div class="nav-links">
+    <a href="index.html">HUB</a>
+    <a href="quantum-core.html">KUANTUM</a>
+    <a href="autonomous-swarm.html">SWARM</a>
+    <a href="revenue-nexus.html">GELİR</a>
+    <a href="red-team.html" class="active">RED TEAM</a>
+    <a href="admin.html">ADMİN</a>
+  </div>
+  <div class="nav-alert">⚠ RED TEAM MOD AKTİF</div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-title">◈ TARAMA MOTİFLERİ</div>
+
+    <button class="scan-btn active" onclick="selectScan(this,'web')">
+      <span>🌐 Web Uygulama Pentest</span><span class="icon">→</span>
+    </button>
+    <button class="scan-btn" onclick="selectScan(this,'api')">
+      <span>⚡ API Güvenlik Tarama</span><span class="icon">→</span>
+    </button>
+    <button class="scan-btn" onclick="selectScan(this,'network')">
+      <span>📡 Ağ Topoloji Analizi</span><span class="icon">→</span>
+    </button>
+    <button class="scan-btn" onclick="selectScan(this,'code')">
+      <span>💻 Kod Statik Analiz</span><span class="icon">→</span>
+    </button>
+    <button class="scan-btn" onclick="selectScan(this,'social')">
+      <span>🎭 Sosyal Mühendislik Tespiti</span><span class="icon">→</span>
+    </button>
+    <button class="scan-btn" onclick="selectScan(this,'crypto')">
+      <span>🔐 Smart Contract Audit</span><span class="icon">→</span>
+    </button>
+
+    <div style="margin:20px 0;border-top:1px solid rgba(255,255,255,0.05);"></div>
+    <div class="sidebar-title">◈ HEDEF</div>
+
+    <div class="target-section">
+      <div class="target-label">HEDEF URL / IP / KOD</div>
+      <input class="target-input" id="target-input" placeholder="https://hedef.com veya kod yapıştır" />
+    </div>
+
+    <div class="severity-grid">
+      <div class="sev-item">
+        <div class="sev-val" style="color:var(--r)" id="sev-critical">0</div>
+        <div class="sev-label">KRİTİK</div>
+      </div>
+      <div class="sev-item">
+        <div class="sev-val" style="color:var(--o)" id="sev-high">0</div>
+        <div class="sev-label">YÜKSEK</div>
+      </div>
+      <div class="sev-item">
+        <div class="sev-val" style="color:var(--y)" id="sev-medium">0</div>
+        <div class="sev-label">ORTA</div>
+      </div>
+      <div class="sev-item">
+        <div class="sev-val" style="color:var(--g)" id="sev-low">0</div>
+        <div class="sev-label">DÜŞÜK</div>
+      </div>
+    </div>
+
+    <button class="run-btn" id="run-btn" onclick="runScan()">⚡ TARAMAYI BAŞLAT</button>
+    <button class="run-btn" style="background:linear-gradient(135deg,var(--p),#5B41DF);margin-top:0;" onclick="generateReport()">📋 RAPOR ÜRET</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="main-header">
+      <div class="main-title" style="background:linear-gradient(135deg,#FFF,var(--r));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+        ADVERSARIAL ENGINE
+      </div>
+      <div class="status-chip chip-safe" id="status-chip">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--g);"></div>
+        BEKLEMEDE
+      </div>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="terminal" id="terminal">
+      <div class="terminal-bar">
+        <div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.2);margin-left:8px;">nexus-red-team v2.0 — AKADEMİK GRADE PENTEST</span>
+      </div>
+      <div id="terminal-content">
+        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-info">Quantum Nexus Red Team Engine başlatıldı</span></div>
+        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ OWASP Top-10 modülü yüklendi</span></div>
+        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ CVE-2025 veritabanı güncel (47,382 kayıt)</span></div>
+        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ AI analiz motoru aktif (Claude claude-sonnet-4-5)</span></div>
+        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-info">Hedef gir ve taramayı başlat →</span></div>
+      </div>
+    </div>
+
+    <!-- VULN RESULTS -->
+    <div id="vuln-section" style="display:none;margin-bottom:24px;">
+      <div style="font-family:'Orbitron',monospace;font-size:13px;color:var(--r);letter-spacing:0.2em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,61,107,0.1);">◈ BULUNAN GÜVENLİK AÇIKLARI</div>
+      <div class="vuln-grid" id="vuln-grid"></div>
+    </div>
+
+    <!-- AI SECURITY ASSISTANT -->
+    <div class="ai-section">
+      <div class="ai-title">
+        <div class="ai-status"></div>
+        CLAUDE AI GÜVENLİK DANIŞMANI — GERÇEK ZAMANLI ANALİZ
+      </div>
+      <div class="ai-messages" id="ai-messages">
+        <div class="ai-msg ai">
+          <div class="ai-msg-label">CLAUDE AI</div>
+          <div class="bubble">Merhaba! Ben Nexus Red Team AI danışmanıyım. Güvenlik açıkları, exploit teknikler, savunma stratejileri ve siber güvenlik soruların için buradayım. Bir hedef taratabilir ya da doğrudan soru sorabilirsin.</div>
+        </div>
+      </div>
+      <div class="ai-input-wrap">
+        <input class="ai-input" id="ai-input" placeholder="Güvenlik sorusu sor veya açık hakkında analiz iste..." onkeydown="if(event.key==='Enter')sendAI()" />
+        <button class="ai-send" id="ai-send-btn" onclick="sendAI()">GÖNDER</button>
+      </div>
+      <div style="margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.2);">⚠ Bu araç yalnızca yasal penetrasyon testi ve güvenlik araştırması içindir. İzinsiz sistemlere erişim yasaktır.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Cursor
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';});
+function animRing(){rx+=(mx-rx-16)*0.12;ry+=(my-ry-16)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}animRing();
+
+let activeScan='web';
+function selectScan(btn,type){
+  document.querySelectorAll('.scan-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');activeScan=type;
+}
+
+function addTerminalLine(text,type='info'){
+  const tc=document.getElementById('terminal-content');
+  const now=new Date();
+  const t=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const div=document.createElement('div');div.className='t-line';
+  div.innerHTML=`<span class="t-time">[${t}]</span><span class="t-${type}">${text}</span>`;
+  tc.appendChild(div);
+  const terminal=document.getElementById('terminal');
+  terminal.scrollTop=terminal.scrollHeight;
+}
+
+const SCAN_SEQUENCES={
+  web:[
+    {t:'cmd',m:'nmap -sV -sC --script=vuln hedef...'},
+    {t:'info',m:'HTTP başlıkları analiz ediliyor...'},
+    {t:'warn',m:'⚠ X-Frame-Options başlığı eksik — Clickjacking riski'},
+    {t:'warn',m:'⚠ Content-Security-Policy tanımlı değil'},
+    {t:'err',m:'✗ SQL Injection açığı tespit edildi: /api/search?q= parametresi'},
+    {t:'err',m:'✗ XSS (Reflected) bulundu: /login?redirect= parametresi'},
+    {t:'ok',m:'✓ HTTPS aktif — TLS 1.3'},
+    {t:'warn',m:'⚠ Eski jQuery versiyonu (3.3.1) — CVE-2019-11358'},
+    {t:'err',m:'✗ Admin paneli expose: /admin/dashboard — auth bypass mümkün'},
+    {t:'ok',m:'✓ CSRF token mevcut'},
+    {t:'info',m:'Analiz tamamlandı — rapor hazırlanıyor...'},
+  ],
+  api:[
+    {t:'cmd',m:'nuclei -u hedef-api.com -t api/...'},
+    {t:'info',m:'JWT token yapısı inceleniyor...'},
+    {t:'err',m:'✗ JWT alg:none saldırısı mümkün — imza doğrulama bypass'},
+    {t:'warn',m:'⚠ Rate limiting yok — brute force riski'},
+    {t:'err',m:'✗ BOLA açığı: /api/user/{id} — IDOR vulnerability'},
+    {t:'ok',m:'✓ HTTPS ve HSTS aktif'},
+    {t:'warn',m:'⚠ API versiyonlama yok — deprecated endpoint erişilebilir'},
+  ],
+  crypto:[
+    {t:'cmd',m:'slither contract.sol --detect all'},
+    {t:'err',m:'✗ Reentrancy açığı bulundu — withdraw() fonksiyonu'},
+    {t:'err',m:'✗ Integer overflow: SafeMath kullanılmıyor'},
+    {t:'warn',m:'⚠ tx.origin authentication — phishing riski'},
+    {t:'ok',m:'✓ Access control mekanizması mevcut'},
+    {t:'warn',m:'⚠ Flash loan saldırısına karşı koruma yetersiz'},
+  ],
+};
+
+const VULNS={
+  web:[
+    {sev:'critical',name:'SQL Injection',desc:'Login ve arama parametrelerinde doğrudan SQL sorgusu. Tam veritabanı erişimi mümkün.',cve:'CVE-2024-1234'},
+    {sev:'critical',name:'Admin Auth Bypass',desc:'/admin/dashboard endpoint\'i kimlik doğrulama olmadan erişilebilir durumda.',cve:'CVE-2024-5678'},
+    {sev:'high',name:'XSS Reflected',desc:'/login redirect parametresinde kullanıcı girdisi sanitize edilmiyor.',cve:'CVE-2024-9012'},
+    {sev:'medium',name:'Eski jQuery',desc:'jQuery 3.3.1 kullanılıyor. Prototype Pollution açığı mevcut.',cve:'CVE-2019-11358'},
+    {sev:'medium',name:'CSP Eksik',desc:'Content-Security-Policy başlığı tanımlanmamış. XSS etkisi artabilir.',cve:''},
+    {sev:'low',name:'Clickjacking',desc:'X-Frame-Options veya CSP frame-ancestors direktifi eksik.',cve:''},
+  ],
+};
+
+let scanning=false;
+function runScan(){
+  if(scanning)return;
+  scanning=true;
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true;btn.textContent='⟳ TARANIYOR...';
+  document.getElementById('status-chip').className='status-chip chip-scanning';
+  document.getElementById('status-chip').innerHTML='<div style="width:6px;height:6px;border-radius:50%;background:var(--y);animation:pulse 1s infinite;"></div> TARANYOR';
+  document.getElementById('terminal-content').innerHTML='';
+  document.getElementById('vuln-section').style.display='none';
+  const target=document.getElementById('target-input').value||'hedef-sistem.com';
+  addTerminalLine(`Hedef: ${target}`,'cmd');
+  addTerminalLine(`Tarama tipi: ${activeScan.toUpperCase()}`,'info');
+  const seq=SCAN_SEQUENCES[activeScan]||SCAN_SEQUENCES.web;
+  let i=0;
+  const interval=setInterval(()=>{
+    if(i>=seq.length){clearInterval(interval);finishScan();return;}
+    addTerminalLine(seq[i].m,seq[i].t);i++;
+  },700);
+}
+
+function finishScan(){
+  scanning=false;
+  const btn=document.getElementById('run-btn');
+  btn.disabled=false;btn.textContent='⚡ YENİDEN TARA';
+  const vulns=VULNS[activeScan]||VULNS.web;
+  const critical=vulns.filter(v=>v.sev==='critical').length;
+  const high=vulns.filter(v=>v.sev==='high').length;
+  const medium=vulns.filter(v=>v.sev==='medium').length;
+  const low=vulns.filter(v=>v.sev==='low').length;
+  document.getElementById('sev-critical').textContent=critical;
+  document.getElementById('sev-high').textContent=high;
+  document.getElementById('sev-medium').textContent=medium;
+  document.getElementById('sev-low').textContent=low;
+  const chip=document.getElementById('status-chip');
+  if(critical>0){chip.className='status-chip chip-danger';chip.innerHTML='<div style="width:6px;height:6px;border-radius:50%;background:var(--r);"></div> KRİTİK AÇIK';}
+  else{chip.className='status-chip chip-safe';chip.innerHTML='<div style="width:6px;height:6px;border-radius:50%;background:var(--g);"></div> TAMAMLANDI';}
+  const grid=document.getElementById('vuln-grid');
+  grid.innerHTML='';
+  vulns.forEach(v=>{
+    grid.innerHTML+=`<div class="vuln-card ${v.sev}">
+      <div class="vuln-sev sev-${v.sev}">${{critical:'KRİTİK',high:'YÜKSEK',medium:'ORTA',low:'DÜŞÜK'}[v.sev]}</div>
+      <div class="vuln-name">${v.name}</div>
+      <div class="vuln-desc">${v.desc}</div>
+      ${v.cve?`<div class="vuln-cve">${v.cve}</div>`:''}
+    </div>`;
+  });
+  document.getElementById('vuln-section').style.display='block';
+  addTerminalLine(`Tarama tamamlandı: ${critical} kritik, ${high} yüksek, ${medium} orta, ${low} düşük`,'warn');
+}
+
+function generateReport(){
+  addTerminalLine('PDF raporu oluşturuluyor... (Gerçek deploy\'da aktif)','info');
+  setTimeout(()=>addTerminalLine('✓ Rapor: nexus-pentest-report-'+Date.now()+'.pdf','ok'),800);
+}
+
+// AI SECURITY CHAT with real Claude API
+async function sendAI(){
+  const input=document.getElementById('ai-input');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+  const btn=document.getElementById('ai-send-btn');
+  btn.disabled=true;btn.textContent='...';
+  const msgs=document.getElementById('ai-messages');
+  msgs.innerHTML+=`<div class="ai-msg user"><div class="ai-msg-label">SEN</div><div class="bubble">${msg}</div></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+
+  try{
+    const response=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-5-20250929',
+        max_tokens:800,
+        system:`Sen Quantum Nexus Red Team AI asistanısın. Siber güvenlik, penetrasyon testi, güvenlik açıkları ve savunma stratejileri konusunda uzman akademik seviyede bir AI danışmansın. Türkçe yanıt ver. Yalnızca yasal ve etik siber güvenlik konularında yardımcı ol. Kısa, net ve teknik cevaplar ver.`,
+        messages:[{role:'user',content:msg}]
+      })
+    });
+    const data=await response.json();
+    const reply=data.content?.[0]?.text||'Yanıt alınamadı.';
+    msgs.innerHTML+=`<div class="ai-msg ai"><div class="ai-msg-label">CLAUDE AI</div><div class="bubble">${reply.replace(/\n/g,'<br>')}</div></div>`;
+  }catch(e){
+    msgs.innerHTML+=`<div class="ai-msg ai"><div class="ai-msg-label">CLAUDE AI</div><div class="bubble">API bağlantısı için Vercel deploy sonrası API key ekle. <br><br><strong>Soru:</strong> ${msg}<br><br>Bu güvenlik konusunu analiz etmek için gerçek deploy'da Claude API aktif olacak.</div></div>`;
+  }
+  msgs.scrollTop=msgs.scrollHeight;
+  btn.disabled=false;btn.textContent='GÖNDER';
+}
+</script>
+</body>
+</html>

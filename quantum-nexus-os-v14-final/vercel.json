@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "name": "quantum-nexus-os-v14",
+  "builds": [{ "src": "package.json", "use": "@vercel/static-build" }],
+  "routes": [
+    { "src": "/api/ai", "dest": "/api/ai.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}

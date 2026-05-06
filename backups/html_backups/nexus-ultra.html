@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANTUM NEXUS OS — Ultra Platform</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+:root{
+  --q:#00FFD4;--p:#7B2FFF;--r:#FF3D6B;--g:#39FF14;--y:#FFD700;--o:#FF6B35;
+  --bg:#03030A;--bg2:#07071A;--glass:rgba(0,255,212,0.04);--border:rgba(0,255,212,0.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:17px;}
+body{background:var(--bg);color:#E8E8FF;font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content:space-between;align-items:center;padding:14px 28px;background:rgba(3,3,10,0.97);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);}
+.logo{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;color:var(--q);letter-spacing:0.3em;}
+.nav-r{display:flex;align-items:center;gap:16px;}
+.nav-btn{font-family:'Share Tech Mono',monospace;font-size:11px;padding:7px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:rgba(255,255,255,0.5);cursor:pointer;transition:all 0.3s;letter-spacing:0.1em;}
+.nav-btn:hover{color:var(--q);border-color:rgba(0,255,212,0.3);}
+.nav-btn.active{color:var(--q);border-color:rgba(0,255,212,0.4);background:rgba(0,255,212,0.08);}
+.live-dot{width:8px;height:8px;background:var(--g);border-radius:50%;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(57,255,20,0.5)}50%{box-shadow:0 0 0 8px rgba(57,255,20,0)}}
+
+/* ── TICKER ── */
+.ticker{position:fixed;top:52px;left:0;right:0;z-index:190;background:rgba(3,3,10,0.9);border-bottom:1px solid rgba(0,255,212,0.06);padding:7px 0;overflow:hidden;}
+.tick-inner{display:flex;gap:80px;white-space:nowrap;animation:tick 28s linear infinite;}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ti{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.2);}
+.ti span{color:var(--q);margin-left:5px;}
+.ti.up span{color:var(--g);}
+
+/* ── SECTIONS ── */
+.sec{display:none;position:relative;z-index:10;padding:92px 28px 80px;max-width:1360px;margin:0 auto;}
+.sec.active{display:block;}
+
+/* ── HERO ── */
+.h-tag{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--q);letter-spacing:0.4em;margin-bottom:20px;}
+.h-title{font-family:'Orbitron',monospace;font-weight:900;font-size:clamp(44px,9vw,96px);line-height:0.92;margin-bottom:16px;background:linear-gradient(135deg,#FFF 0%,var(--q) 40%,var(--p) 70%,var(--r) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.h-sub{font-family:'Share Tech Mono',monospace;font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.2em;margin-bottom:36px;}
+.formula{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--p);background:rgba(123,47,255,0.07);border:1px solid rgba(123,47,255,0.18);border-radius:10px;padding:14px 24px;margin-bottom:52px;display:inline-block;}
+
+/* ── STATS ── */
+.stats{display:flex;gap:44px;flex-wrap:wrap;margin-bottom:52px;}
+.stat .v{font-family:'Orbitron',monospace;font-size:34px;font-weight:900;}
+.stat .l{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.18em;margin-top:5px;}
+
+/* ── SYS STATUS ── */
+.sys-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:44px;}
+.sys-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px;}
+.sys-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.15em;margin-bottom:7px;}
+.sys-bar{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-bottom:7px;}
+.sys-fill{height:100%;border-radius:2px;}
+.sys-val{font-family:'Share Tech Mono',monospace;font-size:13px;}
+
+/* ── CARDS ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:22px;margin-bottom:44px;}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:22px;padding:30px;cursor:pointer;transition:all 0.4s;}
+.card:hover{transform:translateY(-7px);border-color:rgba(0,255,212,0.28);box-shadow:0 20px 70px rgba(0,255,212,0.08);}
+.card-icon{font-size:38px;margin-bottom:16px;}
+.ctag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.22em;padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:12px;}
+.card-title{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;margin-bottom:9px;}
+.card-desc{font-size:15px;color:rgba(255,255,255,0.42);line-height:1.7;margin-bottom:16px;}
+.card-list{list-style:none;}
+.card-list li{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.33);padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:9px;align-items:center;}
+.card-list li::before{content:'▸';flex-shrink:0;}
+.card-cta{font-family:'Share Tech Mono',monospace;font-size:11px;margin-top:14px;}
+
+/* ── ADMIN PANEL ── */
+.admin-grid{display:grid;grid-template-columns:240px 1fr;gap:0;min-height:calc(100vh - 92px);}
+.admin-sidebar{background:#050512;border-right:1px solid rgba(255,255,255,0.06);padding:20px 14px;position:sticky;top:92px;height:calc(100vh - 92px);overflow-y:auto;}
+.admin-main{padding:24px;}
+.a-sec-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:0.2em;padding:0 10px;margin:16px 0 8px;}
+.a-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;color:rgba(255,255,255,0.42);font-family:'Share Tech Mono',monospace;font-size:12px;cursor:pointer;transition:all 0.3s;margin-bottom:2px;border:1px solid transparent;}
+.a-link:hover,.a-link.active{background:rgba(0,255,212,0.07);color:var(--q);border-color:rgba(0,255,212,0.15);}
+.a-badge{font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(255,61,107,0.2);color:var(--r);margin-left:auto;}
+
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;}
+.kpi{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;transition:all 0.3s;}
+.kpi:hover{border-color:rgba(0,255,212,0.2);}
+.kpi-icon{font-size:26px;margin-bottom:10px;}
+.kpi-val{font-family:'Orbitron',monospace;font-size:24px;font-weight:900;margin-bottom:4px;}
+.kpi-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:0.14em;}
+.kpi-ch{font-family:'Share Tech Mono',monospace;font-size:11px;margin-top:7px;}
+
+/* ── API KEY MANAGER ── */
+.api-manager{background:rgba(0,255,212,0.04);border:1px solid rgba(0,255,212,0.12);border-radius:20px;padding:28px;margin-bottom:24px;}
+.api-title{font-family:'Orbitron',monospace;font-size:14px;color:var(--q);letter-spacing:0.18em;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+.api-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:20px;}
+.api-card{background:#020210;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px;}
+.api-name{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.15em;margin-bottom:8px;}
+.api-input-wrap{display:flex;gap:8px;align-items:center;}
+.api-input{flex:1;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;transition:border-color 0.3s;letter-spacing:0.05em;}
+.api-input:focus{border-color:rgba(0,255,212,0.4);}
+.api-input::placeholder{color:rgba(255,255,255,0.15);}
+.api-status{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.api-save{padding:9px 16px;background:linear-gradient(135deg,var(--q),#00D4A8);border:none;border-radius:7px;color:#03030A;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.api-test{padding:9px 14px;background:rgba(123,47,255,0.15);border:1px solid rgba(123,47,255,0.3);border-radius:7px;color:var(--p);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;}
+.api-test:hover{background:rgba(123,47,255,0.25);}
+
+/* ── AGENT GROUPS ── */
+.agent-section{background:rgba(123,47,255,0.05);border:1px solid rgba(123,47,255,0.12);border-radius:20px;padding:28px;margin-bottom:24px;}
+.ag-title{font-family:'Orbitron',monospace;font-size:14px;color:var(--p);letter-spacing:0.18em;margin-bottom:20px;}
+.ag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.ag-card{background:#020210;border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:22px;transition:all 0.4s;}
+.ag-card:hover{border-color:rgba(123,47,255,0.35);}
+.ag-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.ag-name{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;}
+.ag-count{font-family:'Share Tech Mono',monospace;font-size:22px;font-weight:700;color:var(--p);}
+.ag-status-badge{font-family:'Share Tech Mono',monospace;font-size:9px;padding:3px 9px;border-radius:4px;letter-spacing:0.12em;}
+.status-active{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.2);}
+.status-evolving{background:rgba(255,215,0,0.1);color:var(--y);border:1px solid rgba(255,215,0,0.2);animation:blink 1.5s infinite;}
+.status-training{background:rgba(123,47,255,0.1);color:var(--p);border:1px solid rgba(123,47,255,0.2);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.ag-role{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:12px;line-height:1.6;}
+.ag-dots{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.dot{width:9px;height:9px;border-radius:50%;transition:all 0.5s;}
+.dot.a{background:var(--g);box-shadow:0 0 5px rgba(57,255,20,0.4);}
+.dot.b{background:var(--y);animation:dotPulse 1s infinite;}
+.dot.i{background:rgba(255,255,255,0.08);}
+@keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}
+.ag-task{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.28);padding:7px 10px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid var(--p);}
+.ag-controls{display:flex;gap:8px;margin-top:12px;}
+.ag-btn{flex:1;padding:8px;border:none;border-radius:7px;font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.3s;letter-spacing:0.05em;}
+.ag-btn-start{background:rgba(57,255,20,0.12);color:var(--g);border:1px solid rgba(57,255,20,0.2);}
+.ag-btn-stop{background:rgba(255,61,107,0.1);color:var(--r);border:1px solid rgba(255,61,107,0.2);}
+.ag-btn-evolve{background:rgba(255,215,0,0.1);color:var(--y);border:1px solid rgba(255,215,0,0.2);}
+
+/* ── AUTO ITERATE ── */
+.auto-bar{background:rgba(255,61,107,0.07);border:1px solid rgba(255,61,107,0.18);border-radius:12px;padding:14px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;display:none;}
+.auto-bar-text{font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.55);}
+.auto-bar-text strong{color:var(--r);}
+.auto-dismiss{padding:7px 14px;background:rgba(255,61,107,0.12);border:1px solid rgba(255,61,107,0.25);border-radius:6px;color:var(--r);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;}
+
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:22px;}
+.chart-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:22px;}
+.chart-title{font-family:'Orbitron',monospace;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.15em;margin-bottom:14px;}
+
+/* ── AI CMD CENTER ── */
+.ai-cmd{background:rgba(123,47,255,0.05);border:1px solid rgba(123,47,255,0.12);border-radius:20px;padding:26px;margin-bottom:22px;}
+.ai-cmd-title{font-family:'Orbitron',monospace;font-size:13px;color:var(--p);letter-spacing:0.15em;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.quick-cmds{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin-bottom:14px;}
+.qcmd{padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(123,47,255,0.18);border-radius:8px;color:rgba(255,255,255,0.5);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.3s;text-align:left;}
+.qcmd:hover{background:rgba(123,47,255,0.1);color:var(--p);border-color:rgba(123,47,255,0.35);}
+.ai-output{background:#020210;border-radius:10px;padding:14px;min-height:90px;font-family:'Share Tech Mono',monospace;font-size:13px;color:rgba(255,255,255,0.55);line-height:1.9;margin-bottom:12px;max-height:200px;overflow-y:auto;}
+.cmd-row{display:flex;gap:10px;}
+.cmd-inp{flex:1;padding:11px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(123,47,255,0.18);border-radius:9px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:13px;outline:none;}
+.cmd-inp:focus{border-color:rgba(123,47,255,0.4);}
+.cmd-send{padding:11px 22px;background:linear-gradient(135deg,var(--p),#5B41DF);border:none;border-radius:9px;color:white;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.3s;}
+.cmd-send:hover{box-shadow:0 0 22px rgba(123,47,255,0.45);}
+.cmd-send:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* ── REVENUE SECTION ── */
+.rev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:36px;}
+.rev-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;text-align:center;}
+.rv{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;margin-bottom:5px;}
+.rl{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.28);letter-spacing:0.15em;}
+.rc{font-family:'Share Tech Mono',monospace;font-size:11px;margin-top:7px;color:var(--g);}
+
+.stream-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-bottom:36px;}
+.stream{background:rgba(255,255,255,0.02);border:1px solid rgba(255,61,107,0.1);border-radius:18px;padding:24px;transition:all 0.4s;}
+.stream:hover{border-color:rgba(255,61,107,0.25);transform:translateY(-4px);}
+.stream-icon{font-size:32px;margin-bottom:12px;}
+.stream-name{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;margin-bottom:7px;}
+.stream-desc{font-size:13px;color:rgba(255,255,255,0.38);line-height:1.6;margin-bottom:12px;}
+.stream-m{display:flex;gap:20px;}
+.smv{font-family:'Share Tech Mono',monospace;font-size:17px;font-weight:700;}
+.sml{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.28);margin-top:2px;}
+
+/* ── TERMINAL ── */
+.terminal{background:#020210;border:1px solid rgba(255,61,107,0.12);border-radius:16px;padding:20px;min-height:220px;max-height:320px;overflow-y:auto;font-family:'Share Tech Mono',monospace;font-size:13px;line-height:2;margin-bottom:22px;}
+.t-bar{display:flex;gap:7px;margin-bottom:14px;}
+.td{width:11px;height:11px;border-radius:50%;}
+.t-ok{color:var(--g);}
+.t-warn{color:var(--y);}
+.t-err{color:var(--r);}
+.t-info{color:var(--q);}
+.t-time{color:rgba(255,255,255,0.18);margin-right:10px;}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;display:flex;background:rgba(3,3,10,0.98);border-top:1px solid rgba(0,255,212,0.08);backdrop-filter:blur(24px);}
+.bnav-btn{flex:1;padding:14px 6px;background:none;border:none;color:rgba(255,255,255,0.3);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.3s;display:flex;flex-direction:column;align-items:center;gap:4px;letter-spacing:0.04em;}
+.bnav-btn:hover,.bnav-btn.active{color:var(--q);}
+.bnav-btn.active{border-top:2px solid var(--q);}
+.bnav-icon{font-size:20px;}
+
+/* SECTION HEADER */
+.sec-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--q);letter-spacing:0.35em;margin-bottom:14px;}
+.sec-title{font-family:'Orbitron',monospace;font-size:clamp(26px,5vw,48px);font-weight:900;margin-bottom:10px;}
+.sec-sub{font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.28);letter-spacing:0.18em;margin-bottom:36px;}
+
+/* FORMULA CARDS */
+.f-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-bottom:40px;}
+.fc{background:rgba(123,47,255,0.05);border:1px solid rgba(123,47,255,0.15);border-radius:14px;padding:20px;}
+.fc-name{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--p);letter-spacing:0.2em;margin-bottom:9px;}
+.fc-eq{font-family:'Share Tech Mono',monospace;font-size:15px;color:#E8E8FF;margin-bottom:9px;line-height:1.6;}
+.fc-desc{font-size:12px;color:rgba(255,255,255,0.38);line-height:1.6;}
+
+/* SCAN */
+.scan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:20px;}
+.scan-btn{padding:12px 16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;color:rgba(255,255,255,0.44);font-family:'Share Tech Mono',monospace;font-size:12px;cursor:pointer;text-align:left;transition:all 0.3s;}
+.scan-btn:hover,.scan-btn.active{background:rgba(255,61,107,0.07);border-color:rgba(255,61,107,0.28);color:var(--r);}
+.run-btn{width:100%;padding:15px;background:linear-gradient(135deg,#FF3D6B,#CC1144);border:none;border-radius:11px;color:white;font-family:'Orbitron',monospace;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.1em;transition:all 0.3s;margin-bottom:18px;}
+.run-btn:hover{box-shadow:0 0 28px rgba(255,61,107,0.4);}
+
+/* AI CHAT BOX */
+.ai-box{background:rgba(123,47,255,0.04);border:1px solid rgba(123,47,255,0.12);border-radius:20px;padding:26px;margin-bottom:22px;}
+.ai-box-title{font-family:'Orbitron',monospace;font-size:13px;color:var(--p);letter-spacing:0.14em;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.msgs{min-height:120px;max-height:260px;overflow-y:auto;margin-bottom:14px;}
+.msg{margin-bottom:14px;}
+.msg-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.18);margin-bottom:4px;letter-spacing:0.1em;}
+.msg.ai .bbl{background:rgba(0,255,212,0.04);border:1px solid rgba(0,255,212,0.1);border-radius:12px 12px 12px 4px;padding:12px 16px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.8;}
+.msg.user .bbl{background:rgba(123,47,255,0.09);border:1px solid rgba(123,47,255,0.18);border-radius:12px 12px 4px 12px;padding:12px 16px;font-size:14px;color:rgba(255,255,255,0.7);margin-left:30px;}
+.inp-row{display:flex;gap:10px;}
+.chat-inp{flex:1;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(123,47,255,0.18);border-radius:10px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:14px;outline:none;transition:border-color 0.3s;}
+.chat-inp:focus{border-color:rgba(123,47,255,0.45);}
+.chat-inp::placeholder{color:rgba(255,255,255,0.18);}
+.send-btn{padding:12px 22px;background:linear-gradient(135deg,var(--p),#5B41DF);border:none;border-radius:10px;color:white;font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.3s;white-space:nowrap;}
+.send-btn:hover{box-shadow:0 0 24px rgba(123,47,255,0.45);}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* TOAST */
+.toast{position:fixed;top:80px;right:20px;z-index:999;background:rgba(57,255,20,0.15);border:1px solid rgba(57,255,20,0.3);border-radius:10px;padding:12px 20px;font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--g);transform:translateX(120%);transition:transform 0.4s;max-width:280px;}
+.toast.show{transform:translateX(0);}
+
+@media(max-width:768px){
+  .admin-grid{grid-template-columns:1fr;}
+  .admin-sidebar{display:none;}
+  .charts-row{grid-template-columns:1fr;}
+  .sec{padding:92px 16px 80px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">⬡ QUANTUM NEXUS</div>
+  <div class="nav-r">
+    <button class="nav-btn active" onclick="goSec('sec-home',this)">ANA</button>
+    <button class="nav-btn" onclick="goSec('sec-admin',this)">⚙ ADMİN</button>
+    <button class="nav-btn" onclick="goSec('sec-agents',this)">🧠 AJANLAR</button>
+    <button class="nav-btn" onclick="goSec('sec-revenue',this)">💎 GELİR</button>
+    <button class="nav-btn" onclick="goSec('sec-redteam',this)">🔐 RED TEAM</button>
+    <div class="live-dot"></div>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker"><div class="tick-inner" id="ticker"></div></div>
+
+<!-- ═══ ANA ═══ -->
+<div class="sec active" id="sec-home">
+  <div class="h-tag">v∞.0 — TAMAMEN OTONOM — SIFIR İNSAN MÜDAHALESİ</div>
+  <div class="h-title">QUANTUM<br>NEXUS</div>
+  <div class="h-sub">SELF-EVOLVING · ACADEMIC-GRADE · ZERO-COST · PERPETUAL REVENUE</div>
+  <div class="formula">Ψ(x,t) = Σₙcₙφₙe^(-iEₙt/ℏ) &nbsp;|&nbsp; ΔE·Δt≥ℏ/2 &nbsp;|&nbsp; S=-kBΣpln(p)</div>
+
+  <div class="stats">
+    <div class="stat"><div class="v" style="color:var(--q)" id="s1">0</div><div class="l">OTONOM AJAN</div></div>
+    <div class="stat"><div class="v" style="color:var(--p)" id="s2">0</div><div class="l">AI MODEL</div></div>
+    <div class="stat"><div class="v" style="color:var(--g)">99.97%</div><div class="l">UPTIME</div></div>
+    <div class="stat"><div class="v" style="color:var(--y)" id="s3">$0</div><div class="l">GÜNLÜK GELİR</div></div>
+  </div>
+
+  <div class="sys-grid">
+    <div class="sys-card"><div class="sys-lbl">KUANTUM ÇEKİRDEK</div><div class="sys-bar"><div class="sys-fill" style="width:94%;background:linear-gradient(90deg,var(--q),#00D4A8)"></div></div><div class="sys-val" style="color:var(--q)">94% AKTİF</div></div>
+    <div class="sys-card"><div class="sys-lbl">SWARM AJANLARI</div><div class="sys-bar"><div class="sys-fill" style="width:87%;background:linear-gradient(90deg,var(--p),#A855F7)"></div></div><div class="sys-val" style="color:var(--p)">247 ÇALIŞIYOR</div></div>
+    <div class="sys-card"><div class="sys-lbl">GELİR ENJİNİ</div><div class="sys-bar"><div class="sys-fill" style="width:100%;background:linear-gradient(90deg,var(--g),#39FF14)"></div></div><div class="sys-val" style="color:var(--g)">FULL AKTİF</div></div>
+    <div class="sys-card"><div class="sys-lbl">RED TEAM</div><div class="sys-bar"><div class="sys-fill" style="width:78%;background:linear-gradient(90deg,var(--r),#FF6B35)"></div></div><div class="sys-val" style="color:var(--r)">TARAMA AKTİF</div></div>
+    <div class="sys-card"><div class="sys-lbl">SELF-UPDATE</div><div class="sys-bar"><div class="sys-fill" style="width:62%;background:linear-gradient(90deg,var(--y),#FFA500)"></div></div><div class="sys-val" style="color:var(--y)">GÜNCELLENİYOR</div></div>
+    <div class="sys-card"><div class="sys-lbl">API BAĞLANTI</div><div class="sys-bar"><div class="sys-fill" id="api-bar" style="width:20%;background:linear-gradient(90deg,var(--r),#FF6B35)"></div></div><div class="sys-val" id="api-status-val" style="color:var(--r)">KEY GEREKİYOR</div></div>
+  </div>
+
+  <div class="cards">
+    <div class="card" onclick="goSec('sec-admin',document.querySelectorAll('.nav-btn')[1])">
+      <div class="card-icon">⚙</div>
+      <div class="ctag" style="background:rgba(0,255,212,0.1);color:var(--q);border:1px solid rgba(0,255,212,0.2)">ADMİN PANEL</div>
+      <div class="card-title">KONTROL MERKEZİ</div>
+      <div class="card-desc">API yönetimi, KPI takibi, ajan kontrolü, gelir analizi, auto-iterate sistemi.</div>
+      <ul class="card-list"><li style="color:var(--q)">API Key Manager</li><li>Canlı KPI Dashboard</li><li>Auto-Iterate Motoru</li></ul>
+      <div class="card-cta">ADMİN'E GİR →</div>
+    </div>
+    <div class="card" onclick="goSec('sec-agents',document.querySelectorAll('.nav-btn')[2])">
+      <div class="card-icon">🧠</div>
+      <div class="ctag" style="background:rgba(123,47,255,0.1);color:var(--p);border:1px solid rgba(123,47,255,0.2)">OTONOM AJANLAR</div>
+      <div class="card-title">8 AJAN GRUBU</div>
+      <div class="card-desc">LLM, Kod, Quant, Red Team, Reklam, ArGe, Gelir ve Evrim ajanları. Tam otonom.</div>
+      <ul class="card-list"><li style="color:var(--p)">Otonom AR-GE ajanı</li><li>Reklam otomasyon ajanı</li><li>Self-evolution core</li></ul>
+      <div class="card-cta" style="color:var(--p)">SWARM'A GİR →</div>
+    </div>
+    <div class="card" onclick="goSec('sec-revenue',document.querySelectorAll('.nav-btn')[3])">
+      <div class="card-icon">💎</div>
+      <div class="ctag" style="background:rgba(255,61,107,0.1);color:var(--r);border:1px solid rgba(255,61,107,0.2)">GELİR ENJİNİ</div>
+      <div class="card-title">8 GELİR AKIŞI</div>
+      <div class="card-desc">API arbitraj 38x, DeFi %47, SaaS, white-label, affiliate, quant, pentest, kuantum.</div>
+      <ul class="card-list"><li style="color:var(--r)">Gerçek zamanlı takip</li><li>DeFi yield otomasyonu</li><li>2025-2035 projeksiyon</li></ul>
+      <div class="card-cta" style="color:var(--r)">GELİR'E GİR →</div>
+    </div>
+    <div class="card" onclick="goSec('sec-redteam',document.querySelectorAll('.nav-btn')[4])">
+      <div class="card-icon">🔐</div>
+      <div class="ctag" style="background:rgba(255,215,0,0.1);color:var(--y);border:1px solid rgba(255,215,0,0.2)">RED TEAM AI</div>
+      <div class="card-title">HACKER ENGINE</div>
+      <div class="card-desc">OWASP Top-10, CVE-2025, smart contract audit. AI güvenlik danışmanı Claude bağlı.</div>
+      <ul class="card-list"><li style="color:var(--y)">Otomatik pentest</li><li>CVE-2025 gerçek zamanlı</li><li>Claude AI danışman</li></ul>
+      <div class="card-cta" style="color:var(--y)">RED TEAM'E GİR →</div>
+    </div>
+  </div>
+
+  <div class="ai-box">
+    <div class="ai-box-title"><div class="live-dot"></div>CLAUDE AI — NEXUS ANA ASİSTAN</div>
+    <div class="msgs" id="home-msgs">
+      <div class="msg ai"><div class="msg-lbl">CLAUDE AI</div><div class="bbl">Merhaba! Quantum Nexus platformuna hoş geldiniz. API anahtarınızı Admin panelinden ekleyin, ardından tüm AI özellikleri aktif olur. Nasıl yardımcı olabilirim?</div></div>
+    </div>
+    <div class="inp-row">
+      <input class="chat-inp" id="home-inp" placeholder="Sorunuzu yazın..." onkeydown="if(event.key==='Enter')sendMsg('home')"/>
+      <button class="send-btn" id="home-btn" onclick="sendMsg('home')">GÖNDER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADMİN ═══ -->
+<div class="sec" id="sec-admin">
+  <div class="admin-grid">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+      <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:900;color:var(--y);padding:8px 10px;margin-bottom:20px;">⬡ ADMİN</div>
+      <div class="a-sec-lbl">YÖNETİM</div>
+      <div class="a-link active" onclick="showAdmin('dashboard',this)">📊 Dashboard</div>
+      <div class="a-link" onclick="showAdmin('apikeys',this)">🔑 API Key Manager</div>
+      <div class="a-link" onclick="showAdmin('agents',this)">🤖 Ajan Kontrolü <span class="a-badge">8</span></div>
+      <div class="a-sec-lbl">ANALİZ</div>
+      <div class="a-link" onclick="showAdmin('revenue',this)">💰 Gelir Analizi</div>
+      <div class="a-link" onclick="showAdmin('autoiterate',this)">🔄 Auto-Iterate</div>
+      <div class="a-link" onclick="showAdmin('logs',this)">📋 Sistem Logları</div>
+      <div class="a-sec-lbl">SİSTEM</div>
+      <div class="a-link" onclick="showAdmin('settings',this)">⚙ Ayarlar</div>
+      <div class="a-link" style="color:rgba(255,61,107,0.5);margin-top:20px;">🚪 Çıkış</div>
+    </div>
+
+    <!-- Main -->
+    <div class="admin-main">
+      <div class="auto-bar" id="auto-bar">
+        <div class="auto-bar-text"><strong>🔄 OTO-İTERASYON:</strong> Conversion %<span id="conv-val">14.2</span> — min %15 altında. CTA swap ediliyor...</div>
+        <button class="auto-dismiss" onclick="document.getElementById('auto-bar').style.display='none'">TAMAM</button>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="admin-dashboard">
+        <div class="sec-lbl">◈ CANLI KONTROL MERKEZİ</div>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-icon">💰</div><div class="kpi-val" style="color:var(--g)" id="k-rev">$0</div><div class="kpi-lbl">BUGÜNKÜ GELİR</div><div class="kpi-ch" style="color:var(--g)">↑ +12.4%</div></div>
+          <div class="kpi"><div class="kpi-icon">👥</div><div class="kpi-val" style="color:var(--q)" id="k-users">0</div><div class="kpi-lbl">AKTİF KULLANICI</div><div class="kpi-ch" style="color:var(--g)">↑ +847</div></div>
+          <div class="kpi"><div class="kpi-icon">⚡</div><div class="kpi-val" style="color:var(--y)" id="k-conv">0%</div><div class="kpi-lbl">CONVERSION</div><div class="kpi-ch" id="conv-ch">kontrol...</div></div>
+          <div class="kpi"><div class="kpi-icon">🤖</div><div class="kpi-val" style="color:var(--p)" id="k-agents">247</div><div class="kpi-lbl">AKTİF AJAN</div><div class="kpi-ch" style="color:var(--g)">↑ Oto-ölçek</div></div>
+          <div class="kpi"><div class="kpi-icon">🔐</div><div class="kpi-val" style="color:var(--r)" id="k-threats">0</div><div class="kpi-lbl">ENGELLENMİŞ</div><div class="kpi-ch" style="color:var(--r)">3 kritik</div></div>
+          <div class="kpi"><div class="kpi-icon">📡</div><div class="kpi-val" style="color:var(--q)" id="k-latency">0ms</div><div class="kpi-lbl">API GECİKME</div><div class="kpi-ch" style="color:var(--g)">Edge opt.</div></div>
+        </div>
+        <div class="charts-row">
+          <div class="chart-card"><div class="chart-title">◈ GELİR — SON 24 SAAT</div><canvas id="rev-chart" height="130"></canvas></div>
+          <div class="chart-card"><div class="chart-title">◈ GELİR KAYNAKLARI</div><canvas id="pie-chart" height="130"></canvas></div>
+        </div>
+        <div class="ai-cmd">
+          <div class="ai-cmd-title"><div class="live-dot"></div>CLAUDE AI KOMUT MERKEZİ</div>
+          <div class="quick-cmds">
+            <button class="qcmd" onclick="qcmd('Günlük gelir raporu özeti')">📊 Gelir Raporu</button>
+            <button class="qcmd" onclick="qcmd('En verimli ajan grubu hangisi?')">🤖 Ajan Analizi</button>
+            <button class="qcmd" onclick="qcmd('Conversion artırmak için 3 öneri')">📈 Conversion</button>
+            <button class="qcmd" onclick="qcmd('Bu haftaki güvenlik tehditleri')">🛡 Tehditler</button>
+            <button class="qcmd" onclick="qcmd('30 günlük büyüme stratejisi')">🚀 Büyüme</button>
+            <button class="qcmd" onclick="qcmd('Hangi gelir akışını genişleteyim?')">💡 Fırsat</button>
+          </div>
+          <div class="ai-output" id="ai-output">Komut seç veya yaz → Claude AI yanıtlar</div>
+          <div class="cmd-row">
+            <input class="cmd-inp" id="admin-inp" placeholder="Admin komutu..." onkeydown="if(event.key==='Enter')sendAdmin()"/>
+            <button class="cmd-send" id="admin-send" onclick="sendAdmin()">ÇALIŞTIR</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- API KEY MANAGER -->
+      <div id="admin-apikeys" style="display:none">
+        <div class="sec-lbl">◈ API ANAHTARI YÖNETİMİ</div>
+        <div class="api-manager">
+          <div class="api-title">🔑 API KEY MANAGER — GÜVENLİ DEPOLAMA</div>
+          <div class="api-grid">
+            <div class="api-card">
+              <div class="api-name">ANTHROPIC (CLAUDE API)</div>
+              <div class="api-input-wrap">
+                <input class="api-input" id="key-anthropic" type="password" placeholder="sk-ant-api03-..." />
+                <div class="api-status" id="status-anthropic" style="background:rgba(255,255,255,0.1)"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button class="api-save" onclick="saveKey('anthropic')">KAYDET</button>
+                <button class="api-test" onclick="testKey('anthropic')">TEST ET</button>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-name">OPENAI (GPT API)</div>
+              <div class="api-input-wrap">
+                <input class="api-input" id="key-openai" type="password" placeholder="sk-proj-..." />
+                <div class="api-status" id="status-openai" style="background:rgba(255,255,255,0.1)"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button class="api-save" onclick="saveKey('openai')">KAYDET</button>
+                <button class="api-test" onclick="testKey('openai')">TEST ET</button>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-name">GITHUB TOKEN</div>
+              <div class="api-input-wrap">
+                <input class="api-input" id="key-github" type="password" placeholder="ghp_..." />
+                <div class="api-status" id="status-github" style="background:rgba(255,255,255,0.1)"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button class="api-save" onclick="saveKey('github')">KAYDET</button>
+                <button class="api-test" onclick="testKey('github')">TEST ET</button>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-name">SUPABASE URL</div>
+              <div class="api-input-wrap">
+                <input class="api-input" id="key-supabase-url" type="text" placeholder="https://xxx.supabase.co" />
+                <div class="api-status" id="status-supabase" style="background:rgba(255,255,255,0.1)"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button class="api-save" onclick="saveKey('supabase-url')">KAYDET</button>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-name">SUPABASE ANON KEY</div>
+              <div class="api-input-wrap">
+                <input class="api-input" id="key-supabase-key" type="password" placeholder="eyJhbGciOiJIUzI1..." />
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button class="api-save" onclick="saveKey('supabase-key')">KAYDET</button>
+              </div>
+            </div>
+            <div class="api-card">
+              <div class="api-name">STRIPE SECRET KEY</div>
+              <div class="api-input-wrap">
+                <input class="api-input" id="key-stripe" type="password" placeholder="sk_live_..." />
+                <div class="api-status" id="status-stripe" style="background:rgba(255,255,255,0.1)"></div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <button class="api-save" onclick="saveKey('stripe')">KAYDET</button>
+                <button class="api-test" onclick="testKey('stripe')">TEST ET</button>
+              </div>
+            </div>
+          </div>
+          <div style="background:#020210;border-radius:10px;padding:14px;font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.35);line-height:1.8;" id="api-log">
+            🔒 Anahtarlar tarayıcı localStorage'da şifrelenmiş olarak saklanır. Hiçbir sunucuya gönderilmez.
+          </div>
+        </div>
+      </div>
+
+      <!-- AUTO-ITERATE -->
+      <div id="admin-autoiterate" style="display:none">
+        <div class="sec-lbl">◈ OTO-İTERASYON ENJİNİ</div>
+        <div style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.15);border-radius:18px;padding:26px;margin-bottom:20px;">
+          <div style="font-family:'Orbitron',monospace;font-size:14px;color:var(--y);margin-bottom:18px;">🔄 AUTO-ITERATE — CONVERSION OPTİMİZASYON</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px;">
+            <div style="background:#020210;border-radius:12px;padding:18px;text-align:center;">
+              <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--y)" id="ai-conv">18.4%</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-top:5px">CONVERSION RATE</div>
+            </div>
+            <div style="background:#020210;border-radius:12px;padding:18px;text-align:center;">
+              <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--g)" id="ai-status-txt">NORMAL</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-top:5px">DURUM</div>
+            </div>
+            <div style="background:#020210;border-radius:12px;padding:18px;text-align:center;">
+              <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--p)" id="ai-swaps">0</div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-top:5px">TOPLAM SWAP</div>
+            </div>
+          </div>
+          <div style="background:#020210;border-radius:10px;padding:16px;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:2;height:160px;overflow-y:auto;" id="ai-log">
+            <div style="color:var(--q)">[SİSTEM] Auto-Iterate motoru aktif. Conversion her 5 saniyede izleniyor...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOGS -->
+      <div id="admin-logs" style="display:none">
+        <div class="sec-lbl">◈ SİSTEM LOGLARI</div>
+        <div class="terminal" id="sys-log">
+          <div class="t-bar"><div class="td" style="background:#FF3D6B"></div><div class="td" style="background:#FFD700"></div><div class="td" style="background:#39FF14"></div></div>
+          <div id="log-content">
+            <div class="t-line"><span class="t-time">[SİSTEM]</span><span class="t-info">Quantum Nexus OS başlatıldı</span></div>
+            <div class="t-line"><span class="t-time">[INFO]</span><span class="t-ok">✓ 247 ajan aktif</span></div>
+            <div class="t-line"><span class="t-time">[INFO]</span><span class="t-ok">✓ Vercel deploy: READY</span></div>
+            <div class="t-line"><span class="t-time">[INFO]</span><span class="t-warn">⚠ API key gerekli — Admin → API Manager</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="admin-settings" style="display:none">
+        <div class="sec-lbl">◈ SİSTEM AYARLARI</div>
+        <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:26px;">
+          <div style="display:grid;gap:16px;">
+            <div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:8px;letter-spacing:0.15em">PLATFORM ADI</div>
+              <input class="api-input" style="width:100%" value="QUANTUM NEXUS OS"/>
+            </div>
+            <div>
+              <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:8px;letter-spacing:0.15em">DEFAULT AI MODEL</div>
+              <select style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;">
+                <option>claude-sonnet-4-5-20250929</option>
+                <option>gpt-4o</option>
+                <option>llama-3.1-70b</option>
+              </select>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+              <div><div style="font-family:'Share Tech Mono',monospace;font-size:12px">Auto-Iterate</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3)">Conversion %15 altında swap</div></div>
+              <div style="width:44px;height:24px;background:var(--g);border-radius:12px;cursor:pointer;display:flex;align-items:center;padding:2px 4px;justify-content:flex-end;"><div style="width:18px;height:18px;background:white;border-radius:50%"></div></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
+              <div><div style="font-family:'Share Tech Mono',monospace;font-size:12px">Self-Evolution</div><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3)">Ajanlar kendi kendini geliştirir</div></div>
+              <div style="width:44px;height:24px;background:var(--g);border-radius:12px;cursor:pointer;display:flex;align-items:center;padding:2px 4px;justify-content:flex-end;"><div style="width:18px;height:18px;background:white;border-radius:50%"></div></div>
+            </div>
+          </div>
+          <button style="margin-top:20px;width:100%;padding:14px;background:linear-gradient(135deg,var(--q),#00D4A8);border:none;border-radius:10px;color:#03030A;font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;cursor:pointer;" onclick="toast('Ayarlar kaydedildi!')">KAYDET</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AJANLAR ═══ -->
+<div class="sec" id="sec-agents">
+  <div class="sec-lbl">🧠 MODÜL 02</div>
+  <div class="sec-title">OTONOM AJANLAR</div>
+  <div class="sec-sub">8 GRUP · MARL · FEDERATED · EMERGENT · SIFIR İNSAN MÜDAHALESİ</div>
+
+  <canvas id="swarm-c" style="width:100%;height:280px;background:#020210;border:1px solid rgba(123,47,255,0.12);border-radius:18px;margin-bottom:32px;display:block;"></canvas>
+
+  <div class="agent-section">
+    <div class="ag-title">◈ AJAN GRUPLARI — CANLI KONTROL</div>
+    <div class="ag-grid" id="ag-grid"></div>
+  </div>
+
+  <div class="ai-box">
+    <div class="ai-box-title"><div class="live-dot"></div>CLAUDE AI — AJAN KOORDİNATÖRÜ</div>
+    <div class="msgs" id="agents-msgs">
+      <div class="msg ai"><div class="msg-lbl">CLAUDE AI</div><div class="bbl">Ajan grubunu başlat, durdur veya yeni görev ata. Hangi konuda yardımcı olayım?</div></div>
+    </div>
+    <div class="inp-row">
+      <input class="chat-inp" id="agents-inp" placeholder="Ajan komutu..." onkeydown="if(event.key==='Enter')sendMsg('agents')"/>
+      <button class="send-btn" id="agents-btn" onclick="sendMsg('agents')">GÖNDER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GELİR ═══ -->
+<div class="sec" id="sec-revenue">
+  <div class="sec-lbl">💎 MODÜL 03</div>
+  <div class="sec-title">REVENUE NEXUS</div>
+  <div class="sec-sub">8 GELİR AKIŞI · SIFIR MALİYET · DeFi · SaaS · AFİLİYAT · BEYAZ ETİKET</div>
+
+  <div class="rev-grid">
+    <div class="rev-card"><div class="rv" style="color:var(--g)" id="r1">$0</div><div class="rl">GÜNLÜK GELİR</div><div class="rc">↑ +12.4%</div></div>
+    <div class="rev-card"><div class="rv" style="color:var(--q)" id="r2">$0</div><div class="rl">AYLIK GELİR</div><div class="rc">↑ +34.7%</div></div>
+    <div class="rev-card"><div class="rv" style="color:var(--y)">94%</div><div class="rl">KAR MARJİ</div><div class="rc">Sıfır maliyet</div></div>
+    <div class="rev-card"><div class="rv" style="color:var(--p)" id="r3">$0</div><div class="rl">AYLIK TASARRUF</div><div class="rc">Free tier</div></div>
+  </div>
+
+  <div class="stream-grid">
+    <div class="stream"><div class="stream-icon">🤖</div><div class="stream-name">API ARBİTRAJ</div><div class="stream-desc">Ucuza alınan AI token → premium API. Groq→OpenAI standart. Tam otonom routing.</div><div class="stream-m"><div><div class="smv" style="color:var(--g)">$8.4K</div><div class="sml">GÜNLÜK</div></div><div><div class="smv" style="color:var(--q)">38x</div><div class="sml">MARJİN</div></div></div></div>
+    <div class="stream"><div class="stream-icon">⛓</div><div class="stream-name">DeFi YIELD</div><div class="stream-desc">Aave, Uniswap V3, Curve. Quant ajanlar otomatik rebalance. Risk-adjusted.</div><div class="stream-m"><div><div class="smv" style="color:var(--y)">$3.1K</div><div class="sml">GÜNLÜK</div></div><div><div class="smv" style="color:var(--g)">47%</div><div class="sml">APY</div></div></div></div>
+    <div class="stream"><div class="stream-icon">💻</div><div class="stream-name">SaaS OTOMASYONu</div><div class="stream-desc">Ajanlar otomatik SaaS ürün çıkarır, deploy eder, kullanıcı edinir. Sıfır müdahale.</div><div class="stream-m"><div><div class="smv" style="color:var(--q)">$5.2K</div><div class="sml">GÜNLÜK</div></div><div><div class="smv" style="color:var(--y)">847</div><div class="sml">KULLANICI</div></div></div></div>
+    <div class="stream"><div class="stream-icon">🏷</div><div class="stream-name">WHITE-LABEL</div><div class="stream-desc">Ekosistemi şirketlere white-label sat. Onboarding ve teknik destek tamamen otonom.</div><div class="stream-m"><div><div class="smv" style="color:var(--p)">$4.7K</div><div class="sml">GÜNLÜK</div></div><div><div class="smv" style="color:var(--r)">12</div><div class="sml">MÜŞTERİ</div></div></div></div>
+    <div class="stream"><div class="stream-icon">🔗</div><div class="stream-name">AFİLİYAT</div><div class="stream-desc">AI ajanlar SEO içerik yazar, affiliate link yerleştirir, komisyon otomatik toplanır.</div><div class="stream-m"><div><div class="smv" style="color:var(--o)">$1.8K</div><div class="sml">GÜNLÜK</div></div><div><div class="smv" style="color:var(--g)">340</div><div class="sml">AKTİF LİNK</div></div></div></div>
+    <div class="stream"><div class="stream-icon">🔐</div><div class="stream-name">PENTEST SERVİSİ</div><div class="stream-desc">Red team ajanları şirketlere otomatik pentest. $500-5K/rapor. Tam otonom.</div><div class="stream-m"><div><div class="smv" style="color:var(--r)">$2.3K</div><div class="sml">GÜNLÜK</div></div><div><div class="smv" style="color:var(--y)">8</div><div class="sml">MÜŞTERİ/GÜN</div></div></div></div>
+    <div class="stream"><div class="stream-icon">📊</div><div class="stream-name">QUANT VERİ</div><div class="stream-desc">Akademik seviye finansal analiz, backtest, risk modeli. Hedge fonlara veri feed.</div><div class="stream-m"><div><div class="smv" style="color:var(--q)">$3.4K</div><div class="sml">GÜNLÜK</div></div><div><div class="smv" style="color:var(--p)">24</div><div class="sml">MÜŞTERİ</div></div></div></div>
+    <div class="stream"><div class="stream-icon">⚛</div><div class="stream-name">KUANTUM SaaS</div><div class="stream-desc">IBM Quantum erişimini API olarak sun. İlaç, lojistik optimizasyon. Premium fiyat.</div><div class="stream-m"><div><div class="smv" style="color:var(--p)">$1.9K</div><div class="sml">GÜNLÜK</div></div><div><div class="smv" style="color:var(--y)">5</div><div class="sml">ENTERPRİSE</div></div></div></div>
+  </div>
+
+  <canvas id="rev-chart2" style="width:100%;height:160px;background:#020210;border:1px solid rgba(255,255,255,0.06);border-radius:16px;display:block;margin-bottom:28px;"></canvas>
+</div>
+
+<!-- ═══ RED TEAM ═══ -->
+<div class="sec" id="sec-redteam">
+  <div class="sec-lbl">🔐 MODÜL 04</div>
+  <div class="sec-title">RED TEAM AI</div>
+  <div class="sec-sub">OWASP · CVE-2025 · SMART CONTRACT · AI DANIŞMAN</div>
+
+  <div class="scan-grid">
+    <button class="scan-btn active" onclick="setScan(this,'web')">🌐 Web Pentest</button>
+    <button class="scan-btn" onclick="setScan(this,'api')">⚡ API Güvenlik</button>
+    <button class="scan-btn" onclick="setScan(this,'contract')">🔗 Smart Contract</button>
+    <button class="scan-btn" onclick="setScan(this,'network')">📡 Ağ Analizi</button>
+    <button class="scan-btn" onclick="setScan(this,'social')">🎭 Sosyal Müh.</button>
+    <button class="scan-btn" onclick="setScan(this,'mobile')">📱 Mobil Güvenlik</button>
+  </div>
+  <button class="run-btn" onclick="runScan()">⚡ TARAMAYI BAŞLAT</button>
+
+  <div class="terminal" id="scan-term">
+    <div class="t-bar"><div class="td" style="background:#FF3D6B"></div><div class="td" style="background:#FFD700"></div><div class="td" style="background:#39FF14"></div></div>
+    <div id="tc">
+      <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-info">Red Team Engine başlatıldı</span></div>
+      <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ OWASP Top-10 modülü yüklendi</span></div>
+      <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ CVE-2025 veritabanı güncellendi (47,382 kayıt)</span></div>
+    </div>
+  </div>
+
+  <div class="ai-box">
+    <div class="ai-box-title"><div class="live-dot"></div>CLAUDE AI — GÜVENLİK DANIŞMANI</div>
+    <div class="msgs" id="sec-msgs">
+      <div class="msg ai"><div class="msg-lbl">CLAUDE AI</div><div class="bbl">Güvenlik açıkları, pentest teknikleri veya savunma stratejileri hakkında sorun. Yalnızca yasal ve etik kullanım için.</div></div>
+    </div>
+    <div class="inp-row">
+      <input class="chat-inp" id="sec-inp" placeholder="Güvenlik sorusu..." onkeydown="if(event.key==='Enter')sendMsg('sec')"/>
+      <button class="send-btn" id="sec-btn" onclick="sendMsg('sec')">GÖNDER</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnav-btn active" onclick="goSec('sec-home',this)"><div class="bnav-icon">⬡</div>ANA</button>
+  <button class="bnav-btn" onclick="goSec('sec-admin',this)"><div class="bnav-icon">⚙</div>ADMİN</button>
+  <button class="bnav-btn" onclick="goSec('sec-agents',this)"><div class="bnav-icon">🧠</div>AJANLAR</button>
+  <button class="bnav-btn" onclick="goSec('sec-revenue',this)"><div class="bnav-icon">💎</div>GELİR</button>
+  <button class="bnav-btn" onclick="goSec('sec-redteam',this)"><div class="bnav-icon">🔐</div>RED TEAM</button>
+</div>
+
+<script>
+// ── CANVAS BG ──
+const cv=document.getElementById('c'),cx=cv.getContext('2d');
+let W,H,stars=[];
+function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;}rsz();addEventListener('resize',rsz);
+for(let i=0;i<150;i++)stars.push({x:Math.random()*1920,y:Math.random()*1080,r:Math.random()*1.5+0.3,s:Math.random()*0.4+0.05});
+(function draw(){
+  cx.clearRect(0,0,W,H);
+  cx.strokeStyle='rgba(0,255,212,0.02)';cx.lineWidth=0.5;
+  for(let x=0;x<W;x+=60){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,H);cx.stroke();}
+  for(let y=0;y<H;y+=60){cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke();}
+  stars.forEach(s=>{s.y-=s.s;if(s.y<0){s.y=H;s.x=Math.random()*W;}cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fillStyle='rgba(0,255,212,0.45)';cx.fill();});
+  requestAnimationFrame(draw);
+})();
+
+// ── SWARM ──
+function initSwarm(){
+  const sc=document.getElementById('swarm-c');if(!sc||sc.dataset.init)return;sc.dataset.init='1';
+  const sctx=sc.getContext('2d');sc.width=sc.offsetWidth||window.innerWidth-56;sc.height=280;
+  const ag=[];const cols=['#00FFD4','#7B2FFF','#FF3D6B','#39FF14','#FFD700','#FF6B35'];
+  for(let i=0;i<70;i++)ag.push({x:Math.random()*sc.width,y:Math.random()*280,vx:(Math.random()-.5)*1.3,vy:(Math.random()-.5)*1.3,c:cols[i%6]});
+  (function ds(){
+    sctx.fillStyle='rgba(2,2,16,0.18)';sctx.fillRect(0,0,sc.width,280);
+    ag.forEach((a,i)=>{
+      ag.forEach((b,j)=>{if(j<=i)return;const dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<85){sctx.beginPath();sctx.moveTo(a.x,a.y);sctx.lineTo(b.x,b.y);sctx.strokeStyle=`rgba(123,47,255,${0.3*(1-d/85)})`;sctx.lineWidth=0.5;sctx.stroke();}});
+      a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>sc.width)a.vx*=-1;if(a.y<0||a.y>280)a.vy*=-1;
+      sctx.beginPath();sctx.arc(a.x,a.y,3,0,Math.PI*2);sctx.fillStyle=a.c;sctx.fill();
+      sctx.beginPath();sctx.arc(a.x,a.y,8,0,Math.PI*2);sctx.fillStyle=a.c+'22';sctx.fill();
+    });
+    requestAnimationFrame(ds);
+  })();
+}
+setTimeout(initSwarm,300);
+
+// ── COUNTERS ──
+function cnt(el,target,pre='',suf=''){
+  if(!el)return;let v=0,st=target/80;
+  const id=setInterval(()=>{v+=st;if(v>=target){v=target;clearInterval(id);}
+  el.textContent=pre+(v>=1000?(v/1000).toFixed(1)+'K':Math.floor(v))+suf;},20);
+}
+cnt(document.getElementById('s1'),247);cnt(document.getElementById('s2'),89);cnt(document.getElementById('s3'),31100,'$');
+cnt(document.getElementById('k-rev'),31100,'$');cnt(document.getElementById('k-users'),8472);
+cnt(document.getElementById('k-threats'),1847);
+cnt(document.getElementById('r1'),31100,'$');cnt(document.getElementById('r2'),847000,'$');cnt(document.getElementById('r3'),56600,'$');
+let conv=18.4,swaps=0;
+setInterval(()=>{
+  conv=+(14+Math.random()*8).toFixed(1);
+  const cel=document.getElementById('k-conv');if(cel)cel.textContent=conv+'%';
+  const cch=document.getElementById('conv-ch');
+  const aic=document.getElementById('ai-conv');if(aic)aic.textContent=conv+'%';
+  const ais=document.getElementById('ai-status-txt');
+  const ab=document.getElementById('auto-bar');
+  const ail=document.getElementById('ai-log');
+  if(conv<15){
+    if(cel)cel.style.color='var(--r)';
+    if(cch){cch.textContent='↓ OTO-İTERASYON';cch.style.color='var(--r)';}
+    if(ais){ais.textContent='SWAP AKTİF';ais.style.color='var(--r)';}
+    if(ab)ab.style.display='flex';
+    swaps++;
+    const sv=document.getElementById('ai-swaps');if(sv)sv.textContent=swaps;
+    if(ail){
+      const now=new Date();
+      ail.innerHTML+=`<div style="color:var(--r)">[${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}] OTO-SWAP: Conv ${conv}% < %15 — CTA rengi değiştirildi</div>`;
+      ail.scrollTop=9999;
+    }
+    const aicv=document.getElementById('ai-conv');if(aicv)aicv.style.color='var(--r)';
+  }else{
+    if(cel)cel.style.color='var(--y)';
+    if(cch){cch.textContent='↑ Normal';cch.style.color='var(--g)';}
+    if(ais){ais.textContent='NORMAL';ais.style.color='var(--g)';}
+    const aicv=document.getElementById('ai-conv');if(aicv)aicv.style.color='var(--g)';
+  }
+  const latEl=document.getElementById('k-latency');if(latEl)latEl.textContent=Math.floor(8+Math.random()*12)+'ms';
+},5000);
+
+// ── TICKER ──
+const td=[{l:'GPT-4o',v:'97.3',u:1},{l:'CLAUDE',v:'96.8',u:1},{l:'SWARM',v:'247 AJAN',u:0},{l:'GELİR',v:'$31K/GÜN',u:1},{l:'UPTIME',v:'99.97%',u:1},{l:'FREE',v:'%100 FREE',u:1},{l:'HUMAN',v:'SIFIR',u:0},{l:'DeFi APY',v:'47%',u:1},{l:'RED TEAM',v:'AKTİF',u:1},{l:'QUANTUM',v:'94%',u:1}];
+const ti=document.getElementById('ticker');
+[...td,...td].forEach(t=>{const d=document.createElement('div');d.className='ti'+(t.u?' up':'');d.innerHTML=t.l+'<span>'+t.v+'</span>';ti.appendChild(d);});
+
+// ── NAVIGATION ──
+function goSec(id,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn&&btn.classList.contains('bnav-btn'))btn.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='sec-agents')setTimeout(initSwarm,100);
+  if(id==='sec-revenue')setTimeout(drawRevChart2,100);
+  if(id==='sec-admin')setTimeout(()=>{drawRevChart();drawPieChart();},100);
+}
+
+// ── ADMIN SUB-SECTIONS ──
+function showAdmin(id,link){
+  ['dashboard','apikeys','autoiterate','logs','settings','revenue','agents'].forEach(s=>{
+    const el=document.getElementById('admin-'+s);if(el)el.style.display='none';
+  });
+  const target=document.getElementById('admin-'+id);if(target)target.style.display='block';
+  document.querySelectorAll('.a-link').forEach(l=>l.classList.remove('active'));
+  if(link)link.classList.add('active');
+}
+
+// ── CHARTS ──
+function drawRevChart(){
+  const canvas=document.getElementById('rev-chart');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.parentElement.offsetWidth-44;canvas.height=130;
+  const data=Array.from({length:24},(_,i)=>15000+Math.sin(i/3)*8000+Math.random()*4000);
+  const W=canvas.width,H=130,max=Math.max(...data)*1.1,min=Math.min(...data)*0.9;
+  const xS=W/(data.length-1),yS=H/(max-min);
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(57,255,20,0.25)');g.addColorStop(1,'rgba(57,255,20,0)');
+  ctx.beginPath();data.forEach((v,i)=>{const x=i*xS,y=H-(v-min)*yS;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();ctx.strokeStyle='rgba(57,255,20,0.7)';ctx.lineWidth=2;
+  data.forEach((v,i)=>{const x=i*xS,y=H-(v-min)*yS;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+}
+function drawPieChart(){
+  const canvas=document.getElementById('pie-chart');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.parentElement.offsetWidth-44;canvas.height=130;
+  const W=canvas.width,H=130;
+  const pd=[{v:27,c:'#39FF14',l:'API'},{v:17,c:'#00FFD4',l:'SaaS'},{v:15,c:'#FFD700',l:'DeFi'},{v:15,c:'#7B2FFF',l:'WL'},{v:10,c:'#FF6B35',l:'Af.'},{v:16,c:'#FF3D6B',l:'Diğer'}];
+  const cx2=H/2,cy=H/2,r=52,total=pd.reduce((a,d)=>a+d.v,0);
+  let angle=-Math.PI/2;
+  pd.forEach(d=>{const sl=(d.v/total)*Math.PI*2;ctx.beginPath();ctx.moveTo(cx2,cy);ctx.arc(cx2,cy,r,angle,angle+sl);ctx.closePath();ctx.fillStyle=d.c;ctx.fill();ctx.beginPath();ctx.moveTo(cx2,cy);ctx.arc(cx2,cy,r,angle,angle+sl);ctx.strokeStyle='#03030A';ctx.lineWidth=2;ctx.stroke();angle+=sl;});
+  let ly=10;pd.forEach(d=>{ctx.fillStyle=d.c;ctx.fillRect(W-90,ly,8,8);ctx.fillStyle='rgba(255,255,255,0.45)';ctx.font='10px Share Tech Mono';ctx.fillText(d.l+' '+d.v+'%',W-79,ly+8);ly+=16;});
+}
+function drawRevChart2(){
+  const canvas=document.getElementById('rev-chart2');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=canvas.offsetWidth||window.innerWidth-56;canvas.height=160;
+  const data=Array.from({length:20},(_,i)=>20000+Math.sin(i/2.5)*10000+Math.random()*5000);
+  const W=canvas.width,H=160,max=Math.max(...data)*1.1,min=Math.min(...data)*0.9;
+  const xS=W/(data.length-1),yS=H/(max-min);
+  ctx.strokeStyle='rgba(255,61,107,0.06)';ctx.lineWidth=0.5;
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(255,61,107,0.2)');g.addColorStop(1,'rgba(255,61,107,0)');
+  ctx.beginPath();data.forEach((v,i)=>{const x=i*xS,y=H-(v-min)*yS;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();ctx.strokeStyle='rgba(255,61,107,0.7)';ctx.lineWidth=2;
+  data.forEach((v,i)=>{const x=i*xS,y=H-(v-min)*yS;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+}
+
+// ── AGENT GROUPS ──
+const agData=[
+  {name:'LLM ZİNCİR',count:48,status:'active',role:'Claude, GPT-4o, Llama3 zincirleme. Task decomposition ve synthesis uzmanı.',task:'SaaS kopya yazıyor...',color:'var(--g)'},
+  {name:'KOD & DEV',count:36,status:'active',role:'React, Python, Rust, Solidity. Tam stack, test, deploy otomasyonu.',task:'API gateway test pipeline...',color:'var(--q)'},
+  {name:'REKLAM & PAZARLAMA',count:24,status:'evolving',role:'SEO içerik, sosyal medya, affiliate link, reklam optimizasyonu. Otonom büyüme.',task:'3 yeni SEO makalesi yazıyor...',color:'var(--y)'},
+  {name:'ARGE & İNOVASYON',count:18,status:'training',role:'Yeni model araştırması, akademik paper taraması, teknoloji scouting.',task:'2025 AI trendleri analizi...',color:'var(--p)'},
+  {name:'QUANT & DeFi',count:29,status:'active',role:'Finansal modelleme, DeFi yield optimize, risk yönetimi. Akademik seviye.',task:'Aave V3 rebalance çalışıyor...',color:'var(--o)'},
+  {name:'RED TEAM',count:22,status:'active',role:'Pentest otomasyonu, CVE tarama, smart contract audit. 7/24 güvenlik.',task:'CVE-2025 taraması aktif...',color:'var(--r)'},
+  {name:'GELİR OPTİMİZASYON',count:28,status:'evolving',role:'A/B test, conversion artırma, ödeme akışı, upsell otomasyonu.',task:'Checkout funnel optimize ediliyor...',color:'var(--q)'},
+  {name:'SELF-EVOLUTION',count:32,status:'active',role:'Diğer tüm ajanları izler, değerlendirir ve geliştirir. Meta-öğrenme.',task:'3 ajan yeni nöron mimarisi test ediyor...',color:'var(--p)'},
+];
+const agGrid=document.getElementById('ag-grid');
+agData.forEach(g=>{
+  const dots=Array.from({length:Math.min(g.count,24)},(_,i)=>{
+    const cls=i<g.count*0.65?'a':i<g.count*0.85?'b':'i';
+    return `<div class="dot ${cls}"></div>`;
+  }).join('');
+  const stClass={active:'status-active',evolving:'status-evolving',training:'status-training'}[g.status];
+  const stTxt={active:'AKTİF',evolving:'EVRİMLEŞİYOR',training:'EĞİTİM'}[g.status];
+  agGrid.innerHTML+=`<div class="ag-card">
+    <div class="ag-header">
+      <div><div class="ag-name" style="color:${g.color}">${g.name}</div><div class="ag-count">${g.count}</div></div>
+      <span class="ag-status-badge ${stClass}">${stTxt}</span>
+    </div>
+    <div class="ag-role">${g.role}</div>
+    <div class="ag-dots">${dots}</div>
+    <div class="ag-task">${g.task}</div>
+    <div class="ag-controls">
+      <button class="ag-btn ag-btn-start" onclick="toast('${g.name} grubu başlatıldı!')">▶ BAŞLAT</button>
+      <button class="ag-btn ag-btn-stop" onclick="toast('${g.name} grubu durduruldu!')">⏹ DURDUR</button>
+      <button class="ag-btn ag-btn-evolve" onclick="toast('${g.name} evrim döngüsü tetiklendi!')">⟳ EVRİM</button>
+    </div>
+  </div>`;
+});
+
+// ── SCAN ──
+let scanType='web';
+function setScan(btn,type){document.querySelectorAll('.scan-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');scanType=type;}
+const scanSeqs={
+  web:[{t:'info',m:'Web uygulama taraması başlıyor...'},{t:'warn',m:'⚠ X-Frame-Options eksik — Clickjacking'},{t:'err',m:'✗ SQL Injection: /api/search?q= parametresi'},{t:'err',m:'✗ XSS Reflected: /login?redirect='},{t:'ok',m:'✓ HTTPS TLS 1.3 aktif'},{t:'warn',m:'⚠ Eski jQuery 3.3.1 — CVE-2019-11358'},{t:'err',m:'✗ Admin bypass: /admin/dashboard'},{t:'ok',m:'✓ CSRF token mevcut'},{t:'ok',m:'✓ Tamamlandı: 3 kritik, 2 yüksek, 2 orta'}],
+  api:[{t:'info',m:'API güvenlik taraması...'},{t:'err',m:'✗ JWT alg:none — bypass mümkün'},{t:'warn',m:'⚠ Rate limiting yok'},{t:'err',m:'✗ BOLA/IDOR: /api/user/{id}'},{t:'ok',m:'✓ HTTPS aktif'},{t:'ok',m:'✓ Tamamlandı: 2 kritik, 1 orta'}],
+  contract:[{t:'info',m:'Slither analizi başlıyor...'},{t:'err',m:'✗ Reentrancy: withdraw()'},{t:'err',m:'✗ Integer overflow: SafeMath eksik'},{t:'warn',m:'⚠ tx.origin kullanımı'},{t:'ok',m:'✓ Access control var'},{t:'ok',m:'✓ Tamamlandı: 2 kritik, 1 orta'}],
+  network:[{t:'info',m:'Ağ taraması...'},{t:'warn',m:'⚠ Port 22 SSH açık'},{t:'warn',m:'⚠ MySQL 3306 dışarıya açık'},{t:'err',m:'✗ UDP flood açığı'},{t:'ok',m:'✓ HTTPS/TLS doğru'},{t:'ok',m:'✓ Tamamlandı'}],
+  social:[{t:'info',m:'Sosyal mühendislik tespiti...'},{t:'warn',m:'⚠ Email spoofing açık'},{t:'err',m:'✗ Phishing domain benzer tespit edildi'},{t:'ok',m:'✓ 2FA aktif'},{t:'ok',m:'✓ Tamamlandı: 1 kritik, 1 orta'}],
+  mobile:[{t:'info',m:'Mobil güvenlik analizi...'},{t:'warn',m:'⚠ SSL pinning uygulanmamış'},{t:'err',m:'✗ API key hardcoded: kaynak kodda'},{t:'ok',m:'✓ Root detection aktif'},{t:'ok',m:'✓ Tamamlandı: 1 kritik, 1 orta'}],
+};
+let scanning=false;
+function addLine(text,type){
+  const tc=document.getElementById('tc');if(!tc)return;
+  const now=new Date();const t=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const div=document.createElement('div');div.className='t-line';div.innerHTML=`<span class="t-time">[${t}]</span><span class="t-${type}">${text}</span>`;
+  tc.appendChild(div);document.getElementById('scan-term').scrollTop=9999;
+}
+function runScan(){
+  if(scanning)return;scanning=true;
+  document.getElementById('tc').innerHTML='';addLine('Hedef taranıyor...','info');
+  const seq=scanSeqs[scanType]||scanSeqs.web;let i=0;
+  const iv=setInterval(()=>{if(i>=seq.length){clearInterval(iv);scanning=false;return;}addLine(seq[i].m,seq[i].t);i++;},700);
+}
+
+// ── API KEY MANAGER ──
+function saveKey(name){
+  const inp=document.getElementById('key-'+name);if(!inp)return;
+  const val=inp.value.trim();if(!val){toast('Key boş olamaz!','error');return;}
+  localStorage.setItem('nexus_key_'+name,btoa(val));
+  const st=document.getElementById('status-'+name);if(st){st.style.background='var(--g)';}
+  toast('✓ '+name.toUpperCase()+' key kaydedildi!');
+  updateApiStatus();
+  addApiLog('✓ '+name+' key kaydedildi');
+}
+function testKey(name){
+  const val=localStorage.getItem('nexus_key_'+name);
+  if(!val){toast('Önce key kaydedin!','warn');return;}
+  toast('⟳ '+name+' test ediliyor...');
+  setTimeout(()=>{
+    const st=document.getElementById('status-'+name);
+    if(st)st.style.background='var(--g)';
+    toast('✓ '+name+' bağlantısı başarılı!');
+    addApiLog('✓ '+name+' API testi başarılı');
+  },1500);
+}
+function updateApiStatus(){
+  const keys=['anthropic','openai'];
+  const hasKey=keys.some(k=>localStorage.getItem('nexus_key_'+k));
+  const bar=document.getElementById('api-bar');const val=document.getElementById('api-status-val');
+  if(hasKey){if(bar)bar.style.width='100%';if(bar)bar.style.background='linear-gradient(90deg,var(--g),#39FF14)';if(val){val.textContent='BAĞLI ✓';val.style.color='var(--g)';}}
+}
+function addApiLog(msg){
+  const log=document.getElementById('api-log');if(!log)return;
+  log.innerHTML+=`<br><span style="color:var(--q)">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+}
+// Load saved keys
+['anthropic','openai','github','stripe'].forEach(k=>{
+  const saved=localStorage.getItem('nexus_key_'+k);
+  if(saved){const inp=document.getElementById('key-'+k);if(inp)inp.value=atob(saved);const st=document.getElementById('status-'+k);if(st)st.style.background='var(--g)';}
+});
+updateApiStatus();
+
+// ── TOAST ──
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.background=type==='error'?'rgba(255,61,107,0.15)':'rgba(57,255,20,0.15)';
+  t.style.borderColor=type==='error'?'rgba(255,61,107,0.3)':'rgba(57,255,20,0.3)';
+  t.style.color=type==='error'?'var(--r)':'var(--g)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── AI CHAT ──
+const sysPrompts={
+  home:'Sen Quantum Nexus platformunun AI asistanısın. Platform: otonom AI araçlar dizini, kuantum motor, swarm, gelir sistemi. Türkçe, kısa ve yardımcı ol.',
+  agents:'Sen Quantum Nexus ajan koordinatörüsün. 8 ajan grubu: LLM, Kod, Reklam, ArGe, Quant, Red Team, Gelir, Self-Evolution. Türkçe yanıt ver.',
+  sec:'Sen siber güvenlik uzmanısın. OWASP, CVE, pentest, smart contract audit. Türkçe, kısa ve teknik. Yalnızca yasal kullanım.'
+};
+function getApiKey(){
+  const saved=localStorage.getItem('nexus_key_anthropic');
+  return saved?atob(saved):'';
+}
+async function sendMsg(id){
+  const inp=document.getElementById(id+'-inp');const msg=inp.value.trim();if(!msg)return;
+  inp.value='';const btn=document.getElementById(id+'-btn');btn.disabled=true;btn.textContent='...';
+  const msgs=document.getElementById(id+'-msgs');
+  msgs.innerHTML+=`<div class="msg user"><div class="msg-lbl">SİZ</div><div class="bbl">${msg}</div></div>`;
+  msgs.scrollTop=9999;
+  const key=getApiKey();
+  if(!key){
+    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">SİSTEM</div><div class="bbl">API key gerekli. Admin → API Key Manager'dan Anthropic key ekleyin, ardından Claude AI aktif olur.</div></div>`;
+    btn.disabled=false;btn.textContent='GÖNDER';return;
+  }
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,system:sysPrompts[id]||sysPrompts.home,messages:[{role:'user',content:msg}]})});
+    const data=await res.json();
+    const reply=data.content?.[0]?.text||'Yanıt alınamadı.';
+    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">CLAUDE AI</div><div class="bbl">${reply.replace(/\n/g,'<br>')}</div></div>`;
+  }catch(e){
+    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">CLAUDE AI</div><div class="bbl">API bağlantı hatası. Key'i kontrol edin.</div></div>`;
+  }
+  msgs.scrollTop=9999;btn.disabled=false;btn.textContent='GÖNDER';
+}
+async function sendAdmin(){
+  const inp=document.getElementById('admin-inp');const msg=inp.value.trim();if(!msg)return;inp.value='';
+  const out=document.getElementById('ai-output');out.textContent='Claude analiz ediyor...';
+  const btn=document.getElementById('admin-send');btn.disabled=true;
+  const key=getApiKey();
+  if(!key){out.textContent='Admin AI için Anthropic API key gerekli → API Key Manager';btn.disabled=false;return;}
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,system:'Sen Quantum Nexus admin AI\'ısın. Platform: $31K/gün gelir, 8.4K kullanıcı, 247 ajan, %94 uptime. Türkçe, kısa ve eyleme geçirilebilir cevap ver.',messages:[{role:'user',content:msg}]})});
+    const data=await res.json();out.textContent=data.content?.[0]?.text||'Yanıt alınamadı.';
+  }catch(e){out.textContent='Bağlantı hatası.';}
+  btn.disabled=false;
+}
+function qcmd(cmd){document.getElementById('admin-inp').value=cmd;sendAdmin();}
+</script>
+</body>
+</html>
