@@ -3,3 +3,6 @@ node_modules
 *.bak
 .vercel
 .env*.local
+.env
+.env.local
+__pycache__/
