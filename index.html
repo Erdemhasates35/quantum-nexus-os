@@ -3,115 +3,1123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>QUANTUM NEXUS OS v30 — SOVEREIGN ARCHITECT</title>
+<title>QUANTUM NEXUS OS v14</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
-/* Buraya gönderdiğin tüm <style> içeriğini yapıştırdım */
 :root{--bg:#000;--b1:#060e18;--b2:#091420;--bd:#0f2535;--bd2:#163248;--c:#00e5ff;--tl:#00e5b0;--am:#ffb300;--re:#ff3d3d;--gr:#00e676;--vi:#d500f9;--tx:#a0c0d8;--dm:#2a4a60;}
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;color:var(--tx);font-family:'Share Tech Mono',monospace;font-size:12px;}
-/* ... (tüm stil kodunu buraya koydum - tam hali mesajında var) ... */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,229,255,.012) 3px,rgba(0,229,255,.012) 4px);pointer-events:none;z-index:9000;}
+#boot{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s;}
+#boot h1{font-family:Orbitron,sans-serif;font-size:2.6em;font-weight:900;color:var(--c);letter-spacing:8px;text-shadow:0 0 40px var(--c);}
+.bs{color:var(--dm);letter-spacing:4px;font-size:11px;margin-top:6px;}
+#bbar{width:340px;margin-top:34px;height:2px;background:var(--bd);border-radius:1px;overflow:hidden;}
+#bfil{height:100%;background:var(--c);width:0;transition:width .04s;box-shadow:0 0 8px var(--c);}
+#blog{width:380px;margin-top:18px;height:100px;overflow:hidden;font-size:10px;}
+.bl{display:block;animation:fi .1s;}@keyframes fi{from{opacity:0}to{opacity:1}}
+#os{display:none;flex-direction:column;width:100%;height:100%;}
+#top{display:flex;align-items:center;height:40px;background:#000;border-bottom:1px solid var(--bd2);padding:0 10px;flex-shrink:0;position:relative;}
+#top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:.4;}
+.tlo{font-family:Orbitron,sans-serif;font-weight:900;font-size:13px;color:var(--c);letter-spacing:3px;text-shadow:0 0 15px rgba(0,229,255,.5);margin-right:14px;}
+.tsp{flex:1;}.tse{width:1px;height:18px;background:var(--bd2);margin:0 8px;}
+.tst{display:flex;align-items:center;gap:5px;margin-left:12px;font-size:10px;color:var(--dm);}
+.dot{width:5px;height:5px;border-radius:50%;}
+.ok{background:var(--gr);box-shadow:0 0 5px var(--gr);}
+.wn{background:var(--am);box-shadow:0 0 5px var(--am);}
+.dg{background:var(--re);box-shadow:0 0 5px var(--re);}
+#tabs{display:flex;height:36px;background:var(--b1);border-bottom:1px solid var(--bd);overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+#tabs::-webkit-scrollbar{display:none;}
+.tab{display:flex;align-items:center;gap:5px;padding:0 11px;cursor:pointer;white-space:nowrap;font-size:10px;letter-spacing:1px;color:var(--dm);border-right:1px solid var(--bd);transition:all .15s;position:relative;min-width:80px;}
+.tab:hover{color:var(--tx);background:rgba(0,229,255,.04);}
+.tab.on{color:var(--c);background:rgba(0,229,255,.07);}
+.tab.on::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--c);}
+.tn{font-family:Orbitron,sans-serif;font-size:9px;font-weight:700;background:var(--bd);padding:1px 4px;border-radius:2px;}
+.tab.on .tn{background:rgba(0,229,255,.15);color:var(--c);}
+#main{flex:1;overflow:hidden;display:grid;grid-template-columns:194px 1fr;}
+#sb{background:#000;border-right:1px solid var(--bd);overflow-y:auto;padding:8px 0;scrollbar-width:none;}
+.ss{padding:6px 12px 3px;color:var(--dm);font-size:9px;letter-spacing:2px;}
+.si{display:flex;align-items:center;gap:7px;padding:7px 12px;cursor:pointer;color:var(--dm);border-left:2px solid transparent;font-size:11px;transition:all .12s;}
+.si:hover{color:var(--tx);background:rgba(0,229,255,.03);}
+.si.on{color:var(--c);border-left-color:var(--c);background:rgba(0,229,255,.05);}
+.sic{font-size:13px;width:16px;text-align:center;}
+.sbg{margin-left:auto;background:rgba(255,61,61,.2);color:var(--re);border-radius:8px;padding:1px 5px;font-size:9px;}
+.sbg.g{background:rgba(0,230,118,.15);color:var(--gr);}
+.sm{padding:7px 12px;}
+.sml{display:flex;justify-content:space-between;color:var(--dm);font-size:9px;margin-bottom:3px;}
+.smb{height:3px;background:var(--bd);border-radius:2px;overflow:hidden;}
+.smbf{height:100%;border-radius:2px;transition:width .8s;}
+#pgs{flex:1;overflow:hidden;background:#000;}
+.pg{display:none;width:100%;height:100%;overflow-y:auto;padding:14px;animation:pi .2s;}
+@keyframes pi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.pg.on{display:block;}
+.pg::-webkit-scrollbar{width:3px;}
+.pg::-webkit-scrollbar-thumb{background:var(--bd2);}
+.row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.col{flex:1;min-width:180px;}
+.card{background:var(--b1);border:1px solid var(--bd);border-radius:3px;overflow:hidden;margin-bottom:12px;}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--b2);border-bottom:1px solid var(--bd);}
+.ct{font-family:Orbitron,sans-serif;font-size:10px;font-weight:700;color:var(--c);letter-spacing:2px;}
+.cb{padding:13px;}.cb.np{padding:0;}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:9px;margin-bottom:12px;}
+.st{background:var(--b1);border:1px solid var(--bd);border-radius:3px;padding:11px;position:relative;}
+.st::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.st.c::before{background:var(--c);}.st.g::before{background:var(--gr);}.st.a::before{background:var(--am);}.st.r::before{background:var(--re);}.st.v::before{background:var(--vi);}
+.sv{font-family:Orbitron,sans-serif;font-size:1.9em;font-weight:700;line-height:1;}
+.st.c .sv{color:var(--c);}.st.g .sv{color:var(--gr);}.st.a .sv{color:var(--am);}.st.r .sv{color:var(--re);}.st.v .sv{color:var(--vi);}
+.sl{color:var(--dm);font-size:9px;margin-top:4px;letter-spacing:1px;}
+.btn{padding:6px 13px;border:1px solid;border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;background:transparent;transition:all .15s;}
+.bc{border-color:var(--c);color:var(--c);}.bc:hover{background:rgba(0,229,255,.1);}
+.bg2{border-color:var(--gr);color:var(--gr);}.bg2:hover{background:rgba(0,230,118,.1);}
+.ba{border-color:var(--am);color:var(--am);}.ba:hover{background:rgba(255,179,0,.1);}
+.br{border-color:var(--re);color:var(--re);}.br:hover{background:rgba(255,61,61,.1);}
+.bv{border-color:var(--vi);color:var(--vi);}.bv:hover{background:rgba(213,0,249,.1);}
+.tag{display:inline-block;padding:2px 7px;border-radius:2px;font-size:9px;letter-spacing:1px;}
+.tc2{background:rgba(0,229,255,.1);color:var(--c);border:1px solid rgba(0,229,255,.3);}
+.tg2{background:rgba(0,230,118,.1);color:var(--gr);border:1px solid rgba(0,230,118,.3);}
+.ta2{background:rgba(255,179,0,.1);color:var(--am);border:1px solid rgba(255,179,0,.3);}
+.tr2{background:rgba(255,61,61,.1);color:var(--re);border:1px solid rgba(255,61,61,.3);}
+.tv2{background:rgba(213,0,249,.1);color:var(--vi);border:1px solid rgba(213,0,249,.3);}
+.inp{background:#000;border:1px solid var(--bd2);color:var(--tx);padding:7px 10px;border-radius:2px;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;width:100%;transition:border .15s;}
+.inp:focus{border-color:var(--c);}
+.lbl{font-size:9px;color:var(--dm);letter-spacing:1px;margin-bottom:4px;display:block;}
+.term{background:#000;border:1px solid var(--bd);border-radius:2px;padding:9px;font-size:11px;line-height:1.9;overflow-y:auto;}
+.dbt{width:100%;border-collapse:collapse;}
+.dbt th{background:var(--b2);padding:7px 9px;text-align:left;color:var(--dm);font-size:9px;border-bottom:1px solid var(--bd);}
+.dbt td{padding:7px 9px;border-bottom:1px solid rgba(15,37,53,.5);font-size:11px;}
+.dbt tr:hover td{background:rgba(0,229,255,.03);}
+.agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;}
+.agent{background:var(--b1);border:1px solid var(--bd);border-radius:3px;padding:11px;cursor:pointer;transition:all .2s;text-align:center;}
+.agent:hover{border-color:var(--c);transform:translateY(-2px);}
+.agent.run{border-color:var(--gr);box-shadow:0 0 10px rgba(0,230,118,.15);}
+.adot{width:7px;height:7px;border-radius:50%;background:var(--dm);margin:0 auto 7px;transition:all .3s;}
+.agent.run .adot{background:var(--gr);box-shadow:0 0 5px var(--gr);}
+.aname{font-family:Rajdhani,sans-serif;font-size:13px;font-weight:700;color:#85afc5;}
+.atsk{color:var(--dm);font-size:9px;margin-top:3px;min-height:22px;}
+.apr{height:2px;background:var(--bd);border-radius:1px;margin-top:7px;overflow:hidden;}
+.apf{height:100%;background:var(--gr);border-radius:1px;transition:width .4s;}
+#cbox{display:flex;flex-direction:column;height:calc(100vh - 200px);min-height:320px;}
+#clog{flex:1;overflow-y:auto;padding:12px;background:#000;border:1px solid var(--bd);border-radius:3px;margin-bottom:9px;}
+#clog::-webkit-scrollbar{width:2px;}
+.msg{margin-bottom:10px;animation:fi .25s;}
+.mu .mb{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);color:#deeeff;}
+.ma .mb{background:var(--b2);border:1px solid var(--bd2);}
+.mb{display:inline-block;padding:8px 12px;border-radius:3px;max-width:82%;line-height:1.6;font-size:12px;}
+.mu{text-align:right;}
+.mlb{font-size:9px;color:var(--dm);margin-bottom:2px;}
+.cirow{display:flex;gap:7px;}
+.tdot{display:inline-block;width:5px;height:5px;background:var(--c);border-radius:50%;animation:td 1.2s infinite;margin:0 2px;}
+.tdot:nth-child(2){animation-delay:.2s;}.tdot:nth-child(3){animation-delay:.4s;}
+@keyframes td{0%,80%,100%{transform:scale(1);opacity:1;}40%{transform:scale(1.5);opacity:.5;}}
+.sr-row{display:flex;gap:6px;align-items:baseline;padding:3px 0;border-bottom:1px solid rgba(15,37,53,.4);}
+.srk{color:var(--dm);min-width:110px;font-size:10px;}
+.srv{color:var(--c);}
+.srv.g{color:var(--gr);}.srv.r{color:var(--re);}.srv.a{color:var(--am);}
+#wclk{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:7px;margin-bottom:12px;}
+.wc{background:var(--b1);border:1px solid var(--bd);border-radius:3px;padding:8px 9px;text-align:center;}
+.wct{font-family:Orbitron,sans-serif;font-size:1.4em;color:var(--c);font-weight:700;}
+.wcl{color:var(--dm);font-size:9px;margin-top:2px;letter-spacing:1px;}
+.coins{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;}
+.coin{background:#000;border:1px solid var(--bd);border-radius:3px;padding:11px;}
+.csym{font-family:Orbitron,sans-serif;font-size:13px;font-weight:700;color:#deeeff;}
+.cnm{color:var(--dm);font-size:9px;margin-top:2px;}
+.cpr{font-family:Orbitron,sans-serif;font-size:1.2em;color:var(--c);font-weight:700;margin-top:5px;}
+.cup{color:var(--gr);font-size:10px;margin-top:2px;}.cdn{color:var(--re);font-size:10px;margin-top:2px;}
+.blist{max-height:340px;overflow-y:auto;}
+.bi{padding:9px 13px;border-bottom:1px solid rgba(15,37,53,.5);display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border-left:2px solid transparent;animation:fi .3s;}
+.bi.d{border-left-color:var(--re);}.bi.w{border-left-color:var(--am);}.bi.k{border-left-color:var(--gr);}
+.bip{color:var(--c);font-size:12px;}
+.bm{color:var(--dm);font-size:9px;margin-top:2px;}
+.bsc{font-family:Orbitron,sans-serif;font-size:1.4em;font-weight:700;}
+.bsc.d{color:var(--re);}.bsc.w{color:var(--am);}.bsc.k{color:var(--gr);}
+.pzg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px;}
+.pzc{background:#000;border:2px solid var(--bd);border-radius:4px;padding:11px 5px;text-align:center;cursor:pointer;transition:all .2s;font-size:10px;color:var(--dm);}
+.pzc:hover{border-color:var(--c);color:var(--c);}
+.pzi{font-size:1.6em;display:block;margin-bottom:4px;}
+#qout{background:#000;border:1px solid var(--bd);border-radius:2px;padding:9px;font-size:10px;color:var(--vi);word-break:break-all;line-height:1.9;min-height:45px;}
+@media(max-width:700px){#main{grid-template-columns:0 1fr;}#sb{display:none;}.stats{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
 
-<!-- Buraya da gönderdiğin tüm <body> içeriğini koydum -->
-<div id="boot"> ... </div>
-<div id="os"> ... </div>
+<div id="boot">
+  <div class="bs">QUANTUM NEXUS RESEARCH LABORATORY</div>
+  <h1>NEXUS OS</h1>
+  <div class="bs" style="margin-top:5px;color:#0a1c28;letter-spacing:5px;">v14.0 — 20 LEVEL OMEGA</div>
+  <div id="bbar"><div id="bfil"></div></div>
+  <div id="blog"></div>
+</div>
+
+<div id="os">
+  <div id="top">
+    <div class="tlo">⬡ NEXUS</div><div class="tse"></div>
+    <div style="color:var(--am);font-size:11px;letter-spacing:2px;" id="tck">--:--:--</div>
+    <div style="color:var(--dm);font-size:10px;margin-left:10px;" id="tdt"></div>
+    <div class="tsp"></div>
+    <div class="tst"><div class="dot ok"></div>CLAUDE</div><div class="tse"></div>
+    <div class="tst"><div class="dot ok" id="gkd"></div>GROK</div><div class="tse"></div>
+    <div class="tst"><div class="dot wn" id="bbd"></div>KALKAN</div><div class="tse"></div>
+    <div class="tst" id="tthr" style="color:var(--re);">0 TEHDİT</div><div class="tse"></div>
+    <div class="tst"><span id="tbtc" style="color:var(--am);">BTC ---</span></div>
+  </div>
+
+  <div id="tabs">
+    <div class="tab on" onclick="T(0)"><span class="tn">L1</span>⬡ CORE</div>
+    <div class="tab" onclick="T(1)"><span class="tn">L2</span>📡 CSI</div>
+    <div class="tab" onclick="T(2)"><span class="tn">L3</span>🛡 KALKAN</div>
+    <div class="tab" onclick="T(3)"><span class="tn">L4</span>💓 BİYO</div>
+    <div class="tab" onclick="T(4)"><span class="tn">L5</span>🕸 MESH</div>
+    <div class="tab" onclick="T(5)"><span class="tn">L6</span>₿ DeFi</div>
+    <div class="tab" onclick="T(6)"><span class="tn">L7</span>🎓 AREL</div>
+    <div class="tab" onclick="T(7)"><span class="tn">L8</span>👻 GHOST</div>
+    <div class="tab" onclick="T(8)"><span class="tn">L9</span>🤖 AI</div>
+    <div class="tab" onclick="T(9)"><span class="tn">L10</span>⚛ OMEGA</div>
+    <div class="tab" onclick="T(10)"><span class="tn">L11</span>🕵 OSINT</div>
+    <div class="tab" onclick="T(11)"><span class="tn">L12</span>🤝 AJAN</div>
+    <div class="tab" onclick="T(12)"><span class="tn">L13</span>🗄 DB</div>
+    <div class="tab" onclick="T(13)"><span class="tn">L14</span>⚡ GROK</div>
+    <div class="tab" onclick="T(14)"><span class="tn">L15</span>🌐 URL+IP</div>
+    <div class="tab" onclick="T(15)"><span class="tn">L16</span>📊 ANALİT</div>
+    <div class="tab" onclick="T(16)"><span class="tn">L17</span>🔔 ALARM</div>
+    <div class="tab" onclick="T(17)"><span class="tn">L18</span>🗺 HARİTA</div>
+    <div class="tab" onclick="T(18)"><span class="tn">L19</span>📰 HABER</div>
+    <div class="tab" onclick="T(19)"><span class="tn">L20</span>🧬 EVRİM</div>
+  </div>
+
+  <div id="main">
+    <div id="sb">
+      <div class="ss">SİSTEM</div>
+      <div class="si on" onclick="T(0)"><span class="sic">⬡</span>Dashboard</div>
+      <div class="si" onclick="T(8)"><span class="sic">🤖</span>AI Chat<span class="sbg g">CANLI</span></div>
+      <div class="si" onclick="T(2)"><span class="sic">🛡</span>Kalkan<span class="sbg" id="sbbg">0</span></div>
+      <div class="si" onclick="T(14)"><span class="sic">🌐</span>URL+IP</div>
+      <div class="ss" style="margin-top:8px;">MODÜLLER</div>
+      <div class="si" onclick="T(1)"><span class="sic">📡</span>Wi-Fi CSI</div>
+      <div class="si" onclick="T(3)"><span class="sic">💓</span>Biyometrik</div>
+      <div class="si" onclick="T(4)"><span class="sic">🕸</span>Neural Mesh</div>
+      <div class="si" onclick="T(5)"><span class="sic">₿</span>DeFi</div>
+      <div class="si" onclick="T(6)"><span class="sic">🎓</span>Arel Lab</div>
+      <div class="si" onclick="T(7)"><span class="sic">👻</span>Ghost</div>
+      <div class="si" onclick="T(9)"><span class="sic">⚛</span>Omega</div>
+      <div class="ss" style="margin-top:8px;">GENİŞLEME</div>
+      <div class="si" onclick="T(10)"><span class="sic">🕵</span>OSINT</div>
+      <div class="si" onclick="T(11)"><span class="sic">🤝</span>Ajanlar</div>
+      <div class="si" onclick="T(12)"><span class="sic">🗄</span>Veritabanı</div>
+      <div class="si" onclick="T(13)"><span class="sic">⚡</span>Grok</div>
+      <div class="si" onclick="T(16)"><span class="sic">🔔</span>Alarm</div>
+      <div class="si" onclick="T(19)"><span class="sic">🧬</span>Evrim</div>
+      <div class="ss" style="margin-top:8px;">KAYNAK</div>
+      <div class="sm"><div class="sml"><span>CPU</span><span id="scpu">--</span></div><div class="smb"><div class="smbf" id="mcpu" style="width:0;background:var(--c)"></div></div></div>
+      <div class="sm"><div class="sml"><span>RAM</span><span id="sram">--</span></div><div class="smb"><div class="smbf" id="mram" style="width:0;background:var(--tl)"></div></div></div>
+      <div class="sm"><div class="sml"><span>AĞ</span><span id="snet">--</span></div><div class="smb"><div class="smbf" id="mnet" style="width:0;background:var(--am)"></div></div></div>
+    </div>
+
+    <div id="pgs">
+
+      <div class="pg on" id="p0">
+        <div class="stats">
+          <div class="st c"><div class="sv" id="s0">0</div><div class="sl">PKT/SN</div></div>
+          <div class="st r"><div class="sv" id="s1">0</div><div class="sl">TEHDİT</div></div>
+          <div class="st g"><div class="sv" id="s2">12</div><div class="sl">NODE</div></div>
+          <div class="st a"><div class="sv" id="s3">00:00</div><div class="sl">UPTIME</div></div>
+          <div class="st v"><div class="sv" id="s4">0</div><div class="sl">AI SORGU</div></div>
+          <div class="st g"><div class="sv" id="s5">0</div><div class="sl">AJAN ÇAL.</div></div>
+        </div>
+        <div id="wclk"></div>
+        <div class="row">
+          <div class="col" style="flex:2">
+            <div class="card">
+              <div class="ch"><span class="ct">CANLI AKTİVİTE</span><span class="tag tc2">CANLI</span></div>
+              <div class="cb"><canvas id="actc" height="65" style="width:100%"></canvas></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="ch"><span class="ct">HIZLI ERİŞİM</span></div>
+              <div class="cb" style="display:flex;flex-direction:column;gap:6px;">
+                <button class="btn bc" onclick="T(2)" style="width:100%">🛡 KALKAN</button>
+                <button class="btn bg2" onclick="T(8)" style="width:100%">🤖 AI CHAT</button>
+                <button class="btn ba" onclick="T(14)" style="width:100%">🌐 URL+IP TARA</button>
+                <button class="btn bc" onclick="T(6)" style="width:100%">🎓 AREL LAB</button>
+                <button class="btn bv" onclick="T(13)" style="width:100%">⚡ GROK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card"><div class="ch"><span class="ct">SİSTEM LOGU</span></div><div class="term" id="slog" style="height:100px;"></div></div>
+      </div>
+
+      <div class="pg" id="p1">
+        <div class="row">
+          <div style="width:268px;flex-shrink:0">
+            <div class="card">
+              <div class="ch"><span class="ct">CSI RADAR</span><span class="tag tc2" id="csiml">HAREKET</span></div>
+              <div class="cb" style="display:flex;justify-content:center;"><canvas id="csic" width="240" height="240"></canvas></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card">
+              <div class="ch"><span class="ct">MOD SEÇİMİ</span></div>
+              <div class="cb">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:11px;">
+                  <div class="pzc" style="border-color:var(--c);color:var(--c)" onclick="csiM('HAREKET',this)">🚶 HAREKET</div>
+                  <div class="pzc" onclick="csiM('NEFES',this)">🫁 NEFES</div>
+                  <div class="pzc" onclick="csiM('GİRİŞ',this)">🚪 İZİNSİZ</div>
+                  <div class="pzc" onclick="csiM('KALABALIK',this)">👥 KALABALIK</div>
+                </div>
+                <div style="margin-bottom:7px;"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dm);margin-bottom:3px;"><span>AMPLİTÜD</span><span id="ca">--</span></div><div class="smb"><div class="smbf" id="cba" style="width:0;background:var(--c)"></div></div></div>
+                <div style="margin-bottom:7px;"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dm);margin-bottom:3px;"><span>FREKANS</span><span id="cf">--</span></div><div class="smb"><div class="smbf" id="cbf" style="width:0;background:var(--tl)"></div></div></div>
+                <div style="margin-bottom:11px;"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dm);margin-bottom:3px;"><span>SNR</span><span id="cs">--</span></div><div class="smb"><div class="smbf" id="cbs" style="width:0;background:var(--am)"></div></div></div>
+                <canvas id="wvc" height="55" style="width:100%;"></canvas>
+              </div>
+            </div>
+            <div class="card"><div class="ch"><span class="ct">ML SINIFLANDIRMA</span><span class="tag tg2">AKTİF</span></div><div class="cb" style="text-align:center;"><div id="mlr" style="font-family:Orbitron,sans-serif;font-size:1.1em;color:var(--gr);padding:7px 0;">ORTAM SAKİN</div><div style="color:var(--dm);font-size:10px;">Güven: %94</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p2">
+        <div class="stats">
+          <div class="st r"><div class="sv" id="bbd2">0</div><div class="sl">TEHLİKELİ</div></div>
+          <div class="st a"><div class="sv" id="bbw">0</div><div class="sl">ŞÜPHELİ</div></div>
+          <div class="st g"><div class="sv" id="bbk">0</div><div class="sl">TEMİZ</div></div>
+          <div class="st c"><div class="sv" id="bbt">0</div><div class="sl">TOPLAM</div></div>
+        </div>
+        <div class="row">
+          <div class="col" style="flex:2">
+            <div class="card">
+              <div class="ch"><span class="ct">🛡 CANLI TEHDİT AKIŞI</span>
+                <div style="display:flex;gap:5px;"><button class="btn br" onclick="bbS()">SİMÜLE</button><button class="btn bc" onclick="bbC()">TEMİZLE</button></div>
+              </div>
+              <div class="blist cb np" id="bbf"></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">TERMUX BAĞLANTI</span></div><div class="cb">
+              <label class="lbl">API URL</label>
+              <input class="inp" id="bburl" value="http://localhost:7070">
+              <button class="btn bg2" style="width:100%;margin-top:7px;" onclick="bbConn()">BAĞLAN</button>
+              <div id="bbst" style="margin-top:6px;font-size:10px;color:var(--dm);">● Bağlantı bekleniyor</div>
+            </div></div>
+            <div class="card"><div class="ch"><span class="ct">IP SORGULA</span></div><div class="cb">
+              <input class="inp" id="bbqi" placeholder="IP adresi...">
+              <button class="btn bc" style="width:100%;margin-top:7px;" onclick="bbQ()">SORGULA</button>
+              <div id="bbqr" style="margin-top:8px;font-size:11px;line-height:1.9;"></div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p3">
+        <div class="stats">
+          <div class="st r"><div class="sv" id="bbpm">72</div><div class="sl">BPM</div></div>
+          <div class="st c"><div class="sv" id="bspo">98%</div><div class="sl">SpO2</div></div>
+          <div class="st g"><div class="sv" id="bres">14</div><div class="sl">SOLUNUM/DK</div></div>
+          <div class="st a"><div class="sv">DÜŞÜK</div><div class="sl">HAREKETLİLİK</div></div>
+        </div>
+        <div class="card"><div class="ch"><span class="ct">BİYOMETRİK DALGA (Wi-Fi CSI)</span></div><div class="cb"><canvas id="bioc" height="130" style="width:100%"></canvas></div></div>
+        <div class="row">
+          <div class="col"><div class="card"><div class="ch"><span class="ct">DÜŞME</span></div><div class="cb" style="text-align:center;padding:16px;"><div style="font-size:2.2em">✅</div><div style="color:var(--gr);font-family:Orbitron,sans-serif;font-size:11px;margin-top:5px;">NORMAL</div></div></div></div>
+          <div class="col"><div class="card"><div class="ch"><span class="ct">HAREKETSİZLİK</span></div><div class="cb" style="text-align:center;padding:16px;"><div style="font-size:2.2em">✅</div><div style="color:var(--gr);font-family:Orbitron,sans-serif;font-size:11px;margin-top:5px;">AKTİF</div></div></div></div>
+          <div class="col"><div class="card"><div class="ch"><span class="ct">UYKU</span></div><div class="cb" style="text-align:center;padding:16px;"><div style="font-family:Orbitron,sans-serif;font-size:1.9em;color:var(--vi);font-weight:700;">82%</div><div style="color:var(--dm);font-size:10px;margin-top:3px;">Derin: 2s 14dk</div></div></div></div>
+        </div>
+      </div>
+
+      <div class="pg" id="p4">
+        <div class="card"><div class="ch"><span class="ct">ÇOK NOKTA TRİANGÜLASYON</span><span class="tag tg2">GPS GEREKMİYOR</span></div><div class="cb"><canvas id="meshc" height="270" style="width:100%"></canvas></div></div>
+        <div class="stats">
+          <div class="st c"><div class="sv">4</div><div class="sl">NODE</div></div>
+          <div class="st g"><div class="sv">3</div><div class="sl">KİŞİ</div></div>
+          <div class="st a"><div class="sv">±0.8m</div><div class="sl">HASSASIYET</div></div>
+          <div class="st r"><div class="sv">0</div><div class="sl">ANOMALİ</div></div>
+        </div>
+      </div>
+
+      <div class="pg" id="p5">
+        <div class="card">
+          <div class="ch"><span class="ct">KRİPTO PİYASA</span><div style="display:flex;align-items:center;gap:7px;"><span id="dts" style="color:var(--dm);font-size:10px;"></span><button class="btn bc" onclick="fetchCoins()">YENİLE</button></div></div>
+          <div class="cb"><div class="coins" id="coing"><div style="color:var(--dm);padding:14px;">Yükleniyor...</div></div></div>
+        </div>
+        <div class="card"><div class="ch"><span class="ct">ARB TARAYICI</span><span class="tag ta2">SİMÜLASYON</span></div><div class="term" id="arbf" style="height:95px;"></div></div>
+      </div>
+
+      <div class="pg" id="p6">
+        <div class="row">
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">🎓 AREL KOD STÜDYOSU</span><span class="tag tg2">Python</span></div><div class="cb">
+              <textarea class="inp" id="acode" style="min-height:160px;resize:vertical;line-height:1.7" spellcheck="false">print("Merhaba Arel! 👋")
+print("Bugün kodlama öğreniyoruz!")
+hayvan = "kedi"
+print(f"Favori hayvanım: {hayvan}")
+for i in range(1, 6):
+    print(f"Sayı {i} ⭐")</textarea>
+              <div style="display:flex;gap:7px;margin-top:7px;"><button class="btn bg2" onclick="aRun()" style="flex:1">▶ ÇALIŞTIR</button><button class="btn bc" onclick="aRst()">SIFIRLA</button></div>
+              <div class="term" id="aout" style="height:110px;margin-top:7px;color:var(--gr);"></div>
+            </div></div>
+          </div>
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">BİLMECELER</span></div><div class="cb"><div class="pzg" id="pzg"></div></div></div>
+            <div class="card" id="pzcard" style="display:none;"><div class="ch"><span class="ct" id="pztitle">BİLMECE</span></div><div class="cb" id="pzcont"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p7">
+        <div class="stats">
+          <div class="st g"><div class="sv">A+</div><div class="sl">GÜVENLİK</div></div>
+          <div class="st c"><div class="sv" id="gsc">0</div><div class="sl">TARAMA</div></div>
+          <div class="st r"><div class="sv" id="gfv">0</div><div class="sl">AÇIK</div></div>
+          <div class="st a"><div class="sv">7</div><div class="sl">KURAL</div></div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">API KEY SIZINTI TARAYICI</span></div><div class="cb">
+              <textarea class="inp" id="gtxt" style="min-height:80px;resize:vertical;" placeholder="API key içerebilecek metni yapıştır..."></textarea>
+              <button class="btn br" onclick="gScan()" style="width:100%;margin-top:7px;">TARA</button>
+              <div id="gres" style="margin-top:8px;font-size:11px;line-height:1.9;"></div>
+            </div></div>
+          </div>
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">GÜVENLİK KONTROLLİSTESİ</span></div><div class="cb" id="gcl" style="font-size:11px;line-height:2.1;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p8">
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">🤖 AI SOVEREIGN — CLAUDE</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <select id="aips" class="inp" style="width:auto;padding:4px 8px;font-size:10px;">
+                <option value="nx">Nexus Asistan</option>
+                <option value="tc">Yazılım Uzmanı</option>
+                <option value="df">DeFi Analisti</option>
+                <option value="ed">Arel Eğitim</option>
+                <option value="sc">Güvenlik</option>
+              </select>
+              <button class="btn bc" onclick="clrC()">YENİ</button>
+            </div>
+          </div>
+          <div class="cb">
+            <div id="cbox">
+              <div id="clog">
+                <div class="msg ma"><div class="mlb">NEXUS AI</div><div class="mb">Merhaba! Quantum Nexus OS AI Asistanı aktif. Claude API key olmadan demo modunda çalışır.</div></div>
+              </div>
+              <div class="cirow">
+                <input class="inp" id="ci" placeholder="Mesaj yaz... (Enter)" onkeydown="if(event.key==='Enter')sendC()">
+                <button class="btn bc" onclick="sendC()">GÖNDER</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p9">
+        <div class="row">
+          <div class="col" style="flex:2">
+            <div class="card"><div class="ch"><span class="ct">⚛ KUANTUM PARTİKÜL EVRENİ</span><span class="tag tv2">POST-KUANTUM</span></div><div class="cb np"><canvas id="oc" height="250" style="width:100%;display:block;"></canvas></div></div>
+          </div>
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">CRYSTALS-KYBER</span></div><div class="cb">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:11px;">
+                <div style="background:#000;border:1px solid var(--bd);border-radius:3px;padding:9px;text-align:center;"><div style="color:var(--dm);font-size:9px;margin-bottom:4px;">UZUNLUK</div><div style="font-family:Orbitron,sans-serif;color:var(--vi);font-size:.9em;" id="qkdl">256b</div></div>
+                <div style="background:#000;border:1px solid var(--bd);border-radius:3px;padding:9px;text-align:center;"><div style="color:var(--dm);font-size:9px;margin-bottom:4px;">LEVEL</div><div style="font-family:Orbitron,sans-serif;color:var(--vi);font-size:.9em;">AES-256</div></div>
+                <div style="background:#000;border:1px solid var(--bd);border-radius:3px;padding:9px;text-align:center;"><div style="color:var(--dm);font-size:9px;margin-bottom:4px;">Q-DAYANI.</div><div style="color:var(--gr);">✓</div></div>
+              </div>
+              <label class="lbl">METİN</label>
+              <input class="inp" id="qin" value="Nexus OS — Erdem ve Arel">
+              <div style="display:flex;gap:7px;margin-top:7px;"><button class="btn bc" onclick="qEnc()" style="flex:1">ŞİFRELE</button><button class="btn bg2" onclick="qKey()" style="flex:1">YENİ ANAHTAR</button></div>
+              <label class="lbl" style="margin-top:10px;">ÇIKTI</label>
+              <div id="qout">Şifrele butonuna bas...</div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p10">
+        <div class="row">
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">🕵 OSINT ARAÇLARI</span><span class="tag ta2">AÇIK KAYNAK</span></div><div class="cb">
+              <label class="lbl">HEDEF (domain, IP)</label>
+              <input class="inp" id="oit" placeholder="örn: example.com veya 8.8.8.8">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:7px;">
+                <button class="btn bc" onclick="osint('whois')">WHOIS</button>
+                <button class="btn bc" onclick="osint('dns')">DNS</button>
+                <button class="btn ba" onclick="osint('ssl')">SSL</button>
+                <button class="btn ba" onclick="osint('sub')">SUBDOMAIN</button>
+                <button class="btn br" onclick="osint('rep')">İTİBAR</button>
+                <button class="btn bg2" onclick="osint('geo')">GEO-IP</button>
+              </div>
+              <div style="background:#000;border:1px solid var(--bd2);border-radius:3px;padding:11px;margin-top:9px;font-size:11px;line-height:2;min-height:55px;" id="ores">Sorgu bekleniyor...</div>
+            </div></div>
+          </div>
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">OSINT LOG</span></div><div class="term" id="olog" style="height:290px;color:var(--tl);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p11">
+        <div class="card">
+          <div class="ch"><span class="ct">🤝 OTONOM AJAN EKİBİ</span>
+            <div style="display:flex;gap:6px;"><button class="btn bg2" onclick="allAg()">TÜM AJANLARI BAŞLAT</button><button class="btn br" onclick="stopAg()">DURDUR</button></div>
+          </div>
+          <div class="cb"><div class="agents" id="agrid"></div></div>
+        </div>
+        <div class="card"><div class="ch"><span class="ct">AJAN TERMINAL</span></div><div class="term" id="atl" style="height:170px;color:var(--tl);"></div></div>
+      </div>
+
+      <div class="pg" id="p12">
+        <div class="stats">
+          <div class="st c"><div class="sv" id="dbc">0</div><div class="sl">KAYIT</div></div>
+          <div class="st g"><div class="sv" id="dbq">0</div><div class="sl">SORGU</div></div>
+          <div class="st a"><div class="sv" id="dbs">0KB</div><div class="sl">BOYUT</div></div>
+          <div class="st r"><div class="sv">SQLite</div><div class="sl">MOTOR</div></div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">TABLOLAR</span></div><div class="cb" style="display:flex;flex-direction:column;gap:6px;">
+              <button class="btn bc" onclick="showDb('threats')" style="text-align:left;">🔴 threats</button>
+              <button class="btn bc" onclick="showDb('dns')" style="text-align:left;">🔵 dns_log</button>
+              <button class="btn bc" onclick="showDb('scans')" style="text-align:left;">🟡 scans</button>
+              <button class="btn bc" onclick="showDb('agents')" style="text-align:left;">🟢 agent_log</button>
+              <button class="btn bc" onclick="showDb('crypto')" style="text-align:left;">🟣 crypto</button>
+            </div></div>
+          </div>
+          <div class="col" style="flex:2">
+            <div class="card">
+              <div class="ch"><span class="ct" id="dbtit">VERİ GÖRÜNTÜLEYICI</span>
+                <div style="display:flex;gap:6px;">
+                  <input class="inp" id="dbsrch" placeholder="Filtrele..." style="width:130px;padding:4px 8px;" oninput="dbFil()">
+                  <button class="btn bc" onclick="dbExp()">JSON</button>
+                </div>
+              </div>
+              <div class="cb np" style="overflow-x:auto;"><table class="dbt" id="dbtbl"><tr><td style="padding:16px;color:var(--dm);">Sol taraftan tablo seç.</td></tr></table></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p13">
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">⚡ GROK AI (xAI)</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <select id="gmod" class="inp" style="width:auto;padding:4px 8px;font-size:10px;">
+                <option value="grok-3-mini">grok-3-mini</option>
+                <option value="grok-3">grok-3</option>
+              </select>
+              <button class="btn bv" onclick="clrG()">YENİ</button>
+            </div>
+          </div>
+          <div class="cb">
+            <div style="background:rgba(213,0,249,.05);border:1px solid rgba(213,0,249,.2);border-radius:3px;padding:9px;margin-bottom:11px;">
+              <span style="font-size:11px;color:var(--dm);">xAI API Anahtarı:</span>
+              <input class="inp" id="gkey" placeholder="xai-..." style="margin-top:5px;">
+            </div>
+            <div style="display:flex;flex-direction:column;height:calc(100vh - 300px);min-height:280px;">
+              <div id="glog" style="flex:1;overflow-y:auto;background:#000;border:1px solid var(--bd);border-radius:3px;padding:11px;margin-bottom:8px;"></div>
+              <div class="cirow">
+                <input class="inp" id="gi" placeholder="Grok'a sor... (Enter)" onkeydown="if(event.key==='Enter')sendG()">
+                <button class="btn bv" onclick="sendG()">GÖNDER</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p14">
+        <div class="row">
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">🌐 URL / IP / ALAN ADI TARAYICI</span><span class="tag tc2">GENİŞLETİLMİŞ</span></div><div class="cb">
+              <label class="lbl">URL, IP veya ALAN ADI</label>
+              <input class="inp" id="scin" placeholder="https://example.com  8.8.8.8  example.com" style="margin-bottom:7px;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <button class="btn bc" onclick="doScan('ip')">📍 IP &amp; GEO</button>
+                <button class="btn bc" onclick="doScan('url')">🔗 URL ANALİZ</button>
+                <button class="btn ba" onclick="doScan('dns')">📡 DNS SORGU</button>
+                <button class="btn ba" onclick="doScan('ssl')">🔒 SSL</button>
+                <button class="btn br" onclick="doScan('threat')">⚠️ TEHDİT</button>
+                <button class="btn bg2" onclick="doScan('ping')">🏓 PİNG</button>
+              </div>
+              <div style="background:#000;border:1px solid var(--bd2);border-radius:3px;padding:11px;margin-top:9px;font-size:11px;line-height:2;min-height:55px;" id="scres">Hedefi gir ve tarama türü seç.</div>
+            </div></div>
+            <div class="card"><div class="ch"><span class="ct">TOPLU TARAMA</span></div><div class="cb">
+              <label class="lbl">Her satıra bir URL/IP (maks 20)</label>
+              <textarea class="inp" id="blkin" style="min-height:70px;resize:vertical;" placeholder="8.8.8.8&#10;1.1.1.1&#10;example.com"></textarea>
+              <button class="btn bc" style="width:100%;margin-top:6px;" onclick="bulkScan()">TOPLU TARA</button>
+              <div class="term" id="blkres" style="height:100px;margin-top:7px;"></div>
+            </div></div>
+          </div>
+          <div class="col">
+            <div class="card"><div class="ch"><span class="ct">TARAMA GEÇMİŞİ</span><button class="btn bc" onclick="document.getElementById('sclog').innerHTML=''" style="padding:3px 8px;font-size:10px;">TEMİZLE</button></div><div class="term" id="sclog" style="height:460px;color:var(--tl);"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pg" id="p15">
+        <div class="card"><div class="ch"><span class="ct">📊 SİSTEM ANALİTİKLERİ (24 SAAT)</span></div><div class="cb"><canvas id="anac" height="185" style="width:100%"></canvas></div></div>
+        <div class="stats">
+          <div class="st c"><div class="sv" id="a0">0</div><div class="sl">TARAMA</div></div>
+          <div class="st r"><div class="sv" id="a1">0</div><div class="sl">TEHDİT (24s)</div></div>
+          <div class="st g"><div class="sv" id="a2">0</div><div class="sl">AI YANIT</div></div>
+          <div class="st a"><div class="sv" id="a3">0ms</div><div class="sl">GECİKME</div></div>
+        </div>
+      </div>
+
+      <div class="pg" id="p16">
+        <div class="card"><div class="ch"><span class="ct">🔔 ALARM SİSTEMİ</span></div><div class="cb">
+          <div class="row">
+            <div class="col">
+              <label class="lbl">DISCORD WEBHOOK</label><input class="inp" id="dwh" placeholder="https://discord.com/api/webhooks/...">
+              <label class="lbl" style="margin-top:7px;">TELEGRAM BOT TOKEN</label><input class="inp" id="tbt" placeholder="bot_token...">
+              <label class="lbl" style="margin-top:7px;">TELEGRAM CHAT ID</label><input class="inp" id="tci" placeholder="-100...">
+              <button class="btn bg2" style="width:100%;margin-top:8px;" onclick="saveAl()">KAYDET &amp; TEST ET</button>
+            </div>
+            <div class="col">
+              <label class="lbl">ALARM KURALLARI</label>
+              <div id="alrul" style="font-size:11px;line-height:2.2;background:#000;border:1px solid var(--bd);border-radius:3px;padding:9px;"></div>
+              <button class="btn bc" style="width:100%;margin-top:7px;" onclick="addRule()">+ KURAL EKLE</button>
+            </div>
+          </div>
+        </div></div>
+        <div class="card"><div class="ch"><span class="ct">BİLDİRİM GEÇMİŞİ</span></div><div class="term" id="allog" style="height:130px;color:var(--am);"></div></div>
+      </div>
+
+      <div class="pg" id="p17">
+        <div class="card"><div class="ch"><span class="ct">🗺 KÜRESEL TEHDİT HARİTASI</span><span class="tag tr2">CANLI</span></div><div class="cb"><canvas id="mapc" height="310" style="width:100%;background:#000;border-radius:3px;"></canvas><div id="mapleg" style="display:flex;gap:12px;margin-top:8px;font-size:10px;flex-wrap:wrap;"></div></div></div>
+      </div>
+
+      <div class="pg" id="p18">
+        <div class="card"><div class="ch"><span class="ct">📰 SİBER GÜVENLİK &amp; KRIPTO HABERLERİ</span><button class="btn bc" onclick="fetchNews()">YENİLE</button></div><div class="cb" id="newsf" style="font-size:12px;line-height:2;"></div></div>
+      </div>
+
+      <div class="pg" id="p19">
+        <div class="card"><div class="ch"><span class="ct">🧬 NEXUS EVRİM MOTORU</span><span class="tag tv2">BETA</span></div><div class="cb">
+          <div style="text-align:center;padding:16px 0;">
+            <div style="font-family:Orbitron,sans-serif;font-size:1.5em;color:var(--vi);letter-spacing:3px;margin-bottom:7px;">OMEGA PROTOCOL</div>
+            <div style="color:var(--dm);font-size:11px;max-width:480px;margin:0 auto 16px;line-height:1.8;">Sistem kendini izleyerek modülleri otomatik günceller. Düşük performanslı bileşenler tespit edilir, yeni özellikler önerilir ve onayınızla entegre edilir.</div>
+            <button class="btn bv" onclick="evoRun()">🧬 EVRİM BAŞLAT</button>
+          </div>
+          <div class="term" id="evolog" style="height:260px;color:var(--vi);margin-top:14px;"></div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <script>
-// ====================== QUANTUM NEXUS OS v30 JS ======================
+const NX={t0:Date.now(),threats:0,ai:0,ag:0,scans:0,cH:[],gH:[],qk:new Uint8Array(32),
+  db:{threats:[],dns:[],scans:[],agents:[],crypto:[]}};
 
-let currentTab = 0;
+const BL=["[BIOS] Quantum Memory Bus... OK","[BIOS] Neural Interface... OK","[INIT] Nexus Kernel v14.0","[INIT] Wi-Fi CSI Engine... MOUNTED","[INIT] Bax Bekir Shield... ACTIVE","[INIT] OSINT Module... READY","[INIT] Agent Fleet (8)... STANDING BY","[INIT] Grok xAI Bridge... CONFIGURED","[INIT] URL+IP Scanner... ARMED","[INIT] Database Engine... SQLite","[INIT] Evolution Engine... BETA","[INIT] Quantum Crypto... KYBER-256","[NEXUS] 20 levels nominal","[NEXUS] Welcome, Erdem ⬡"];
 
-function T(n) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
-    document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
-    document.querySelectorAll('.si').forEach(s => s.classList.remove('on'));
-    
-    document.querySelectorAll('.tab')[n].classList.add('on');
-    document.getElementById('p'+n).classList.add('on');
-    currentTab = n;
+function boot(i){
+  const bf=document.getElementById('bfil'),bl=document.getElementById('blog');
+  if(i>=BL.length){bf.style.width='100%';setTimeout(()=>{const b=document.getElementById('boot');b.style.opacity='0';setTimeout(()=>{b.style.display='none';document.getElementById('os').style.display='flex';osInit();},500);},300);return;}
+  bf.style.width=(i/BL.length*100)+'%';
+  const s=document.createElement('span');s.className='bl';
+  s.style.color=BL[i].includes('OK')||BL[i].includes('Welcome')?'#00e5ff':BL[i].includes('ACTIVE')||BL[i].includes('ARMED')?'#ffb300':'#1a5a40';
+  s.textContent=BL[i];bl.appendChild(s);bl.appendChild(document.createElement('br'));bl.scrollTop=bl.scrollHeight;
+  setTimeout(()=>boot(i+1),130);
+}
+setTimeout(()=>boot(0),300);
+
+function osInit(){
+  updateClock();setInterval(updateClock,1000);
+  setInterval(sysM,1800);setInterval(actG,700);setInterval(bioT,1400);setInterval(arbT,3800);
+  buildWClk();buildAgents();buildPuzzles();
+  initCSI();initWave();initBio();initMesh();initOmega();initMap();initAna();
+  buildGCL();buildAlRules();qKey();fetchCoins();fetchNews();
+  slog('Quantum Nexus OS v14 başlatıldı.','ok');
+  slog('20 level aktif — URL+IP, Grok, Ajanlar, DB hazır.','ok');
+  slog('Baş Bekir Kalkan devreye girdi.','warn');
+  setTimeout(bbAutoSim,2500);
 }
 
-// Boot ekranı
-function bootSequence() {
-    const boot = document.getElementById('boot');
-    const fill = document.getElementById('bfil');
-    const blog = document.getElementById('blog');
-    
-    const messages = [
-        "INITIALIZING QUANTUM CORE...",
-        "LOADING NEXMON CSI DRIVER...",
-        "CONNECTING TO SWARM 500...",
-        "FLASH LOAN ARBITRAGE ENGINE ACTIVE",
-        "SOVEREIGN ARCHITECT v30 ONLINE",
-        "ERDEM HASATEŞ — LEVEL 30"
-    ];
-    
-    let i = 0;
-    fill.style.width = '100%';
-    
-    const interval = setInterval(() => {
-        if (i < messages.length) {
-            const line = document.createElement('div');
-            line.className = 'bl';
-            line.textContent = '> ' + messages[i];
-            blog.appendChild(line);
-            blog.scrollTop = blog.scrollHeight;
-            i++;
-        } else {
-            clearInterval(interval);
-            setTimeout(() => {
-                boot.style.opacity = '0';
-                setTimeout(() => {
-                    boot.style.display = 'none';
-                    document.getElementById('os').style.display = 'flex';
-                    startLiveSystems();
-                }, 600);
-            }, 800);
-        }
-    }, 180);
+const TZS=[{id:'wc0',l:'İSTANBUL',tz:'Europe/Istanbul'},{id:'wc1',l:'NEW YORK',tz:'America/New_York'},{id:'wc2',l:'LONDON',tz:'Europe/London'},{id:'wc3',l:'TOKYO',tz:'Asia/Tokyo'},{id:'wc4',l:'DUBAI',tz:'Asia/Dubai'},{id:'wc5',l:'MOSKOVA',tz:'Europe/Moscow'}];
+function buildWClk(){const r=document.getElementById('wclk');TZS.forEach(z=>{r.innerHTML+=`<div class="wc"><div class="wct" id="${z.id}">--:--</div><div class="wcl">${z.l}</div></div>`;});}
+function updateClock(){
+  const n=new Date();
+  const tc=document.getElementById('tck');if(tc)tc.textContent=n.toLocaleTimeString('tr-TR');
+  const td=document.getElementById('tdt');if(td)td.textContent=n.toLocaleDateString('tr-TR');
+  TZS.forEach(z=>{const e=document.getElementById(z.id);if(e)e.textContent=n.toLocaleTimeString('tr-TR',{timeZone:z.tz,hour:'2-digit',minute:'2-digit'});});
+  const up=Math.floor((Date.now()-NX.t0)/1000);
+  const e=document.getElementById('s3');if(e)e.textContent=String(Math.floor(up/60)).padStart(2,'0')+':'+String(up%60).padStart(2,'0');
+}
+function sysM(){
+  const c=20+Math.random()*40,r=30+Math.random()*30,n=10+Math.random()*55;
+  [{k:'cpu',v:c},{k:'ram',v:r},{k:'net',v:n}].forEach(x=>{
+    const m=document.getElementById('m'+x.k),s=document.getElementById('s'+x.k);
+    if(m)m.style.width=x.v+'%';if(s)s.textContent=Math.round(x.v)+(x.k==='net'?'kB/s':'%');
+  });
+  const e=document.getElementById('s0');if(e)e.textContent=~~(Math.random()*90+30);
+}
+const AD=new Array(90).fill(0).map(()=>Math.random()*55+15);
+function actG(){
+  AD.shift();AD.push(Math.random()*65+15);
+  const c=document.getElementById('actc');if(!c)return;
+  c.width=c.offsetWidth||500;const W=c.width,H=65,ctx=c.getContext('2d');
+  ctx.clearRect(0,0,W,H);ctx.beginPath();
+  AD.forEach((v,i)=>{const x=i*(W/(AD.length-1)),y=H-(v/100)*H;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.strokeStyle='rgba(0,229,255,.75)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(0,229,255,.12)');g.addColorStop(1,'rgba(0,229,255,0)');
+  ctx.fillStyle=g;ctx.fill();
+}
+function T(n){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===n));
+  document.querySelectorAll('.pg').forEach((p,i)=>p.classList.toggle('on',i===n));
+}
+function slog(m,t='info'){
+  const el=document.getElementById('slog');if(!el)return;
+  const c={ok:'#00e676',warn:'#ffb300',danger:'#ff3d3d',info:'#00e5ff'}[t]||'#a0c0d8';
+  el.innerHTML+=`<span style="color:${c}">[${new Date().toLocaleTimeString('tr-TR')}] ${m}</span><br>`;el.scrollTop=el.scrollHeight;
+}
+function tlog(id,m,col='#00e5b0'){
+  const e=document.getElementById(id);if(!e)return;
+  e.innerHTML+=`<span style="color:${col}">[${new Date().toLocaleTimeString('tr-TR')}] ${m}</span><br>`;e.scrollTop=e.scrollHeight;
 }
 
-// Canlı sistemler
-function startLiveSystems() {
-    // Saat
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById('tck').textContent = now.toLocaleTimeString('tr-TR');
-    }, 1000);
-
-    // Rastgele değerler (gerçek backend'e bağlanınca değişecek)
-    setInterval(() => {
-        document.getElementById('s0').textContent = Math.floor(Math.random()*1200);
-        document.getElementById('s1').textContent = Math.floor(Math.random()*3);
-        document.getElementById('s4').textContent = Math.floor(Math.random()*450);
-        document.getElementById('s5').textContent = Math.floor(Math.random()*28);
-    }, 1800);
-
-    // CPU-RAM animasyonu
-    let cpu = 45, ram = 67;
-    setInterval(() => {
-        cpu = Math.min(98, cpu + (Math.random()*8 - 4));
-        ram = Math.min(95, ram + (Math.random()*6 - 3));
-        document.getElementById('mcpu').style.width = cpu + '%';
-        document.getElementById('mram').style.width = ram + '%';
-        document.getElementById('scpu').textContent = cpu.toFixed(0) + '%';
-        document.getElementById('sram').textContent = ram.toFixed(0) + '%';
-    }, 1200);
+// CSI
+let csiA=0,csiP=[];
+function csiM(m,el){
+  document.querySelectorAll('.pzc').forEach(e=>{e.style.borderColor='';e.style.color='';});
+  el.style.borderColor='var(--c)';el.style.color='var(--c)';
+  const lbl=document.getElementById('csiml');if(lbl)lbl.textContent=m;
+  const mlr=document.getElementById('mlr');if(mlr)mlr.textContent={HAREKET:'HAREKET TESPİT',NEFES:'NORMAL SOLUNUM',GİRİŞ:'BÖLGE TEMİZ',KALABALIK:'3 KİŞİ TESPİT'}[m]||m;
+}
+function initCSI(){
+  const c=document.getElementById('csic');if(!c)return;
+  (function draw(){
+    const W=c.width,H=c.height,cx=W/2,cy=H/2,r=W/2-6,ctx=c.getContext('2d');
+    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#000';ctx.fill();
+    [.25,.5,.75,1].forEach(k=>{ctx.beginPath();ctx.arc(cx,cy,r*k,0,Math.PI*2);ctx.strokeStyle='rgba(0,229,255,.09)';ctx.lineWidth=1;ctx.stroke();});
+    [0,45,90,135].forEach(d=>{const rad=d*Math.PI/180;ctx.beginPath();ctx.moveTo(cx+r*Math.cos(rad),cy+r*Math.sin(rad));ctx.lineTo(cx-r*Math.cos(rad),cy-r*Math.sin(rad));ctx.strokeStyle='rgba(0,229,255,.06)';ctx.stroke();});
+    for(let i=0;i<60;i++){const a=(csiA-i*1.5)*Math.PI/180;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+.03);ctx.closePath();ctx.fillStyle=`rgba(0,229,255,${.09*(1-i/60)})`;ctx.fill();}
+    const sa=csiA*Math.PI/180;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(sa),cy+r*Math.sin(sa));ctx.strokeStyle='rgba(0,229,255,.9)';ctx.lineWidth=2;ctx.stroke();
+    csiP=csiP.filter(p=>Date.now()-p.ts<5000);
+    csiP.forEach(p=>{const al=1-(Date.now()-p.ts)/5000;ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);ctx.fillStyle=`rgba(0,229,255,${al})`;ctx.fill();});
+    if(Math.random()<.012){const a=Math.random()*Math.PI*2,d=(.3+Math.random()*.55)*r;csiP.push({x:cx+d*Math.cos(a),y:cy+d*Math.sin(a),ts:Date.now()});}
+    csiA=(csiA+2)%360;requestAnimationFrame(draw);
+  })();
+  setInterval(()=>{
+    const a=30+~~(Math.random()*60),f=20+~~(Math.random()*70),s=40+~~(Math.random()*55);
+    ['cba','cbf','cbs'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.style.width=[a,f,s][i]+'%';});
+    ['ca','cf','cs'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[a+'%',f+'Hz',s+'dB'][i];});
+  },1200);
+}
+const WD=new Array(100).fill(28);
+function initWave(){
+  const c=document.getElementById('wvc');if(!c)return;
+  (function draw(){
+    c.width=c.offsetWidth||280;const W=c.width,H=55,ctx=c.getContext('2d');
+    ctx.clearRect(0,0,W,H);WD.shift();WD.push((Math.sin(Date.now()/270)*18)+(Math.random()*8-4)+H/2);
+    ctx.beginPath();WD.forEach((v,i)=>{const x=i*(W/(WD.length-1));i===0?ctx.moveTo(x,v):ctx.lineTo(x,v);});
+    ctx.strokeStyle='rgba(0,229,176,.8)';ctx.lineWidth=1.5;ctx.stroke();
+    setTimeout(()=>requestAnimationFrame(draw),40);
+  })();
 }
 
-// Sayfa yüklendiğinde başlat
-window.onload = bootSequence;
+// BAŞ BEKİR
+const BT=[
+  {ip:'45.83.64.12',sc:92,ul:'Rusya',sh:'Moskova',tr:'PORT_TARAMA',ku:'AS197414',vpn:false,tor:false},
+  {ip:'103.45.126.5',sc:78,ul:'Çin',sh:'Shanghai',tr:'BRUTE_FORCE',ku:'ChinaTelecom',vpn:false,tor:false},
+  {ip:'186.232.4.88',sc:44,ul:'Brezilya',sh:'São Paulo',tr:'VPN',ku:'DataCenter',vpn:true,tor:false},
+  {ip:'194.165.16.80',sc:88,ul:'İran',sh:'Tehran',tr:'TOR_CIKISI',ku:'AS201814',vpn:false,tor:true},
+  {ip:'91.108.4.1',sc:55,ul:'Hollanda',sh:'Amsterdam',tr:'ZARARLI_DNS',ku:'LeaseWeb',vpn:true,tor:false},
+  {ip:'8.8.4.4',sc:0,ul:'ABD',sh:'Mountain View',tr:'',ku:'Google',vpn:false,tor:false},
+  {ip:'185.220.101.9',sc:96,ul:'Almanya',sh:'Frankfurt',tr:'TOR_RELAY',ku:'TorProject',vpn:false,tor:true},
+];
+let bbI=0;
+function bbAdd(t){
+  const f=document.getElementById('bbf');if(!f)return;
+  const cl=t.sc>=60?'d':t.sc>=20?'w':'k';
+  const ic=t.sc>=60?'🔴':t.sc>=20?'🟡':'🟢';
+  const d=document.createElement('div');d.className='bi '+cl;
+  d.innerHTML=`<div style="font-size:1.1em">${ic}</div><div><div class="bip">${t.ip}</div><div class="bm">${t.ul}/${t.sh} — ${t.ku}${t.vpn?' <span class="tag ta2" style="font-size:8px">VPN</span>':''}${t.tor?' <span class="tag tr2" style="font-size:8px">TOR</span>':''}${t.tr?` <span class="tag tr2" style="font-size:8px">${t.tr}</span>`:''}</div></div><div class="bsc ${cl}">${t.sc}</div>`;
+  f.insertBefore(d,f.firstChild);if(f.children.length>22)f.removeChild(f.lastChild);
+  if(t.sc>=60){
+    NX.threats++;
+    ['s1','sbbg','bbd2','a1'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=NX.threats;});
+    const e2=document.getElementById('tthr');if(e2)e2.textContent=NX.threats+' TEHDİT';
+    const e3=document.getElementById('bbd');if(e3)e3.className='dot dg';
+    slog('TEHDİT: '+t.ip+' — '+t.tr+' ('+t.ul+')','danger');
+    NX.db.threats.push({zaman:new Date().toISOString(),ip:t.ip,ulke:t.ul,sehir:t.sh,tur:t.tr,skor:t.sc});
+  }
+}
+function bbAutoSim(){setInterval(()=>bbAdd(BT[bbI++%BT.length]),3200);}
+function bbS(){const t={...BT[~~(Math.random()*BT.length)],ip:`${~~(Math.random()*200+10)}.${~~(Math.random()*255)}.${~~(Math.random()*255)}.${~~(Math.random()*255)}`};bbAdd(t);}
+function bbC(){const f=document.getElementById('bbf');if(f)f.innerHTML='';NX.threats=0;['s1','tthr','sbbg','bbd2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='0';});}
+async function bbQ(){
+  const ip=document.getElementById('bbqi').value.trim();if(!ip)return;
+  const r=document.getElementById('bbqr');r.innerHTML='<span style="color:var(--c)">Sorgulanıyor...</span>';
+  try{
+    const res=await fetch(`https://ipapi.co/${ip}/json/`,{signal:AbortSignal.timeout(6000)});
+    const d=await res.json();
+    if(d.error){r.innerHTML=`<span style="color:var(--am)">${d.reason||'Bulunamadı'}</span>`;return;}
+    r.innerHTML=`<div class="sr-row"><span class="srk">Ülke</span><span class="srv">${d.country_name||'?'}</span></div><div class="sr-row"><span class="srk">Şehir</span><span class="srv">${d.city||'?'}</span></div><div class="sr-row"><span class="srk">ISP</span><span class="srv">${d.org||'?'}</span></div><div class="sr-row"><span class="srk">Timezone</span><span class="srv">${d.timezone||'?'}</span></div><div class="sr-row"><span class="srk">Konum</span><span class="srv">${d.latitude},${d.longitude}</span></div>`;
+    NX.scans++;const e=document.getElementById('a0');if(e)e.textContent=NX.scans;
+  }catch(e){r.innerHTML='<span style="color:var(--am)">Sorgu başarısız: '+e.message+'</span>';}
+}
+async function bbConn(){
+  const url=document.getElementById('bburl').value.trim();const st=document.getElementById('bbst');
+  try{const r=await fetch(`${url}/api/durum`,{signal:AbortSignal.timeout(4000)});if(r.ok){st.innerHTML='<span style="color:var(--gr)">● Bağlandı — Termux API aktif</span>';slog('Baş Bekir API bağlandı.','ok');}}
+  catch(e){st.innerHTML='<span style="color:var(--am)">● Bağlanamadı. Termux: python bas_bekir_v2.py --api</span>';}
+}
 
-// Klavye kısayolları
-document.addEventListener('keydown', e => {
-    if (e.key === '/' && document.getElementById('os').style.display !== 'none') {
-        // Gelecekte komut paleti açılacak
-        console.log('%cQuantum Nexus Command Ready', 'color:#00e5ff; font-family:Orbitron');
-    }
-});
+// BİYO
+const BD={bpm:[],spo2:[],res:[]};
+for(let i=0;i<80;i++){BD.bpm.push(68+Math.random()*12);BD.spo2.push(96+Math.random()*3);BD.res.push(12+Math.random()*6);}
+function initBio(){
+  const c=document.getElementById('bioc');if(!c)return;
+  (function draw(){
+    c.width=c.offsetWidth||500;const W=c.width,H=130,ctx=c.getContext('2d');ctx.clearRect(0,0,W,H);
+    const dl=(data,col,mn,mx,yo,yh)=>{ctx.beginPath();data.forEach((v,i)=>{const x=i*(W/(data.length-1)),y=yo+yh-((v-mn)/(mx-mn))*yh;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();};
+    dl(BD.bpm,'rgba(255,61,61,.8)',55,90,0,40);dl(BD.spo2,'rgba(0,229,255,.8)',93,100,44,40);dl(BD.res,'rgba(0,230,118,.8)',8,22,88,40);
+    ctx.fillStyle='rgba(255,61,61,.6)';ctx.font="9px 'Share Tech Mono'";ctx.fillText('BPM',4,12);
+    ctx.fillStyle='rgba(0,229,255,.6)';ctx.fillText('SpO2',4,52);
+    ctx.fillStyle='rgba(0,230,118,.6)';ctx.fillText('SOLUNUM',4,96);
+    requestAnimationFrame(draw);
+  })();
+}
+function bioT(){
+  const b=68+~~(Math.random()*12),s=96+~~(Math.random()*3),r=12+~~(Math.random()*6);
+  BD.bpm.shift();BD.bpm.push(b);BD.spo2.shift();BD.spo2.push(s);BD.res.shift();BD.res.push(r);
+  ['bbpm','bspo','bres'].forEach((id,i)=>{const e=document.getElementById(id);if(e)e.textContent=[b,s+'%',r][i];});
+}
+
+// MESH
+function initMesh(){
+  const c=document.getElementById('meshc');if(!c)return;
+  const nodes=[{x:.1,y:.15},{x:.9,y:.12},{x:.1,y:.88},{x:.9,y:.85}];
+  const persons=[{x:.35,y:.4},{x:.62,y:.55},{x:.45,y:.75}];
+  (function draw(){
+    c.width=c.offsetWidth||600;const W=c.width,H=270,ctx=c.getContext('2d'),t=Date.now()/1000;
+    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.strokeStyle='rgba(0,229,255,.03)';ctx.stroke();}
+    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.strokeStyle='rgba(0,229,255,.03)';ctx.stroke();}
+    nodes.forEach((n,i)=>nodes.slice(i+1).forEach(m=>{ctx.beginPath();ctx.moveTo(n.x*W,n.y*H);ctx.lineTo(m.x*W,m.y*H);ctx.strokeStyle='rgba(0,229,255,.07)';ctx.lineWidth=1;ctx.stroke();}));
+    persons.forEach(p=>{
+      const px=p.x*W+Math.sin(t+p.x)*5,py=p.y*H+Math.cos(t+p.y)*5;
+      nodes.forEach(n=>{ctx.beginPath();ctx.moveTo(n.x*W,n.y*H);ctx.lineTo(px,py);ctx.strokeStyle='rgba(0,230,118,.12)';ctx.lineWidth=1;ctx.stroke();});
+      ctx.beginPath();ctx.arc(px,py,7,0,Math.PI*2);ctx.fillStyle='rgba(0,230,118,.2)';ctx.fill();
+      ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);ctx.fillStyle='#00e676';ctx.fill();
+    });
+    nodes.forEach(n=>{ctx.beginPath();ctx.arc(n.x*W,n.y*H,8,0,Math.PI*2);ctx.fillStyle='rgba(0,229,255,.12)';ctx.fill();ctx.beginPath();ctx.arc(n.x*W,n.y*H,4,0,Math.PI*2);ctx.fillStyle='#00e5ff';ctx.fill();});
+    requestAnimationFrame(draw);
+  })();
+}
+
+// DeFi
+async function fetchCoins(){
+  const ts=document.getElementById('dts'),g=document.getElementById('coing');
+  if(ts)ts.textContent='Yükleniyor...';
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,binancecoin,matic-network,avalanche-2&order=market_cap_desc&per_page=6&sparkline=false',{signal:AbortSignal.timeout(8000)});
+    const d=await r.json();
+    if(ts)ts.textContent=new Date().toLocaleTimeString('tr-TR');if(g)g.innerHTML='';
+    d.forEach(c=>{
+      const chg=c.price_change_percentage_24h||0;
+      const pr=c.current_price>=1000?'$'+Math.round(c.current_price).toLocaleString():'$'+c.current_price.toFixed(2);
+      if(g)g.innerHTML+=`<div class="coin"><div class="csym">${c.symbol.toUpperCase()}</div><div class="cnm">${c.name}</div><div class="cpr">${pr}</div><div class="${chg>=0?'cup':'cdn'}">${chg>=0?'▲':'▼'} ${Math.abs(chg).toFixed(2)}%</div></div>`;
+      if(c.id==='bitcoin'){const e=document.getElementById('tbtc');if(e)e.textContent='BTC $'+Math.round(c.current_price).toLocaleString();}
+      NX.db.crypto.push({zaman:new Date().toISOString(),sembol:c.symbol,fiyat:c.current_price,degisim:chg.toFixed(2)});
+    });
+  }catch(e){if(g)g.innerHTML='<div style="color:var(--am);padding:13px;font-size:11px;">API limiti. 1 dk bekle.</div>';}
+}
+const ARBS=['SOL/USDC — Orca↔Raydium','ETH/USDT — Uniswap↔Sushi','BNB/BUSD — PancakeSwap↔BiSwap','AVAX/USDC — TraderJoe↔Pangolin'];
+function arbT(){
+  const el=document.getElementById('arbf');if(!el)return;
+  const pair=ARBS[~~(Math.random()*ARBS.length)],pct=(Math.random()*.4+.05).toFixed(3),profit=(Math.random()*80+10).toFixed(2);
+  el.innerHTML=`<span style="color:${parseFloat(pct)>.2?'var(--gr)':'var(--am)'}">[${new Date().toLocaleTimeString('tr-TR')}] ${pair} — %${pct} — $${profit}</span><br>`+el.innerHTML;
+}
+
+// AREL
+const PZS=[{icon:'🐱',title:'Kediler',q:"3 kedisi var, 2 daha aldı. Kaç oldu?",a:'5'},{icon:'♟',title:'Satranç',q:'Satranç tahtasında kaç kare var?',a:'64'},{icon:'🔢',title:'Sayılar',q:"1'den 10'a kadar toplamı kaçtır?",a:'55'},{icon:'🐶',title:'Hayvanlar',q:'4 inek + 3 at. Kaç bacak?',a:'28'},{icon:'🌈',title:'Renkler',q:'Gökkuşağında kaç renk var?',a:'7'},{icon:'⭐',title:'Yıldızlar',q:'5×5 yıldız kaç eder?',a:'25'},{icon:'🍎',title:'Meyveler',q:'12 elmadan 5 düştü, kaç kaldı?',a:'7'},{icon:'🤖',title:'Robot',q:'Robot her adımda 2 ileri gider. 5 adımda kaç?',a:'10'}];
+function buildPuzzles(){
+  const g=document.getElementById('pzg');if(!g)return;
+  PZS.forEach((p,i)=>{const d=document.createElement('div');d.className='pzc';d.innerHTML=`<span class="pzi">${p.icon}</span>${p.title}`;d.onclick=()=>showPz(i);g.appendChild(d);});
+}
+function showPz(i){
+  const p=PZS[i];
+  document.getElementById('pzcard').style.display='block';
+  document.getElementById('pztitle').textContent=p.icon+' '+p.title;
+  document.getElementById('pzcont').innerHTML=`<div style="font-size:1.1em;color:#deeeff;margin-bottom:9px;">${p.q}</div><div style="display:flex;gap:6px;align-items:center;"><input class="inp" id="pa${i}" placeholder="Cevabın..." style="flex:1"><button class="btn bg2" onclick="chkPz(${i})">KONTROL</button></div><div id="pr${i}" style="margin-top:8px;font-size:1.1em;"></div>`;
+}
+function chkPz(i){const a=document.getElementById('pa'+i).value.trim(),r=document.getElementById('pr'+i);r.innerHTML=a===PZS[i].a?'<span style="color:var(--gr);font-size:1.2em">🎉 Harika! Doğru! Arel çok zeki!</span>':'<span style="color:var(--am)">Tekrar dene!</span>';}
+function aRun(){
+  const code=document.getElementById('acode').value;let res='',vars={};
+  code.split('\n').forEach(line=>{
+    line=line.trim();if(!line||line.startsWith('#'))return;
+    const pm=line.match(/^print\((.*)\)$/);
+    if(pm){let e=pm[1].trim();e=e.replace(/f["'](.*?)["']/,(_,s)=>s.replace(/\{([^}]+)\}/g,(_,v)=>vars[v.trim()]!==undefined?vars[v.trim()]:`{${v.trim()}}`));e=e.replace(/^["'](.*?)["']$/,'$1');res+=e+'\n';return;}
+    const vm=line.match(/^(\w+)\s*=\s*(.+)$/);if(vm&&!line.startsWith('for')){vars[vm[1]]=vm[2].trim().replace(/^["'](.*?)["']$/,'$1');}
+  });
+  document.getElementById('aout').textContent=res||'(Çıktı yok)';
+}
+function aRst(){document.getElementById('acode').value=`print("Merhaba Arel! 👋")\nfor i in range(1, 6):\n    print(f"Sayı {i} ⭐")`;document.getElementById('aout').textContent='';}
+
+// GHOST
+const GP=[{n:'Anthropic Key',p:/sk-ant-[a-zA-Z0-9\-_]{20,}/g,s:'KRİTİK'},{n:'OpenAI Key',p:/sk-[a-zA-Z0-9]{40,}/g,s:'KRİTİK'},{n:'AWS Key',p:/AKIA[0-9A-Z]{16}/g,s:'KRİTİK'},{n:'Solana Key',p:/[1-9A-HJ-NP-Za-km-z]{87,88}/g,s:'KRİTİK'},{n:'JWT',p:/eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/g,s:'YÜKSEK'},{n:'MongoDB URL',p:/mongodb(\+srv)?:\/\/[^\s'"]+/gi,s:'YÜKSEK'},{n:'Private Key',p:/(private[_-]?key|secret)\s*[:=]\s*['"]\S{10,}/gi,s:'KRİTİK'}];
+function gScan(){
+  const txt=document.getElementById('gtxt').value,r=document.getElementById('gres');let found=0,html='';
+  GP.forEach(p=>{const m=txt.match(p.p);if(m){found++;html+=`<div style="color:${p.s==='KRİTİK'?'var(--re)':'var(--am)'};margin-bottom:5px;">⚠️ ${p.n} — ${m.length} adet — ${p.s}</div>`;}});
+  if(!found)html='<span style="color:var(--gr)">✅ Tehlikeli pattern bulunamadı.</span>';
+  const e1=document.getElementById('gfv');if(e1)e1.textContent=found;
+  const e2=document.getElementById('gsc');if(e2)e2.textContent=parseInt(e2.textContent||0)+1;
+  r.innerHTML=html;
+}
+function buildGCL(){
+  const items=[{l:'.gitignore aktif',ok:true},{l:"API keyler .env'de",ok:true},{l:"Public repo'da secret yok",ok:false},{l:'Dependabot güncel',ok:false},{l:'HTTPS zorunlu',ok:true},{l:'CORS konfigürasyonu',ok:true},{l:'Rate limiting',ok:false}];
+  const el=document.getElementById('gcl');if(!el)return;
+  el.innerHTML=items.map(i=>`<div>${i.ok?'<span style="color:var(--gr)">✅</span>':'<span style="color:var(--re)">❌</span>'} ${i.l}</div>`).join('');
+}
+
+// AI CHAT
+const PERSONAS={nx:'Sen Quantum Nexus OS AI asistanısın. Kısa, net, Türkçe cevap ver.',tc:'Deneyimli yazılım geliştirici. Teknik, net, Türkçe.',df:'Kripto/DeFi analisti. Analiz sun, Türkçe.',ed:'Arel için eğlenceli öğretmen. 8 yaş, emoji, basit Türkçe.',sc:'Siber güvenlik uzmanı. Tehdit analizi, Türkçe.'};
+async function sendC(){
+  const inp=document.getElementById('ci');const msg=inp.value.trim();if(!msg)return;
+  inp.value='';addMsg(msg,'u');NX.cH.push({role:'user',content:msg});NX.ai++;
+  const e=document.getElementById('s4');if(e)e.textContent=NX.ai;
+  const tid=document.createElement('div');tid.className='msg ma';tid.id='typing';
+  tid.innerHTML='<div class="mlb">NEXUS AI</div><div class="mb"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></div>';
+  document.getElementById('clog').appendChild(tid);scrollC();
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:PERSONAS[document.getElementById('aips').value]||PERSONAS.nx,messages:NX.cH.slice(-10)})});
+    const d=await r.json();const txt=d.content?.[0]?.text||'API bağlantısı yapılandırılmamış. Anthropic key gerekli.';
+    NX.cH.push({role:'assistant',content:txt});document.getElementById('typing')?.remove();addMsg(txt,'a');
+    const e2=document.getElementById('a2');if(e2)e2.textContent=NX.ai;
+  }catch(e){document.getElementById('typing')?.remove();addMsg('Claude API: Anthropic API key gerekli.','a');}
+}
+function addMsg(t,r){
+  const log=document.getElementById('clog');const d=document.createElement('div');d.className='msg m'+r;
+  d.innerHTML=`<div class="mlb">${r==='u'?'ERDEM':'NEXUS AI'}</div><div class="mb">${t.replace(/\n/g,'<br>')}</div>`;
+  log.appendChild(d);scrollC();
+}
+function scrollC(){const l=document.getElementById('clog');if(l)l.scrollTop=l.scrollHeight;}
+function clrC(){document.getElementById('clog').innerHTML='<div class="msg ma"><div class="mlb">NEXUS AI</div><div class="mb">Yeni sohbet.</div></div>';NX.cH=[];}
+
+// OMEGA
+function initOmega(){
+  const c=document.getElementById('oc');if(!c)return;
+  const pts=Array.from({length:120},()=>({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.003,vy:(Math.random()-.5)*.003,h:~~(Math.random()*60+260)}));
+  (function draw(){
+    c.width=c.offsetWidth||700;const W=c.width,H=250,ctx=c.getContext('2d');
+    ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(0,0,W,H);
+    pts.forEach((p,i)=>{
+      pts.slice(i+1,i+7).forEach(q=>{const dx=(p.x-q.x)*W,dy=(p.y-q.y)*H,d=Math.sqrt(dx*dx+dy*dy);if(d<80){ctx.beginPath();ctx.moveTo(p.x*W,p.y*H);ctx.lineTo(q.x*W,q.y*H);ctx.strokeStyle=`rgba(213,0,249,${.15*(1-d/80)})`;ctx.lineWidth=.5;ctx.stroke();}});
+      p.x=(p.x+p.vx+1)%1;p.y=(p.y+p.vy+1)%1;
+      ctx.beginPath();ctx.arc(p.x*W,p.y*H,1.5,0,Math.PI*2);ctx.fillStyle=`hsla(${p.h},100%,70%,.8)`;ctx.fill();
+    });
+    const t=Date.now()/2000;ctx.save();ctx.translate(W/2,H/2);ctx.rotate(t);
+    for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(0,0,20+i*20,0,Math.PI*2);ctx.strokeStyle='rgba(213,0,249,.4)';ctx.lineWidth=1.5;ctx.stroke();ctx.rotate(Math.PI*2/3);}
+    ctx.restore();requestAnimationFrame(draw);
+  })();
+}
+function qKey(){NX.qk=new Uint8Array(32);crypto.getRandomValues(NX.qk);}
+function qEnc(){
+  const inp=document.getElementById('qin').value;if(!inp)return;
+  const data=new TextEncoder().encode(inp),enc=new Uint8Array(data.length);
+  for(let i=0;i<data.length;i++)enc[i]=data[i]^NX.qk[i%NX.qk.length];
+  const hex=Array.from(enc).map(b=>b.toString(16).padStart(2,'0')).join(' ');
+  const b64=btoa(String.fromCharCode(...enc));
+  document.getElementById('qout').innerHTML=`<div style="color:var(--dm);font-size:9px;margin-bottom:3px">HEX:</div>${hex}<div style="color:var(--dm);font-size:9px;margin:7px 0 3px">BASE64:</div><span style="color:var(--c)">${b64}</span>`;
+  const el=document.getElementById('qkdl');if(el)el.textContent=(data.length*8)+'b';
+}
+
+// OSINT
+function osint(t){
+  const target=document.getElementById('oit').value.trim()||'example.com';
+  const el=document.getElementById('ores');el.innerHTML='<span style="color:var(--c)">Sorgulanıyor...</span>';
+  const RES={whois:`DOMAIN: ${target}\nREGISTRAR: ICANN\nCREATED: 1995-08-14\nNS: ns1.example.com`,dns:`A: 93.184.216.34\nMX: mail.${target}\nTXT: v=spf1 -all`,ssl:`VALID: ✓\nISSUER: DigiCert\nGRADE: A+`,sub:`www.${target}\nmail.${target}\napi.${target}`,rep:`AbuseIPDB: 0/100\nStatus: TEMIZ`,geo:`Konum: ABD / Ashburn\nASN: AS15133`};
+  setTimeout(()=>{
+    const r=(RES[t]||'Sonuç yok.').split('\n').map(l=>{const[k,...v]=l.split(':');return v.length?`<div class="sr-row"><span class="srk">${k}</span><span class="srv">${v.join(':')}</span></div>`:`<div style="color:var(--dm);padding:2px 0">${l}</div>`;}).join('');
+    el.innerHTML=r;tlog('olog',`${t.toUpperCase()} — ${target}`);
+  },700);
+}
+
+// AJANLAR
+const AGDEFS=[{n:'AR-GE',icon:'🔬',tasks:['Yeni modül ara','Güvenlik tara','Performans analizi']},{n:'KODLAMA',icon:'💻',tasks:['Kod üret','Hata düzelt','Refactor']},{n:'GÜVENLİK',icon:'🛡',tasks:['Tehdit tara','Kara liste güncelle','Port tara']},{n:'VERİ',icon:'📊',tasks:['Veri topla','İstatistik çıkar','Rapor üret']},{n:'DeFi',icon:'₿',tasks:['ARB fırsatı ara','Fiyat izle','Pool analizi']},{n:'OSINT',icon:'🕵',tasks:['Domain tara','IP sorgula','İstihbarat']},{n:'AREL',icon:'🎓',tasks:['Bulmaca oluştur','Öğrenme planla','İlerleme izle']},{n:'EVRİM',icon:'🧬',tasks:['Sistem analizi','Optimizasyon','Self-update']}];
+function buildAgents(){
+  const g=document.getElementById('agrid');if(!g)return;
+  AGDEFS.forEach((a,i)=>{
+    const d=document.createElement('div');d.className='agent';d.id='ag'+i;
+    d.innerHTML=`<div class="adot" id="adot${i}"></div><div style="font-size:1.5em">${a.icon}</div><div class="aname">${a.n}</div><div class="atsk" id="atsk${i}">Bekliyor</div><div class="apr"><div class="apf" id="apf${i}" style="width:0"></div></div>`;
+    d.onclick=()=>runAg(i);g.appendChild(d);
+  });
+}
+function runAg(i){
+  const a=AGDEFS[i];const el=document.getElementById('ag'+i);if(el)el.classList.add('run');
+  const task=a.tasks[~~(Math.random()*a.tasks.length)];
+  const tsk=document.getElementById('atsk'+i);if(tsk)tsk.textContent=task;
+  let p=0;const iv=setInterval(()=>{
+    p+=Math.random()*15+5;if(p>100)p=100;
+    const pf=document.getElementById('apf'+i);if(pf)pf.style.width=p+'%';
+    if(p>=100){clearInterval(iv);setTimeout(()=>{
+      if(el)el.classList.remove('run');if(tsk)tsk.textContent='Tamamlandı';if(pf)pf.style.width='0';
+      NX.ag++;const e=document.getElementById('s5');if(e)e.textContent=NX.ag;
+      tlog('atl',`[${a.n}] ${task} — TAMAMLANDI`,'#00e676');
+      NX.db.agents.push({zaman:new Date().toISOString(),ajan:a.n,gorev:task,durum:'tamamlandi'});
+    },400);}
+  },200);
+}
+function allAg(){AGDEFS.forEach((_,i)=>setTimeout(()=>runAg(i),i*350));}
+function stopAg(){AGDEFS.forEach((_,i)=>{const e=document.getElementById('ag'+i);if(e)e.classList.remove('run');});}
+
+// DB
+const DBCOLS={threats:['zaman','ip','ulke','sehir','tur','skor'],dns:['zaman','domain','tur','sonuc'],scans:['zaman','hedef','tur','sonuc'],agents:['zaman','ajan','gorev','durum'],crypto:['zaman','sembol','fiyat','degisim']};
+let curDb='threats',curData=[];
+function showDb(t){
+  curDb=t;const tit=document.getElementById('dbtit');if(tit)tit.textContent=t.toUpperCase();
+  const cols=DBCOLS[t]||[];const data=NX.db[t]||[];curData=data;
+  const e1=document.getElementById('dbc');if(e1)e1.textContent=data.length;
+  const e2=document.getElementById('dbq');if(e2)e2.textContent=parseInt(e2.textContent||0)+1;
+  const e3=document.getElementById('dbs');if(e3)e3.textContent=Math.round(JSON.stringify(NX.db).length/1024)+'KB';
+  renderTbl(cols,data);
+}
+function renderTbl(cols,data){
+  const t=document.getElementById('dbtbl');if(!t)return;
+  if(!data.length){t.innerHTML='<tr><td style="padding:16px;color:var(--dm);">Henüz kayıt yok.</td></tr>';return;}
+  t.innerHTML=`<tr>${cols.map(c=>`<th>${c.toUpperCase()}</th>`).join('')}</tr>`+data.slice(-50).reverse().map(r=>`<tr>${cols.map(c=>`<td style="color:${c==='tur'||c==='durum'?'var(--am)':c==='ip'||c==='sembol'?'var(--c)':'var(--tx)'}">${r[c]||'-'}</td>`).join('')}</tr>`).join('');
+}
+function dbFil(){const q=document.getElementById('dbsrch').value.toLowerCase();renderTbl(DBCOLS[curDb]||[],(NX.db[curDb]||[]).filter(r=>JSON.stringify(r).toLowerCase().includes(q)));}
+function dbExp(){const blob=new Blob([JSON.stringify(NX.db[curDb],null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`nexus_${curDb}.json`;a.click();}
+
+// GROK
+async function sendG(){
+  const inp=document.getElementById('gi');const msg=inp.value.trim();if(!msg)return;
+  const key=document.getElementById('gkey').value.trim();inp.value='';
+  addGMsg(msg,'u');NX.gH.push({role:'user',content:msg});
+  const tid=document.createElement('div');tid.className='msg ma';tid.id='gtyp';
+  tid.innerHTML='<div class="mlb" style="color:var(--vi)">GROK</div><div class="mb"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></div>';
+  const gl=document.getElementById('glog');if(gl){gl.appendChild(tid);gl.scrollTop=9999;}
+  if(!key){tid.remove();addGMsg('xAI API anahtarı gerekli.','a');return;}
+  try{
+    const r=await fetch('https://api.x.ai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:document.getElementById('gmod').value,messages:[{role:'system',content:'Sen Grok, Quantum Nexus OS içinde Türkçe cevap veren xAI asistanısın.'},...NX.gH.slice(-8)],max_tokens:600})});
+    const d=await r.json();const txt=d.choices?.[0]?.message?.content||JSON.stringify(d.error||'Hata');
+    NX.gH.push({role:'assistant',content:txt});tid.remove();addGMsg(txt,'a');
+  }catch(e){tid.remove();addGMsg('Bağlantı hatası: '+e.message,'a');}
+}
+function addGMsg(t,r){
+  const log=document.getElementById('glog');if(!log)return;
+  const d=document.createElement('div');d.className='msg m'+r;
+  d.innerHTML=`<div class="mlb" style="color:var(--vi)">${r==='u'?'ERDEM':'GROK'}</div><div class="mb" style="${r==='a'?'border-color:rgba(213,0,249,.3)':''}">${t.replace(/\n/g,'<br>')}</div>`;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;
+}
+function clrG(){const l=document.getElementById('glog');if(l)l.innerHTML='';NX.gH=[];}
+
+// URL+IP TARAYICI
+async function doScan(type){
+  const raw=document.getElementById('scin').value.trim();
+  const el=document.getElementById('scres');
+  if(!raw){el.innerHTML='<span style="color:var(--am)">Hedef gir.</span>';return;}
+  el.innerHTML='<span style="color:var(--c)">Taranıyor...</span>';
+  let ip=raw;try{if(raw.startsWith('http'))ip=new URL(raw).hostname;}catch(e){}
+  tlog('sclog',`[${type.toUpperCase()}] ${raw}`);
+  NX.scans++;const e=document.getElementById('a0');if(e)e.textContent=NX.scans;
+
+  if(type==='ip'||type==='geo'){
+    try{
+      const r=await fetch(`https://ipapi.co/${ip}/json/`,{signal:AbortSignal.timeout(7000)});
+      const d=await r.json();
+      if(d.error){el.innerHTML=`<span style="color:var(--am)">${d.reason||'Bulunamadı'}</span>`;return;}
+      el.innerHTML=`<div class="sr-row"><span class="srk">IP</span><span class="srv">${d.ip}</span></div><div class="sr-row"><span class="srk">Ülke</span><span class="srv">${d.country_name} (${d.country})</span></div><div class="sr-row"><span class="srk">Şehir/Bölge</span><span class="srv">${d.city||'-'} / ${d.region||'-'}</span></div><div class="sr-row"><span class="srk">ISP</span><span class="srv">${d.org||'-'}</span></div><div class="sr-row"><span class="srk">ASN</span><span class="srv">${d.asn||'-'}</span></div><div class="sr-row"><span class="srk">Konum</span><span class="srv">${d.latitude}, ${d.longitude}</span></div><div class="sr-row"><span class="srk">Timezone</span><span class="srv">${d.timezone}</span></div>`;
+      NX.db.scans.push({zaman:new Date().toISOString(),hedef:ip,tur:'GEO',sonuc:d.country_name});
+    }catch(e){el.innerHTML=`<span style="color:var(--am)">Hata: ${e.message}</span>`;}
+  }else if(type==='url'){
+    el.innerHTML=`<div class="sr-row"><span class="srk">Hedef</span><span class="srv">${raw}</span></div><div class="sr-row"><span class="srk">Domain</span><span class="srv">${ip}</span></div><div class="sr-row"><span class="srk">Protokol</span><span class="srv ${raw.startsWith('https')?'g':'r'}">${raw.startsWith('https')?'HTTPS ✓':'HTTP ⚠️'}</span></div><div class="sr-row"><span class="srk">Not</span><span class="srv a">Tam analiz için Termux API bağla</span></div>`;
+    NX.db.scans.push({zaman:new Date().toISOString(),hedef:raw,tur:'URL',sonuc:'analiz edildi'});
+  }else if(type==='dns'){
+    try{
+      const r=await fetch(`https://cloudflare-dns.com/dns-query?name=${ip}&type=A`,{headers:{'Accept':'application/dns-json'},signal:AbortSignal.timeout(6000)});
+      const d=await r.json();
+      const ans=(d.Answer||[]).map(a=>`<div class="sr-row"><span class="srk">${a.type===1?'A':a.type===28?'AAAA':'TYPE'+a.type}</span><span class="srv">${a.data}</span></div>`).join('');
+      el.innerHTML=`<div class="sr-row"><span class="srk">Domain</span><span class="srv">${ip}</span></div>${ans||'<div style="color:var(--am);padding:5px;">Kayıt bulunamadı.</div>'}`;
+      NX.db.dns.push({zaman:new Date().toISOString(),domain:ip,tur:'A',sonuc:(d.Answer||[]).length+' kayıt'});
+    }catch(e){el.innerHTML=`<span style="color:var(--am)">DNS sorgu hatası.</span>`;}
+  }else if(type==='ssl'){
+    el.innerHTML=`<div class="sr-row"><span class="srk">Domain</span><span class="srv">${ip}</span></div><div class="sr-row"><span class="srk">HTTPS</span><span class="srv ${raw.startsWith('https')?'g':'r'}">${raw.startsWith('https')?'AKTİF ✓':'PASİF ⚠️'}</span></div><div class="sr-row"><span class="srk">Not</span><span class="srv a">Tam SSL analizi için Termux API</span></div>`;
+  }else if(type==='threat'){
+    const isBad=Math.random()<.3;const sc=isBad?~~(40+Math.random()*50):~~(Math.random()*10);
+    el.innerHTML=`<div class="sr-row"><span class="srk">Hedef</span><span class="srv">${ip}</span></div><div class="sr-row"><span class="srk">Tehdit</span><span class="srv ${isBad?'r':'g'}">${isBad?'⚠️ ŞÜPHELİ':'✓ TEMİZ'}</span></div><div class="sr-row"><span class="srk">Risk</span><span class="srv ${isBad?'r':'g'}">${sc}/100</span></div><div class="sr-row"><span class="srk">Not</span><span class="srv a">Tam analiz için AbuseIPDB key ekle</span></div>`;
+  }else if(type==='ping'){
+    const ms=~~(5+Math.random()*80);
+    el.innerHTML=`<div class="sr-row"><span class="srk">Hedef</span><span class="srv">${ip}</span></div><div class="sr-row"><span class="srk">Gecikme</span><span class="srv g">${ms}ms</span></div><div class="sr-row"><span class="srk">Durum</span><span class="srv g">ERİŞİLEBİLİR</span></div><div class="sr-row"><span class="srk">Not</span><span class="srv a">Simüle — gerçek ICMP tarayıcıda çalışmaz</span></div>`;
+  }
+}
+async function bulkScan(){
+  const lines=document.getElementById('blkin').value.split('\n').filter(l=>l.trim()).slice(0,20);
+  const el=document.getElementById('blkres');el.innerHTML='';
+  for(const l of lines){
+    const ip=l.trim();
+    try{
+      const r=await fetch(`https://ipapi.co/${ip}/json/`,{signal:AbortSignal.timeout(4000)});
+      const d=await r.json();
+      el.innerHTML+=`<span style="color:var(--gr)">[✓] ${ip} — ${d.country_name||'?'} / ${d.city||'?'} — ${d.org||'?'}</span><br>`;
+    }catch(e){el.innerHTML+=`<span style="color:var(--am)">[?] ${ip} — Sorgu başarısız</span><br>`;}
+    await new Promise(r=>setTimeout(r,300));
+  }
+}
+
+// ANALİTİK
+const ANA=new Array(24).fill(0).map(()=>({t:~~(Math.random()*50),s:~~(Math.random()*20)}));
+function initAna(){
+  const c=document.getElementById('anac');if(!c)return;
+  (function draw(){
+    c.width=c.offsetWidth||600;const W=c.width,H=185,ctx=c.getContext('2d');
+    ctx.clearRect(0,0,W,H);const bw=W/24-2;
+    ANA.forEach((d,i)=>{
+      const x=i*(W/24)+1;
+      ctx.fillStyle='rgba(0,229,255,.3)';ctx.fillRect(x,H-d.t*3,bw/2,d.t*3);
+      ctx.fillStyle='rgba(255,61,61,.4)';ctx.fillRect(x+bw/2+1,H-d.s*5,bw/2-1,d.s*5);
+    });
+    ctx.fillStyle='rgba(0,229,255,.7)';ctx.font="9px 'Share Tech Mono'";ctx.fillText('■ Tarama',8,14);
+    ctx.fillStyle='rgba(255,61,61,.7)';ctx.fillText('■ Tehdit',70,14);
+    requestAnimationFrame(draw);
+  })();
+}
+
+// ALARM
+function buildAlRules(){
+  const el=document.getElementById('alrul');if(!el)return;
+  el.innerHTML=['Tehdit skoru &gt; 80','TOR bağlantısı tespit','Port taraması &gt; 15 port'].map(r=>`<div style="color:var(--re)">▸ ${r}</div>`).join('');
+}
+function saveAl(){tlog('allog','Alarm ayarları kaydedildi.','#ffb300');tlog('allog','Test bildirimi gönderildi.','#00e676');}
+function addRule(){const el=document.getElementById('alrul');if(el)el.innerHTML+=`<div style="color:var(--c)">▸ Yeni kural</div>`;}
+
+// HARİTA
+function initMap(){
+  const c=document.getElementById('mapc');if(!c)return;
+  const pts=[{lat:55.7,lon:37.6,col:'#ff3d3d',lbl:'Moskova'},{lat:39.9,lon:116.4,col:'#ff3d3d',lbl:'Pekin'},{lat:35.7,lon:51.4,col:'#ff3d3d',lbl:'Tahran'},{lat:52.5,lon:13.4,col:'#ffb300',lbl:'Berlin'},{lat:48.9,lon:2.3,col:'#00e676',lbl:'Paris'},{lat:41.0,lon:28.9,col:'#00e5ff',lbl:'İstanbul'}];
+  (function draw(){
+    c.width=c.offsetWidth||700;const W=c.width,H=310,ctx=c.getContext('2d');
+    ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.strokeStyle='rgba(0,229,255,.04)';ctx.stroke();}
+    for(let y=0;y<H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.strokeStyle='rgba(0,229,255,.04)';ctx.stroke();}
+    pts.forEach(p=>{
+      const x=((p.lon+180)/360)*W,y=((90-p.lat)/180)*H;
+      ctx.beginPath();ctx.arc(x,y,6+Math.sin(Date.now()/500)*2,0,Math.PI*2);ctx.fillStyle=p.col+'40';ctx.fill();
+      ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=p.col;ctx.fill();
+      ctx.fillStyle=p.col;ctx.font="9px 'Share Tech Mono'";ctx.fillText(p.lbl,x+7,y+4);
+    });
+    requestAnimationFrame(draw);
+  })();
+  const leg=document.getElementById('mapleg');if(leg)leg.innerHTML='<span style="color:var(--re)">■ Tehdit</span> <span style="color:var(--am)">■ Şüpheli</span> <span style="color:var(--gr)">■ Normal</span> <span style="color:var(--c)">■ Yerel</span>';
+}
+
+// HABER
+function fetchNews(){
+  const el=document.getElementById('newsf');if(!el)return;
+  const h=[{title:'Yeni Solana DeFi protokolü 500M$ TVL\'e ulaştı',src:'CoinDesk',t:'DeFi'},{title:'FBI siber saldırı uyarısı: Kamu kurumları hedefte',src:'SecurityWeek',t:'Güvenlik'},{title:'Bitcoin ETF işlem hacmi rekor kırdı',src:'Bloomberg',t:'Kripto'},{title:'Log4Shell açığının yeni varyantı tespit edildi',src:'Bleeping Computer',t:'Güvenlik'},{title:'Quantum bilgisayarlar RSA şifrelemeyi tehdit ediyor',src:'MIT Tech Review',t:'Kuantum'},{title:'Ethereum Layer 2 işlem sayısı mainnet\'i geçti',src:'The Block',t:'DeFi'},{title:'Türkiye dijital kimlik sistemine geçiyor',src:'Sabah Tech',t:'Haber'},{title:'AI tabanlı siber saldırılar %340 arttı',src:'Kaspersky',t:'Güvenlik'}];
+  el.innerHTML=h.map(n=>{const col={Güvenlik:'var(--re)',DeFi:'var(--c)',Kripto:'var(--am)',Kuantum:'var(--vi)',Haber:'var(--gr)'}[n.t]||'var(--tx)';return `<div style="padding:9px 0;border-bottom:1px solid var(--bd);display:flex;align-items:baseline;gap:9px;"><span class="tag" style="background:${col}20;color:${col};border-color:${col}50;flex-shrink:0">${n.t}</span><span style="color:#85afc5">${n.title}</span><span style="color:var(--dm);font-size:10px;margin-left:auto;flex-shrink:0">${n.src}</span></div>`;}).join('');
+}
+
+// EVRİM
+function evoRun(){
+  const el=document.getElementById('evolog');if(!el)return;
+  const steps=['🧬 Sistem analizi başlatılıyor...','📊 Modül performansları ölçülüyor...','🔍 L3 Baş Bekir: %94 verimlilik — OPTIMAL','🔍 L9 AI Chat: Yanıt süresi 1.2s — NORMAL','🔍 L15 URL Tarayıcı: DNS modülü mevcut','💡 Öneri: L2 CSI → YOLOv8 entegrasyonu','💡 Öneri: L6 DeFi → Hyperliquid API ekle','💡 Öneri: L14 Grok → Streaming yanıt aktif et','✅ 2 güncelleme hazır. Onay bekliyor...','🧬 Evrim döngüsü tamamlandı.'];
+  el.innerHTML='';steps.forEach((s,i)=>setTimeout(()=>{el.innerHTML+=`<span>[${new Date().toLocaleTimeString('tr-TR')}] ${s}</span><br>`;el.scrollTop=el.scrollHeight;},i*700));
+}
 </script>
 </body>
 </html>

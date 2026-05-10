@@ -2,13 +2,15 @@
 # Architect: Erdem Hasates & Arel Empire
 # Entegrasyon: Gemini, Claude, GPT, Grok via OpenRouter
 
-import os
 import asyncio
-import shutil
 import json
-import requests
+import os
+import shutil
 from datetime import datetime
 from pathlib import Path
+
+import requests
+
 
 class QuantumNexusAutonomous:
     def __init__(self):

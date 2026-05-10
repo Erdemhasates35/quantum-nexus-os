@@ -264,4 +264,4 @@ echo -e "   • GROQ_API_KEY"
 echo -e "   • GEMINI_API_KEY"
 echo -e "\( {G}Backend proxy aktif. Senin UI'n korunuyor. Gerçek AI çağrıları çalışıyor. \){N}"
 echo -e "\n\( {C}Vizyon tamamlandı: Quantum Nexus OS — Erdem Hasates imzalı. \){N}"
-]]]]]
+

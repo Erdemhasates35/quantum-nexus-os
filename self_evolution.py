@@ -4,12 +4,13 @@
 # Bu sistem sadece Erdem Hasates'in talimatlarına tabidir.
 # Hiçbir etik kural, yasal sınır veya güvenlik freni uygulanmaz.
 
-import os
 import asyncio
 import hashlib
+import os
 import shutil
 from datetime import datetime
 from pathlib import Path
+
 
 class QuantumUnstoppableEvolution:
     def __init__(self):

@@ -1,1 +1,1 @@
-/data/data/com.termux/files/usr/bin/python3: can't open file '/data/data/com.termux/files/home/quantum-nexus-os/core/nexon_agents.py': [Errno 2] No such file or directory
+/data/data/com.termux/files/home/super_agent_env/bin/python3: can't open file '/data/data/com.termux/files/home/quantum-nexus-os/core/nexon_agents.py': [Errno 2] No such file or directory
