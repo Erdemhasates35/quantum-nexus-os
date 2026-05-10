@@ -1,0 +1,367 @@
+{
+  "bundleSize": 45627,
+  "bundleOrigSize": 65643,
+  "bundleReduction": 30.49,
+  "modules": [
+    {
+      "id": "/src/links/wsLink.ts",
+      "size": 9505,
+      "origSize": 10101,
+      "renderedExports": [
+        "createWSClient",
+        "wsLink"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 20.83,
+      "reduction": 5.9
+    },
+    {
+      "id": "/src/links/loggerLink.ts",
+      "size": 5236,
+      "origSize": 6448,
+      "renderedExports": [
+        "loggerLink"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 11.48,
+      "reduction": 18.8
+    },
+    {
+      "id": "/src/internals/dataLoader.ts",
+      "size": 4409,
+      "origSize": 4766,
+      "renderedExports": [
+        "dataLoader"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/internals/createHTTPBatchLink.ts"
+      ],
+      "percent": 9.66,
+      "reduction": 7.49
+    },
+    {
+      "id": "/src/links/internals/parseJSONStream.ts",
+      "size": 4007,
+      "origSize": 4969,
+      "renderedExports": [
+        "parseJSONStream",
+        "streamingJsonHttpRequester"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/httpBatchStreamLink.ts"
+      ],
+      "percent": 8.78,
+      "reduction": 19.36
+    },
+    {
+      "id": "/src/internals/TRPCUntypedClient.ts",
+      "size": 3250,
+      "origSize": 6287,
+      "renderedExports": [
+        "TRPCUntypedClient"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/createTRPCUntypedClient.ts",
+        "/src/createTRPCClient.ts",
+        "/src/createTRPCClientProxy.ts"
+      ],
+      "percent": 7.12,
+      "reduction": 48.31
+    },
+    {
+      "id": "/src/links/internals/httpUtils.ts",
+      "size": 3074,
+      "origSize": 5176,
+      "renderedExports": [
+        "resolveHTTPLinkOptions",
+        "getUrl",
+        "getBody",
+        "jsonHttpRequester",
+        "fetchHTTPResponse",
+        "httpRequest"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/internals/parseJSONStream.ts",
+        "/src/links/httpFormDataLink.ts",
+        "/src/links/httpLink.ts",
+        "/src/links/internals/createHTTPBatchLink.ts",
+        "/src/links/httpBatchLink.ts"
+      ],
+      "percent": 6.74,
+      "reduction": 40.61
+    },
+    {
+      "id": "/src/links/internals/createHTTPBatchLink.ts",
+      "size": 2912,
+      "origSize": 3538,
+      "renderedExports": [
+        "createHTTPBatchLink"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/httpBatchStreamLink.ts",
+        "/src/links/httpBatchLink.ts"
+      ],
+      "percent": 6.38,
+      "reduction": 17.69
+    },
+    {
+      "id": "/src/links/httpLink.ts",
+      "size": 2172,
+      "origSize": 2558,
+      "renderedExports": [
+        "httpLinkFactory",
+        "httpLink"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/httpFormDataLink.ts"
+      ],
+      "percent": 4.76,
+      "reduction": 15.09
+    },
+    {
+      "id": "/src/TRPCClientError.ts",
+      "size": 1818,
+      "origSize": 3666,
+      "renderedExports": [
+        "TRPCClientError"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/internals/TRPCUntypedClient.ts",
+        "/src/index.ts",
+        "/src/links/httpLink.ts",
+        "/src/links/wsLink.ts",
+        "/src/links/internals/httpUtils.ts",
+        "/src/links/internals/createHTTPBatchLink.ts"
+      ],
+      "percent": 3.98,
+      "reduction": 50.41
+    },
+    {
+      "id": "/src/shared/transformResult.ts",
+      "size": 1545,
+      "origSize": 2244,
+      "renderedExports": [
+        "transformResult"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/httpLink.ts",
+        "/src/links/wsLink.ts",
+        "/src/shared/index.ts",
+        "/src/links/internals/createHTTPBatchLink.ts"
+      ],
+      "percent": 3.39,
+      "reduction": 31.15
+    },
+    {
+      "id": "/src/links/httpBatchStreamLink.ts",
+      "size": 1309,
+      "origSize": 2041,
+      "renderedExports": [
+        "unstable_httpBatchStreamLink"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 2.87,
+      "reduction": 35.86
+    },
+    {
+      "id": "/src/createTRPCClientProxy.ts",
+      "size": 1210,
+      "origSize": 4384,
+      "renderedExports": [
+        "clientCallTypeToProcedureType",
+        "createTRPCClientProxy",
+        "createTRPCProxyClient",
+        "getUntypedClient"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/index.ts"
+      ],
+      "percent": 2.65,
+      "reduction": 72.4
+    },
+    {
+      "id": "/src/links/httpBatchLink.ts",
+      "size": 1185,
+      "origSize": 1430,
+      "renderedExports": [
+        "httpBatchLink"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 2.6,
+      "reduction": 17.13
+    },
+    {
+      "id": "/src/links/internals/createChain.ts",
+      "size": 690,
+      "origSize": 998,
+      "renderedExports": [
+        "createChain"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/internals/TRPCUntypedClient.ts",
+        "/src/links/splitLink.ts"
+      ],
+      "percent": 1.51,
+      "reduction": 30.86
+    },
+    {
+      "id": "/src/links/httpFormDataLink.ts",
+      "size": 663,
+      "origSize": 780,
+      "renderedExports": [
+        "experimental_formDataLink"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 1.45,
+      "reduction": 15
+    },
+    {
+      "id": "/src/links/splitLink.ts",
+      "size": 598,
+      "origSize": 1080,
+      "renderedExports": [
+        "splitLink"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 1.31,
+      "reduction": 44.63
+    },
+    {
+      "id": "/src/links/internals/getTextDecoder.ts",
+      "size": 553,
+      "origSize": 634,
+      "renderedExports": [
+        "getTextDecoder"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/httpBatchStreamLink.ts"
+      ],
+      "percent": 1.21,
+      "reduction": 12.78
+    },
+    {
+      "id": "/src/internals/getAbortController.ts",
+      "size": 542,
+      "origSize": 682,
+      "renderedExports": [
+        "getAbortController"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/internals/httpUtils.ts"
+      ],
+      "percent": 1.19,
+      "reduction": 20.53
+    },
+    {
+      "id": "/src/getFetch.ts",
+      "size": 428,
+      "origSize": 644,
+      "renderedExports": [
+        "getFetch"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/index.ts",
+        "/src/links/internals/httpUtils.ts"
+      ],
+      "percent": 0.94,
+      "reduction": 33.54
+    },
+    {
+      "id": "/src/createTRPCClient.ts",
+      "size": 161,
+      "origSize": 2083,
+      "renderedExports": [
+        "createTRPCClient"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/index.ts"
+      ],
+      "percent": 0.35,
+      "reduction": 92.27
+    },
+    {
+      "id": "/src/internals/retryDelay.ts",
+      "size": 142,
+      "origSize": 162,
+      "renderedExports": [
+        "retryDelay"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/links/wsLink.ts"
+      ],
+      "percent": 0.31,
+      "reduction": 12.35
+    },
+    {
+      "id": "/src/internals/isObject.ts",
+      "size": 136,
+      "origSize": 183,
+      "renderedExports": [
+        "isObject"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/TRPCClientError.ts",
+        "/src/shared/transformResult.ts"
+      ],
+      "percent": 0.3,
+      "reduction": 25.68
+    },
+    {
+      "id": "/src/createTRPCUntypedClient.ts",
+      "size": 82,
+      "origSize": 546,
+      "renderedExports": [
+        "createTRPCUntypedClient"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/index.ts"
+      ],
+      "percent": 0.18,
+      "reduction": 84.98
+    },
+    {
+      "id": "/src/index.ts",
+      "size": 0,
+      "origSize": 208,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0,
+      "reduction": 100
+    },
+    {
+      "id": "/src/shared/index.ts",
+      "size": 0,
+      "origSize": 35,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0,
+      "reduction": 100
+    }
+  ],
+  "moduleCount": 25
+}

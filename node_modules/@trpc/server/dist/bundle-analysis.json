@@ -1,0 +1,1027 @@
+{
+  "bundleSize": 115299,
+  "bundleOrigSize": 197273,
+  "bundleReduction": 41.55,
+  "modules": [
+    {
+      "id": "/src/adapters/ws.ts",
+      "size": 9720,
+      "origSize": 8535,
+      "renderedExports": [
+        "applyWSSHandler"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/fastify/fastifyTRPCPlugin.ts"
+      ],
+      "percent": 8.43,
+      "reduction": 0
+    },
+    {
+      "id": "/src/http/resolveHTTPResponse.ts",
+      "size": 9508,
+      "origSize": 12284,
+      "renderedExports": [
+        "resolveHTTPResponse"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/fastify/fastifyRequestHandler.ts",
+        "/src/adapters/fetch/fetchRequestHandler.ts",
+        "/src/http/index.ts",
+        "/src/adapters/node-http/nodeHTTPRequestHandler.ts"
+      ],
+      "percent": 8.25,
+      "reduction": 22.6
+    },
+    {
+      "id": "/src/deprecated/router.ts",
+      "size": 7231,
+      "origSize": 22249,
+      "renderedExports": [
+        "Router",
+        "router"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/index.ts"
+      ],
+      "percent": 6.27,
+      "reduction": 67.5
+    },
+    {
+      "id": "/home/runner/work/trpc/trpc/node_modules/.pnpm/@web3-storage+multipart-parser@1.0.0/node_modules/@web3-storage/multipart-parser/esm/src/index.js",
+      "size": 5880,
+      "origSize": 6352,
+      "renderedExports": [
+        "streamMultipart"
+      ],
+      "removedExports": [
+        "iterateMultipart"
+      ],
+      "dependents": [
+        "/src/adapters/node-http/content-type/form-data/index.ts"
+      ],
+      "percent": 5.1,
+      "reduction": 7.43
+    },
+    {
+      "id": "/src/deprecated/internals/procedure.ts",
+      "size": 5629,
+      "origSize": 10238,
+      "renderedExports": [
+        "Procedure",
+        "createProcedure"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/router.ts"
+      ],
+      "percent": 4.88,
+      "reduction": 45.02
+    },
+    {
+      "id": "/src/core/internals/procedureBuilder.ts",
+      "size": 5619,
+      "origSize": 11644,
+      "renderedExports": [
+        "createBuilder"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/interop.ts",
+        "/src/core/initTRPC.ts"
+      ],
+      "percent": 4.87,
+      "reduction": 51.74
+    },
+    {
+      "id": "/src/core/router.ts",
+      "size": 5159,
+      "origSize": 9368,
+      "renderedExports": [
+        "createRouterFactory",
+        "callProcedure",
+        "createCallerFactory"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/interop.ts",
+        "/src/core/internals/mergeRouters.ts",
+        "/src/core/initTRPC.ts"
+      ],
+      "percent": 4.47,
+      "reduction": 44.93
+    },
+    {
+      "id": "/src/adapters/node-http/content-type/form-data/fileUploadHandler.ts",
+      "size": 4939,
+      "origSize": 7870,
+      "renderedExports": [
+        "readableStreamToString",
+        "createFileUploadHandler",
+        "NodeOnDiskFile"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/node-http/content-type/form-data/index.ts"
+      ],
+      "percent": 4.28,
+      "reduction": 37.24
+    },
+    {
+      "id": "/home/runner/work/trpc/trpc/node_modules/.pnpm/@web3-storage+multipart-parser@1.0.0/node_modules/@web3-storage/multipart-parser/esm/src/search.js",
+      "size": 4453,
+      "origSize": 6918,
+      "renderedExports": [
+        "MATCH",
+        "ReadableStreamSearch",
+        "StreamSearch"
+      ],
+      "removedExports": [
+        "QueueableStreamSearch",
+        "allStrings",
+        "arrayIterator",
+        "chunksIterator",
+        "split",
+        "splitChunks",
+        "stringIterator"
+      ],
+      "dependents": [
+        "/home/runner/work/trpc/trpc/node_modules/.pnpm/@web3-storage+multipart-parser@1.0.0/node_modules/@web3-storage/multipart-parser/esm/src/index.js"
+      ],
+      "percent": 3.86,
+      "reduction": 35.63
+    },
+    {
+      "id": "/src/adapters/node-http/content-type/form-data/index.ts",
+      "size": 4353,
+      "origSize": 6697,
+      "renderedExports": [
+        "nodeHTTPFormDataContentTypeHandler",
+        "experimental_parseMultipartFormData",
+        "experimental_isMultipartFormDataRequest"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 3.78,
+      "reduction": 35
+    },
+    {
+      "id": "/src/adapters/node-http/nodeHTTPRequestHandler.ts",
+      "size": 3450,
+      "origSize": 4131,
+      "renderedExports": [
+        "nodeHTTPRequestHandler"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/node-http/index.ts"
+      ],
+      "percent": 2.99,
+      "reduction": 16.49
+    },
+    {
+      "id": "/src/adapters/fetch/fetchRequestHandler.ts",
+      "size": 3182,
+      "origSize": 3560,
+      "renderedExports": [
+        "fetchRequestHandler"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/fetch/index.ts"
+      ],
+      "percent": 2.76,
+      "reduction": 10.62
+    },
+    {
+      "id": "/src/adapters/aws-lambda/utils.ts",
+      "size": 2971,
+      "origSize": 4823,
+      "renderedExports": [
+        "isPayloadV1",
+        "isPayloadV2",
+        "getHTTPMethod",
+        "getPath",
+        "transformHeaders",
+        "UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/aws-lambda/index.ts"
+      ],
+      "percent": 2.58,
+      "reduction": 38.4
+    },
+    {
+      "id": "/src/core/initTRPC.ts",
+      "size": 2587,
+      "origSize": 5435,
+      "renderedExports": [
+        "initTRPC"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 2.24,
+      "reduction": 52.4
+    },
+    {
+      "id": "/src/adapters/fastify/fastifyRequestHandler.ts",
+      "size": 2544,
+      "origSize": 3660,
+      "renderedExports": [
+        "fastifyRequestHandler"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/fastify/fastifyTRPCPlugin.ts",
+        "/src/adapters/fastify/index.ts"
+      ],
+      "percent": 2.21,
+      "reduction": 30.49
+    },
+    {
+      "id": "/src/core/middleware.ts",
+      "size": 2410,
+      "origSize": 7542,
+      "renderedExports": [
+        "createMiddlewareFactory",
+        "experimental_standaloneMiddleware",
+        "createInputMiddleware",
+        "createOutputMiddleware"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/core/internals/procedureBuilder.ts",
+        "/src/deprecated/interop.ts",
+        "/src/core/initTRPC.ts"
+      ],
+      "percent": 2.09,
+      "reduction": 68.05
+    },
+    {
+      "id": "/src/adapters/aws-lambda/index.ts",
+      "size": 2144,
+      "origSize": 3317,
+      "renderedExports": [
+        "awsLambdaRequestHandler"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 1.86,
+      "reduction": 35.36
+    },
+    {
+      "id": "/src/observable/observable.ts",
+      "size": 1850,
+      "origSize": 1985,
+      "renderedExports": [
+        "isObservable",
+        "observable"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/observable/index.ts"
+      ],
+      "percent": 1.6,
+      "reduction": 6.8
+    },
+    {
+      "id": "/src/deprecated/interop.ts",
+      "size": 1741,
+      "origSize": 5968,
+      "renderedExports": [
+        "migrateRouter"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/router.ts"
+      ],
+      "percent": 1.51,
+      "reduction": 70.83
+    },
+    {
+      "id": "/src/observable/operators/share.ts",
+      "size": 1691,
+      "origSize": 1560,
+      "renderedExports": [
+        "share"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 1.47,
+      "reduction": 0
+    },
+    {
+      "id": "/src/http/contentType.ts",
+      "size": 1642,
+      "origSize": 2516,
+      "renderedExports": [
+        "getJsonContentTypeInputs"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/node-http/content-type/json/index.ts",
+        "/src/http/resolveHTTPResponse.ts"
+      ],
+      "percent": 1.42,
+      "reduction": 34.74
+    },
+    {
+      "id": "/src/rpc/parseTRPCMessage.ts",
+      "size": 1637,
+      "origSize": 2009,
+      "renderedExports": [
+        "parseTRPCMessage"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/rpc/index.ts"
+      ],
+      "percent": 1.42,
+      "reduction": 18.52
+    },
+    {
+      "id": "/src/core/internals/mergeRouters.ts",
+      "size": 1575,
+      "origSize": 2931,
+      "renderedExports": [
+        "mergeRouters"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/core/initTRPC.ts"
+      ],
+      "percent": 1.37,
+      "reduction": 46.26
+    },
+    {
+      "id": "/src/shared/createProxy/index.ts",
+      "size": 1507,
+      "origSize": 1596,
+      "renderedExports": [
+        "createRecursiveProxy",
+        "createFlatProxy"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/core/initTRPC.ts",
+        "/src/shared/index.ts",
+        "/src/core/router.ts"
+      ],
+      "percent": 1.31,
+      "reduction": 5.58
+    },
+    {
+      "id": "/src/adapters/node-http/content-type/form-data/streamSlice.ts",
+      "size": 1393,
+      "origSize": 1370,
+      "renderedExports": [
+        "streamSlice"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/node-http/content-type/form-data/fileUploadHandler.ts"
+      ],
+      "percent": 1.21,
+      "reduction": 0
+    },
+    {
+      "id": "/src/http/getHTTPStatusCode.ts",
+      "size": 1307,
+      "origSize": 1694,
+      "renderedExports": [
+        "TRPC_ERROR_CODES_BY_NUMBER",
+        "getHTTPStatusCode",
+        "getHTTPStatusCodeFromError"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/router.ts",
+        "/src/http/index.ts",
+        "/src/core/router.ts",
+        "/src/http/resolveHTTPResponse.ts",
+        "/src/shared/getErrorShape.ts"
+      ],
+      "percent": 1.13,
+      "reduction": 22.85
+    },
+    {
+      "id": "/src/adapters/next.ts",
+      "size": 1261,
+      "origSize": 1730,
+      "renderedExports": [
+        "createNextApiHandler"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 1.09,
+      "reduction": 27.11
+    },
+    {
+      "id": "/src/adapters/fastify/fastifyTRPCPlugin.ts",
+      "size": 1196,
+      "origSize": 1933,
+      "renderedExports": [
+        "fastifyTRPCPlugin"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/fastify/index.ts"
+      ],
+      "percent": 1.04,
+      "reduction": 38.13
+    },
+    {
+      "id": "/src/observable/internals/observableToPromise.ts",
+      "size": 1187,
+      "origSize": 1121,
+      "renderedExports": [
+        "ObservableAbortError",
+        "observableToPromise"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/observable/index.ts"
+      ],
+      "percent": 1.03,
+      "reduction": 0
+    },
+    {
+      "id": "/src/core/internals/getParseFn.ts",
+      "size": 1185,
+      "origSize": 1326,
+      "renderedExports": [
+        "getParseFn",
+        "getParseFnOrPassThrough"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/core/internals/procedureBuilder.ts",
+        "/src/deprecated/interop.ts"
+      ],
+      "percent": 1.03,
+      "reduction": 10.63
+    },
+    {
+      "id": "/src/adapters/node-http/content-type/json/getPostBody.ts",
+      "size": 1102,
+      "origSize": 1137,
+      "renderedExports": [
+        "getPostBody"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/node-http/content-type/json/index.ts"
+      ],
+      "percent": 0.96,
+      "reduction": 3.08
+    },
+    {
+      "id": "/src/error/TRPCError.ts",
+      "size": 1084,
+      "origSize": 1511,
+      "renderedExports": [
+        "getTRPCErrorFromUnknown",
+        "TRPCError"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/internals/procedure.ts",
+        "/src/core/middleware.ts",
+        "/src/core/internals/procedureBuilder.ts",
+        "/src/deprecated/router.ts",
+        "/src/index.ts",
+        "/src/subscription.ts",
+        "/src/adapters/aws-lambda/utils.ts",
+        "/src/adapters/node-http/content-type/json/getPostBody.ts",
+        "/src/adapters/next.ts",
+        "/src/adapters/ws.ts",
+        "/src/core/router.ts",
+        "/src/http/resolveHTTPResponse.ts",
+        "/src/http/contentType.ts"
+      ],
+      "percent": 0.94,
+      "reduction": 28.26
+    },
+    {
+      "id": "/src/rpc/codes.ts",
+      "size": 1014,
+      "origSize": 1334,
+      "renderedExports": [
+        "TRPC_ERROR_CODES_BY_KEY",
+        "TRPC_ERROR_CODES_BY_NUMBER"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/rpc/index.ts"
+      ],
+      "percent": 0.88,
+      "reduction": 23.99
+    },
+    {
+      "id": "/src/subscription.ts",
+      "size": 903,
+      "origSize": 1201,
+      "renderedExports": [
+        "subscriptionPullFactory"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0.78,
+      "reduction": 24.81
+    },
+    {
+      "id": "/src/adapters/standalone.ts",
+      "size": 897,
+      "origSize": 1618,
+      "renderedExports": [
+        "createHTTPHandler",
+        "createHTTPServer"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0.78,
+      "reduction": 44.56
+    },
+    {
+      "id": "/src/shared/transformTRPCResponse.ts",
+      "size": 758,
+      "origSize": 1077,
+      "renderedExports": [
+        "transformTRPCResponse"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/ws.ts",
+        "/src/shared/index.ts",
+        "/src/http/resolveHTTPResponse.ts"
+      ],
+      "percent": 0.66,
+      "reduction": 29.62
+    },
+    {
+      "id": "/src/adapters/node-http/content-type/form-data/uploadHandler.ts",
+      "size": 726,
+      "origSize": 2234,
+      "renderedExports": [
+        "composeUploadHandlers",
+        "MaxPartSizeExceededError",
+        "MaxBodySizeExceededError"
+      ],
+      "removedExports": [
+        "createMemoryUploadHandler"
+      ],
+      "dependents": [
+        "/src/adapters/node-http/content-type/form-data/fileUploadHandler.ts",
+        "/src/adapters/node-http/content-type/form-data/memoryUploadHandler.ts",
+        "/src/adapters/node-http/content-type/form-data/index.ts"
+      ],
+      "percent": 0.63,
+      "reduction": 67.5
+    },
+    {
+      "id": "/home/runner/work/trpc/trpc/node_modules/.pnpm/@web3-storage+multipart-parser@1.0.0/node_modules/@web3-storage/multipart-parser/esm/src/utils.js",
+      "size": 694,
+      "origSize": 722,
+      "renderedExports": [
+        "stringToArray",
+        "arrayToString",
+        "mergeArrays",
+        "arraysEqual"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/home/runner/work/trpc/trpc/node_modules/.pnpm/@web3-storage+multipart-parser@1.0.0/node_modules/@web3-storage/multipart-parser/esm/src/search.js",
+        "/home/runner/work/trpc/trpc/node_modules/.pnpm/@web3-storage+multipart-parser@1.0.0/node_modules/@web3-storage/multipart-parser/esm/src/index.js"
+      ],
+      "percent": 0.6,
+      "reduction": 3.88
+    },
+    {
+      "id": "/src/adapters/node-http/content-type/form-data/memoryUploadHandler.ts",
+      "size": 685,
+      "origSize": 2427,
+      "renderedExports": [
+        "createMemoryUploadHandler"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/node-http/content-type/form-data/index.ts"
+      ],
+      "percent": 0.59,
+      "reduction": 71.78
+    },
+    {
+      "id": "/src/http/batchStreamFormatter.ts",
+      "size": 667,
+      "origSize": 671,
+      "renderedExports": [
+        "getBatchStreamFormatter"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/http/index.ts"
+      ],
+      "percent": 0.58,
+      "reduction": 0.6
+    },
+    {
+      "id": "/src/shared/getCauseFromUnknown.ts",
+      "size": 662,
+      "origSize": 716,
+      "renderedExports": [
+        "getCauseFromUnknown"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/shared/index.ts",
+        "/src/error/TRPCError.ts"
+      ],
+      "percent": 0.57,
+      "reduction": 7.54
+    },
+    {
+      "id": "/src/observable/operators/tap.ts",
+      "size": 656,
+      "origSize": 659,
+      "renderedExports": [
+        "tap"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0.57,
+      "reduction": 0.46
+    },
+    {
+      "id": "/src/observable/operators/map.ts",
+      "size": 631,
+      "origSize": 692,
+      "renderedExports": [
+        "map"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0.55,
+      "reduction": 8.82
+    },
+    {
+      "id": "/src/shared/getErrorShape.ts",
+      "size": 613,
+      "origSize": 1078,
+      "renderedExports": [
+        "getErrorShape"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/next.ts",
+        "/src/adapters/ws.ts",
+        "/src/shared/index.ts",
+        "/src/http/resolveHTTPResponse.ts"
+      ],
+      "percent": 0.53,
+      "reduction": 43.14
+    },
+    {
+      "id": "/src/core/internals/mergeWithoutOverrides.ts",
+      "size": 471,
+      "origSize": 562,
+      "renderedExports": [
+        "mergeWithoutOverrides"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/core/internals/procedureBuilder.ts",
+        "/src/deprecated/interop.ts",
+        "/src/core/internals/mergeRouters.ts"
+      ],
+      "percent": 0.41,
+      "reduction": 16.19
+    },
+    {
+      "id": "/src/transformer.ts",
+      "size": 467,
+      "origSize": 2247,
+      "renderedExports": [
+        "getDataTransformer",
+        "defaultTransformer"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/router.ts",
+        "/src/core/internals/mergeRouters.ts",
+        "/src/core/initTRPC.ts",
+        "/src/index.ts",
+        "/src/core/router.ts"
+      ],
+      "percent": 0.41,
+      "reduction": 79.22
+    },
+    {
+      "id": "/src/adapters/express.ts",
+      "size": 339,
+      "origSize": 855,
+      "renderedExports": [
+        "createExpressMiddleware"
+      ],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0.29,
+      "reduction": 60.35
+    },
+    {
+      "id": "/src/observable/internals/pipe.ts",
+      "size": 339,
+      "origSize": 611,
+      "renderedExports": [
+        "pipeFromArray"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/observable/observable.ts"
+      ],
+      "percent": 0.29,
+      "reduction": 44.52
+    },
+    {
+      "id": "/src/adapters/node-http/content-type/json/index.ts",
+      "size": 280,
+      "origSize": 449,
+      "renderedExports": [
+        "nodeHTTPJSONContentTypeHandler"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/node-http/nodeHTTPRequestHandler.ts"
+      ],
+      "percent": 0.24,
+      "reduction": 37.64
+    },
+    {
+      "id": "/src/core/internals/config.ts",
+      "size": 271,
+      "origSize": 2325,
+      "renderedExports": [
+        "isServerDefault"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/core/initTRPC.ts"
+      ],
+      "percent": 0.24,
+      "reduction": 88.34
+    },
+    {
+      "id": "/src/internals/invert.ts",
+      "size": 190,
+      "origSize": 550,
+      "renderedExports": [
+        "invert"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/http/getHTTPStatusCode.ts",
+        "/src/rpc/codes.ts"
+      ],
+      "percent": 0.16,
+      "reduction": 65.45
+    },
+    {
+      "id": "/src/core/internals/omitPrototype.ts",
+      "size": 176,
+      "origSize": 237,
+      "renderedExports": [
+        "omitPrototype"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/core/router.ts"
+      ],
+      "percent": 0.15,
+      "reduction": 25.74
+    },
+    {
+      "id": "/src/http/toURL.ts",
+      "size": 158,
+      "origSize": 184,
+      "renderedExports": [
+        "toURL"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/standalone.ts",
+        "/src/adapters/fetch/fetchRequestHandler.ts"
+      ],
+      "percent": 0.14,
+      "reduction": 14.13
+    },
+    {
+      "id": "/src/error/utils.ts",
+      "size": 157,
+      "origSize": 478,
+      "renderedExports": [
+        "isObject"
+      ],
+      "removedExports": [
+        "getMessageFromUnknownError"
+      ],
+      "dependents": [
+        "/src/shared/getCauseFromUnknown.ts"
+      ],
+      "percent": 0.14,
+      "reduction": 67.15
+    },
+    {
+      "id": "/src/adapters/node-http/internals/contentType.ts",
+      "size": 100,
+      "origSize": 825,
+      "renderedExports": [
+        "createNodeHTTPContentTypeHandler"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/node-http/content-type/json/index.ts",
+        "/src/adapters/node-http/content-type/form-data/index.ts"
+      ],
+      "percent": 0.09,
+      "reduction": 87.88
+    },
+    {
+      "id": "/src/core/types.ts",
+      "size": 75,
+      "origSize": 2547,
+      "renderedExports": [
+        "procedureTypes"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/core/router.ts"
+      ],
+      "percent": 0.07,
+      "reduction": 97.06
+    },
+    {
+      "id": "/src/deprecated/internals/middlewares.ts",
+      "size": 69,
+      "origSize": 1427,
+      "renderedExports": [
+        "middlewareMarker"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/internals/procedure.ts"
+      ],
+      "percent": 0.06,
+      "reduction": 95.16
+    },
+    {
+      "id": "/src/core/internals/utils.ts",
+      "size": 65,
+      "origSize": 2280,
+      "renderedExports": [
+        "middlewareMarker"
+      ],
+      "removedExports": [
+        "unsetMarker"
+      ],
+      "dependents": [
+        "/src/core/internals/procedureBuilder.ts"
+      ],
+      "percent": 0.06,
+      "reduction": 97.15
+    },
+    {
+      "id": "/src/error/formatter.ts",
+      "size": 61,
+      "origSize": 1062,
+      "renderedExports": [
+        "defaultFormatter"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/router.ts",
+        "/src/core/internals/mergeRouters.ts",
+        "/src/core/initTRPC.ts",
+        "/src/core/router.ts"
+      ],
+      "percent": 0.05,
+      "reduction": 94.26
+    },
+    {
+      "id": "/src/observable/internals/identity.ts",
+      "size": 38,
+      "origSize": 65,
+      "renderedExports": [
+        "identity"
+      ],
+      "removedExports": [],
+      "dependents": [
+        "/src/observable/internals/pipe.ts"
+      ],
+      "percent": 0.03,
+      "reduction": 41.54
+    },
+    {
+      "id": "/src/index.ts",
+      "size": 0,
+      "origSize": 190,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/aws-lambda/index.ts"
+      ],
+      "percent": 0,
+      "reduction": 100
+    },
+    {
+      "id": "/src/adapters/fastify/index.ts",
+      "size": 0,
+      "origSize": 78,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0,
+      "reduction": 100
+    },
+    {
+      "id": "/src/adapters/node-http/index.ts",
+      "size": 0,
+      "origSize": 67,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/express.ts",
+        "/src/adapters/next.ts",
+        "/src/adapters/standalone.ts"
+      ],
+      "percent": 0,
+      "reduction": 100
+    },
+    {
+      "id": "/src/adapters/fetch/index.ts",
+      "size": 0,
+      "origSize": 64,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0,
+      "reduction": 100
+    },
+    {
+      "id": "/src/http/index.ts",
+      "size": 0,
+      "origSize": 141,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [
+        "/src/adapters/aws-lambda/index.ts",
+        "/src/adapters/fastify/fastifyRequestHandler.ts",
+        "/src/adapters/fetch/fetchRequestHandler.ts",
+        "/src/adapters/node-http/nodeHTTPRequestHandler.ts"
+      ],
+      "percent": 0,
+      "reduction": 100
+    },
+    {
+      "id": "/src/rpc/index.ts",
+      "size": 0,
+      "origSize": 90,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [
+        "/src/deprecated/router.ts",
+        "/src/adapters/ws.ts",
+        "/src/core/router.ts",
+        "/src/http/getHTTPStatusCode.ts",
+        "/src/shared/getErrorShape.ts"
+      ],
+      "percent": 0,
+      "reduction": 100
+    },
+    {
+      "id": "/src/observable/index.ts",
+      "size": 0,
+      "origSize": 155,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [
+        "/src/subscription.ts",
+        "/src/adapters/ws.ts"
+      ],
+      "percent": 0,
+      "reduction": 100
+    },
+    {
+      "id": "/src/shared/index.ts",
+      "size": 0,
+      "origSize": 345,
+      "renderedExports": [],
+      "removedExports": [],
+      "dependents": [],
+      "percent": 0,
+      "reduction": 100
+    }
+  ],
+  "moduleCount": 68
+}
