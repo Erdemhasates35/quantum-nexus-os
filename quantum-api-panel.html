@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANTUM NEXUS — API KONTROL MERKEZİ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+:root{
+  --q:#00FFD4;--p:#7B2FFF;--r:#FF3D6B;--g:#39FF14;--y:#FFD700;--o:#FF6B35;
+  --bg:#02020C;--bg2:#05050F;--glass:rgba(0,255,212,0.04);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:#E8E8FF;font-family:'Rajdhani',sans-serif;min-height:100vh;padding:16px;}
+canvas#bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.4;}
+.wrap{max-width:1000px;margin:0 auto;position:relative;z-index:1;}
+
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:14px 0 20px;border-bottom:1px solid rgba(0,255,212,0.1);margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--q);letter-spacing:0.25em;}
+.status-row{display:flex;align-items:center;gap:10px;font-family:'Share Tech Mono',monospace;font-size:11px;}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--g);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(57,255,20,0.5)}50%{box-shadow:0 0 0 8px rgba(57,255,20,0)}}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:18px;flex-wrap:wrap;}
+.tab{font-family:'Share Tech Mono',monospace;font-size:10px;padding:8px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:6px;color:rgba(255,255,255,0.35);cursor:pointer;transition:all 0.3s;letter-spacing:0.1em;}
+.tab:hover{color:var(--q);border-color:rgba(0,255,212,0.25);}
+.tab.active{color:var(--q);border-color:rgba(0,255,212,0.4);background:rgba(0,255,212,0.07);}
+.panel{display:none;}.panel.active{display:block;}
+
+/* BOXES */
+.box{background:var(--glass);border:1px solid rgba(0,255,212,0.1);border-radius:14px;padding:18px;margin-bottom:14px;}
+.box-p{background:rgba(123,47,255,0.04);border-color:rgba(123,47,255,0.12);}
+.box-g{background:rgba(57,255,20,0.03);border-color:rgba(57,255,20,0.1);}
+.box-r{background:rgba(255,61,107,0.03);border-color:rgba(255,61,107,0.1);}
+.box-y{background:rgba(255,215,0,0.03);border-color:rgba(255,215,0,0.1);}
+.bt{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:0.18em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* API KEY CARDS */
+.api-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:14px;}
+.api-card{background:#030310;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px;transition:border-color 0.3s;}
+.api-card:hover{border-color:rgba(0,255,212,0.2);}
+.api-name{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:0.18em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.api-badge{font-size:8px;padding:2px 7px;border-radius:3px;}
+.badge-ok{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.2);}
+.badge-no{background:rgba(255,61,107,0.08);color:var(--r);border:1px solid rgba(255,61,107,0.15);}
+.badge-test{background:rgba(255,215,0,0.08);color:var(--y);border:1px solid rgba(255,215,0,0.15);}
+.key-row{display:flex;gap:6px;align-items:center;margin-bottom:8px;}
+.key-inp{flex:1;padding:9px 11px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:7px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;transition:border-color 0.3s;}
+.key-inp:focus{border-color:rgba(0,255,212,0.4);}
+.key-inp::placeholder{color:rgba(255,255,255,0.12);}
+.key-dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.1);flex-shrink:0;transition:background 0.3s;}
+.key-dot.ok{background:var(--g);box-shadow:0 0 6px rgba(57,255,20,0.4);}
+.key-dot.err{background:var(--r);}
+.btn-row{display:flex;gap:6px;}
+.btn-save{padding:8px 13px;background:linear-gradient(135deg,var(--q),#00C8A0);border:none;border-radius:6px;color:#02020C;font-family:'Share Tech Mono',monospace;font-size:10px;font-weight:700;cursor:pointer;transition:all 0.3s;}
+.btn-save:hover{box-shadow:0 0 14px rgba(0,255,212,0.35);}
+.btn-test{padding:8px 11px;background:rgba(123,47,255,0.12);border:1px solid rgba(123,47,255,0.25);border-radius:6px;color:var(--p);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.3s;}
+.btn-test:hover{background:rgba(123,47,255,0.22);}
+.btn-del{padding:8px 10px;background:rgba(255,61,107,0.08);border:1px solid rgba(255,61,107,0.18);border-radius:6px;color:var(--r);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;}
+.test-result{font-family:'Share Tech Mono',monospace;font-size:10px;padding:6px 9px;border-radius:5px;margin-top:7px;display:none;}
+.tr-ok{background:rgba(57,255,20,0.08);color:var(--g);border:1px solid rgba(57,255,20,0.15);}
+.tr-err{background:rgba(255,61,107,0.08);color:var(--r);border:1px solid rgba(255,61,107,0.15);}
+.tr-load{background:rgba(255,215,0,0.08);color:var(--y);border:1px solid rgba(255,215,0,0.15);}
+
+/* MODEL SEÇİM */
+.model-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:14px;}
+.model-btn{padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:9px;color:rgba(255,255,255,0.4);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.3s;text-align:left;}
+.model-btn:hover{border-color:rgba(0,255,212,0.25);color:rgba(255,255,255,0.7);}
+.model-btn.sel{border-color:rgba(0,255,212,0.45);color:var(--q);background:rgba(0,255,212,0.07);}
+.model-btn .mn{font-weight:700;font-size:11px;margin-bottom:3px;}
+.model-btn .mp{font-size:9px;opacity:0.5;}
+
+/* AI CHAT */
+.msgs{background:#020210;border-radius:10px;padding:13px;min-height:120px;max-height:300px;overflow-y:auto;margin-bottom:12px;scroll-behavior:smooth;}
+.msg{margin-bottom:12px;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.msg-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,255,255,0.18);margin-bottom:4px;letter-spacing:0.1em;}
+.msg.ai .bbl{background:rgba(0,255,212,0.04);border:1px solid rgba(0,255,212,0.1);border-radius:10px 10px 10px 3px;padding:10px 13px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.8;}
+.msg.usr .bbl{background:rgba(123,47,255,0.09);border:1px solid rgba(123,47,255,0.18);border-radius:10px 10px 3px 10px;padding:10px 13px;font-size:14px;color:rgba(255,255,255,0.7);margin-left:20px;}
+.inp-row{display:flex;gap:8px;}
+.chat-inp{flex:1;padding:11px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(123,47,255,0.18);border-radius:9px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:13px;outline:none;transition:border-color 0.3s;}
+.chat-inp:focus{border-color:rgba(123,47,255,0.4);}
+.chat-inp::placeholder{color:rgba(255,255,255,0.16);}
+.send-btn{padding:11px 18px;background:linear-gradient(135deg,var(--p),#5B41DF);border:none;border-radius:9px;color:white;font-family:'Share Tech Mono',monospace;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.3s;}
+.send-btn:hover{box-shadow:0 0 20px rgba(123,47,255,0.4);}
+.send-btn:disabled{opacity:0.35;cursor:not-allowed;}
+
+/* QUICK CMDS */
+.qcmds{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px;margin-bottom:12px;}
+.qc{padding:9px 10px;background:rgba(255,255,255,0.02);border:1px solid rgba(123,47,255,0.12);border-radius:7px;color:rgba(255,255,255,0.35);font-family:'Share Tech Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.3s;text-align:left;}
+.qc:hover{background:rgba(123,47,255,0.08);color:var(--p);border-color:rgba(123,47,255,0.3);}
+
+/* PROVIDER TABS */
+.prov-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.ptab{font-family:'Share Tech Mono',monospace;font-size:10px;padding:7px 13px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:6px;color:rgba(255,255,255,0.3);cursor:pointer;transition:all 0.3s;}
+.ptab.active{background:rgba(0,255,212,0.07);border-color:rgba(0,255,212,0.3);color:var(--q);}
+.pchat{display:none;}.pchat.active{display:block;}
+
+/* AGENT PANEL */
+.ag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px;}
+.ag{background:#030310;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:14px;transition:all 0.4s;}
+.ag:hover{border-color:rgba(123,47,255,0.3);}
+.ag-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.ag-name{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;}
+.ag-st{font-family:'Share Tech Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;}
+.st-run{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.18);}
+.st-idle{background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.07);}
+.ag-task{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.28);min-height:20px;line-height:1.6;margin-bottom:8px;}
+.ag-bar{height:2px;background:rgba(255,255,255,0.05);border-radius:1px;overflow:hidden;}
+.ag-fill{height:100%;border-radius:1px;width:0;transition:width 1.5s;}
+.ag-btns{display:flex;gap:5px;margin-top:8px;}
+.ab{flex:1;padding:6px;border:none;border-radius:5px;font-family:'Share Tech Mono',monospace;font-size:9px;cursor:pointer;}
+.ab-start{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.18);}
+.ab-stop{background:rgba(255,61,107,0.08);color:var(--r);border:1px solid rgba(255,61,107,0.15);}
+
+/* EVO LOG */
+.evo-log{background:#020210;border-radius:9px;padding:12px;height:160px;overflow-y:auto;font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1.9;margin-bottom:12px;}
+.el-ok{color:var(--g);}.el-info{color:var(--q);}.el-w{color:var(--y);}.el-evo{color:#A855F7;}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px;}
+.kpi{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:11px;padding:13px;}
+.kv{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;margin-bottom:3px;}
+.kl{font-family:'Share Tech Mono',monospace;font-size:8px;color:rgba(255,255,255,0.22);letter-spacing:0.12em;}
+
+/* TOAST */
+.toast{position:fixed;top:14px;right:14px;z-index:999;border-radius:9px;padding:10px 16px;font-family:'Share Tech Mono',monospace;font-size:11px;transform:translateX(130%);transition:transform 0.35s;pointer-events:none;max-width:260px;}
+.toast.show{transform:translateX(0);}
+
+/* TERMINAL */
+.terminal{background:#020210;border:1px solid rgba(57,255,20,0.1);border-radius:12px;padding:14px;min-height:120px;max-height:240px;overflow-y:auto;font-family:'Share Tech Mono',monospace;font-size:11px;line-height:1.9;margin-bottom:14px;}
+.tl-ok{color:var(--g);}.tl-e{color:var(--r);}.tl-i{color:var(--q);}.tl-w{color:var(--y);}
+
+footer{text-align:center;padding:16px 0;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.1);border-top:1px solid rgba(255,255,255,0.04);margin-top:8px;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="toast" id="toast"></div>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo">⬡ QUANTUM NEXUS — API MERKEZİ</div>
+  <div class="status-row">
+    <div class="pulse"></div>
+    <span id="sys-status" style="color:var(--y)">BAŞLATIYOR...</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('api',this)">🔑 API ANAHTARLAR</button>
+  <button class="tab" onclick="switchTab('chat',this)">🧠 AI SOHBET</button>
+  <button class="tab" onclick="switchTab('agents',this)">⚡ AJANLAR</button>
+  <button class="tab" onclick="switchTab('evo',this)">⟳ SELF-EVOLUTİON</button>
+</div>
+
+<!-- ═══ API ANAHTARLAR ═══ -->
+<div id="tab-api" class="panel active">
+  <div class="box">
+    <div class="bt" style="color:var(--q)">🔑 API ANAHTAR YÖNETİCİSİ</div>
+    <div class="api-grid">
+
+      <!-- ANTHROPIC -->
+      <div class="api-card" id="card-anthropic">
+        <div class="api-name">
+          ANTHROPIC / CLAUDE
+          <span class="api-badge badge-no" id="badge-anthropic">KAYITSIZ</span>
+        </div>
+        <div class="key-row">
+          <input class="key-inp" id="inp-anthropic" type="password" placeholder="sk-ant-api03-..."/>
+          <div class="key-dot" id="dot-anthropic"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-save" onclick="saveKey('anthropic')">KAYDET</button>
+          <button class="btn-test" onclick="testKey('anthropic')">TEST ET</button>
+          <button class="btn-del" onclick="delKey('anthropic')">SİL</button>
+        </div>
+        <div class="test-result" id="tr-anthropic"></div>
+      </div>
+
+      <!-- OPENAI -->
+      <div class="api-card" id="card-openai">
+        <div class="api-name">
+          OPENAI / GPT
+          <span class="api-badge badge-no" id="badge-openai">KAYITSIZ</span>
+        </div>
+        <div class="key-row">
+          <input class="key-inp" id="inp-openai" type="password" placeholder="sk-proj-..."/>
+          <div class="key-dot" id="dot-openai"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-save" onclick="saveKey('openai')">KAYDET</button>
+          <button class="btn-test" onclick="testKey('openai')">TEST ET</button>
+          <button class="btn-del" onclick="delKey('openai')">SİL</button>
+        </div>
+        <div class="test-result" id="tr-openai"></div>
+      </div>
+
+      <!-- GROQ -->
+      <div class="api-card" id="card-groq">
+        <div class="api-name">
+          GROQ / LLAMA (ÜCRETSİZ)
+          <span class="api-badge badge-no" id="badge-groq">KAYITSIZ</span>
+        </div>
+        <div class="key-row">
+          <input class="key-inp" id="inp-groq" type="password" placeholder="gsk_..."/>
+          <div class="key-dot" id="dot-groq"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-save" onclick="saveKey('groq')">KAYDET</button>
+          <button class="btn-test" onclick="testKey('groq')">TEST ET</button>
+          <button class="btn-del" onclick="delKey('groq')">SİL</button>
+        </div>
+        <div class="test-result" id="tr-groq"></div>
+      </div>
+
+      <!-- GITHUB -->
+      <div class="api-card" id="card-github">
+        <div class="api-name">
+          GITHUB TOKEN
+          <span class="api-badge badge-no" id="badge-github">KAYITSIZ</span>
+        </div>
+        <div class="key-row">
+          <input class="key-inp" id="inp-github" type="password" placeholder="ghp_..."/>
+          <div class="key-dot" id="dot-github"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-save" onclick="saveKey('github')">KAYDET</button>
+          <button class="btn-test" onclick="testKey('github')">TEST ET</button>
+          <button class="btn-del" onclick="delKey('github')">SİL</button>
+        </div>
+        <div class="test-result" id="tr-github"></div>
+      </div>
+
+    </div>
+
+    <!-- Termux Komutları -->
+    <div class="box box-y" style="margin-bottom:0">
+      <div class="bt" style="color:var(--y);font-size:10px">📋 TERMUX — API KEY EXPORT KOMUTLARI</div>
+      <div class="terminal" id="cmd-terminal">
+        <span class="tl-i"># API keylerini Termux'ta ortam değişkeni olarak ayarla:</span><br>
+        <span class="tl-w" id="cmd-anthropic-line">export ANTHROPIC_API_KEY='sk-ant-...' # kayıtlı değil</span><br>
+        <span class="tl-w" id="cmd-openai-line">export OPENAI_API_KEY='sk-...' # kayıtlı değil</span><br>
+        <span class="tl-w" id="cmd-groq-line">export GROQ_API_KEY='gsk_...' # kayıtlı değil</span><br>
+        <span class="tl-w" id="cmd-github-line">export GITHUB_TOKEN='ghp_...' # kayıtlı değil</span><br>
+        <br>
+        <span class="tl-i"># Kalıcı hale getirmek için ~/.bashrc'ye ekle:</span><br>
+        <span class="tl-ok">echo "export ANTHROPIC_API_KEY='...'" >> ~/.bashrc && source ~/.bashrc</span>
+      </div>
+      <button onclick="copyAllCmds()" style="padding:9px 16px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.25);border-radius:7px;color:var(--y);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;">📋 TÜM KOMUTLARI KOPYALA</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AI SOHBET ═══ -->
+<div id="tab-chat" class="panel">
+
+  <!-- Provider Seçim -->
+  <div class="box">
+    <div class="bt" style="color:var(--q)">🔄 AKTİF PROVIDER</div>
+    <div class="prov-tabs">
+      <button class="ptab active" id="ptab-anthropic" onclick="switchProvider('anthropic')">🟦 CLAUDE</button>
+      <button class="ptab" id="ptab-openai" onclick="switchProvider('openai')">🟩 GPT</button>
+      <button class="ptab" id="ptab-groq" onclick="switchProvider('groq')">🟨 GROQ (ÜCRETSİZ)</button>
+    </div>
+
+    <!-- Model Seçim -->
+    <div class="bt" style="color:rgba(255,255,255,0.4);font-size:9px;margin-bottom:10px">MODEL SEÇ</div>
+    <div class="model-grid" id="model-grid"></div>
+
+    <div id="active-model-display" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--q);margin-bottom:14px;padding:8px 12px;background:rgba(0,255,212,0.05);border-radius:7px;border:1px solid rgba(0,255,212,0.1)">
+      AKTİF MODEL: Seçilmedi
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="box box-p">
+    <div class="bt" style="color:var(--p)">🧠 AI SOHBET — QUANTUM NEXUS</div>
+    <div class="qcmds">
+      <button class="qc" onclick="qcmd('Sistem durumunu özetle')">📊 Sistem Özeti</button>
+      <button class="qc" onclick="qcmd('Gelir artırmak için 3 somut adım')">💰 Gelir Artır</button>
+      <button class="qc" onclick="qcmd('Self-evolution sonraki hedef')">⟳ Evrim Hedefi</button>
+      <button class="qc" onclick="qcmd('Quantum Nexus için yeni özellik öner')">🚀 Yeni Özellik</button>
+      <button class="qc" onclick="qcmd('Wi-Fi CSI modülünü nasıl geliştiririm?')">📡 CSI Geliştir</button>
+      <button class="qc" onclick="qcmd('Arel için yazılım öğrenme modülü tasarla')">⭐ Arel Modülü</button>
+    </div>
+    <div class="msgs" id="chat-msgs">
+      <div class="msg ai"><div class="msg-lbl">QUANTUM NEXUS AI</div><div class="bbl">Merhaba! API keyini ekleyip bir model seç — sonra konuşmaya başlayalım.</div></div>
+    </div>
+    <div class="inp-row">
+      <input class="chat-inp" id="chat-inp" placeholder="Mesajını yaz..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){sendChat();event.preventDefault();}"/>
+      <button class="send-btn" id="chat-btn" onclick="sendChat()">GÖNDER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AJANLAR ═══ -->
+<div id="tab-agents" class="panel">
+  <div class="kpi-row">
+    <div class="kpi"><div class="kv" style="color:var(--q)" id="k-active">0</div><div class="kl">AKTİF AJAN</div></div>
+    <div class="kpi"><div class="kv" style="color:var(--p)" id="k-tasks">0</div><div class="kl">TAMAMLANAN GÖREV</div></div>
+    <div class="kpi"><div class="kv" style="color:var(--g)" id="k-health">%94</div><div class="kl">SİSTEM SAĞLIĞI</div></div>
+    <div class="kpi"><div class="kv" style="color:var(--y)" id="k-iter">0</div><div class="kl">EVRİM İTERASYONU</div></div>
+  </div>
+
+  <div class="box">
+    <div class="bt" style="color:var(--p)">⚡ 8 AJAN GRUBU</div>
+    <div class="ag-grid" id="ag-grid"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="startAllAgents()" style="padding:10px 18px;background:linear-gradient(135deg,var(--g),#22C55E);border:none;border-radius:8px;color:#020210;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;">▶ TÜM AJANLARI BAŞLAT</button>
+      <button onclick="stopAllAgents()" style="padding:10px 18px;background:rgba(255,61,107,0.1);border:1px solid rgba(255,61,107,0.2);border-radius:8px;color:var(--r);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;">■ DURDUR</button>
+      <button onclick="aiAgentAnalysis()" style="padding:10px 18px;background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);border-radius:8px;color:var(--p);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;">🧠 AI ANALİZ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SELF-EVOLUTION ═══ -->
+<div id="tab-evo" class="panel">
+  <div class="box">
+    <div class="bt" style="color:#A855F7">⟳ SELF-EVOLUTION ENGINE</div>
+    <div class="evo-log" id="evo-log">
+      <span class="el-info">[SİSTEM] Self-Evolution Engine hazır. "BAŞLAT" butonuna bas.</span><br>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button onclick="startEvo()" id="evo-start" style="padding:10px 18px;background:linear-gradient(135deg,#A855F7,#7B2FFF);border:none;border-radius:8px;color:white;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;">⟳ EVRİMİ BAŞLAT</button>
+      <button onclick="stopEvo()" style="padding:10px 18px;background:rgba(255,61,107,0.1);border:1px solid rgba(255,61,107,0.2);border-radius:8px;color:var(--r);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;">■ DURDUR</button>
+    </div>
+
+    <!-- Termux self_evolution.py komutu -->
+    <div class="box box-y" style="margin-bottom:0">
+      <div class="bt" style="color:var(--y);font-size:10px">📋 TERMUX — SELF EVOLUTION KOMUTLARI</div>
+      <div class="terminal">
+        <span class="tl-i"># Self-evolution motorunu çalıştır:</span><br>
+        <span class="tl-ok">cd ~/quantum-nexus-os && python self_evolution.py</span><br><br>
+        <span class="tl-i"># Swarm durumunu gör:</span><br>
+        <span class="tl-ok">python self_evolution.py --swarm</span><br><br>
+        <span class="tl-i"># Tek dosya evolve et:</span><br>
+        <span class="tl-ok">python self_evolution.py --single agent_core.py</span><br><br>
+        <span class="tl-i"># Groq (ücretsiz) ile çalıştır:</span><br>
+        <span class="tl-ok">export GROQ_API_KEY='gsk_...' && python self_evolution.py</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+<footer>QUANTUM NEXUS OS — API KONTROL MERKEZİ — ERDEM HASATEŞ</footer>
+
+<script>
+// ── CANVAS BG ──
+const cv=document.getElementById('bg'),cx=cv.getContext('2d');
+function resizeCv(){cv.width=innerWidth;cv.height=innerHeight;}
+resizeCv();window.addEventListener('resize',resizeCv);
+const pts=Array.from({length:60},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3}));
+function drawBg(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1;cx.beginPath();cx.arc(p.x,p.y,1.2,0,Math.PI*2);cx.fillStyle='rgba(0,255,212,0.4)';cx.fill();});
+  pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<120){cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.strokeStyle=`rgba(0,255,212,${0.08*(1-d/120)})`;cx.stroke();}}));
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+// ── KEY STORAGE ──
+const KS='nxk_';
+function saveKey(id){
+  const v=document.getElementById('inp-'+id).value.trim();
+  if(!v||v.includes('•')){toast('Key boş olamaz!','w');return;}
+  localStorage.setItem(KS+id,btoa(v));
+  setDot(id,'ok');setBadge(id,'ok');
+  toast('✓ '+id.toUpperCase()+' kaydedildi');
+  updateCmdLine(id,v);
+  updateSysStatus();
+}
+function getKey(id){const s=localStorage.getItem(KS+id);return s?atob(s):null;}
+function delKey(id){
+  localStorage.removeItem(KS+id);
+  document.getElementById('inp-'+id).value='';
+  setDot(id,'');setBadge(id,'no');
+  toast(id.toUpperCase()+' silindi','w');
+  updateSysStatus();
+}
+function setDot(id,state){const d=document.getElementById('dot-'+id);if(!d)return;d.className='key-dot'+(state==='ok'?' ok':state==='err'?' err':'');}
+function setBadge(id,state){
+  const b=document.getElementById('badge-'+id);if(!b)return;
+  const map={ok:['badge-ok','AKTİF ✓'],no:['badge-no','KAYITSIZ'],test:['badge-test','TEST...']};
+  const[cls,txt]=map[state]||map.no;
+  b.className='api-badge '+cls;b.textContent=txt;
+}
+
+// ── GERÇEK API TEST ──
+async function testKey(id){
+  const key=getKey(id);
+  if(!key){toast('Önce key kaydet!','w');return;}
+  showTR(id,'load','⟳ Test ediliyor...');
+  setBadge(id,'test');
+  try{
+    let ok=false,msg='';
+    if(id==='anthropic'){
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Hi'}]})});
+      const d=await r.json();ok=!!d.content;msg=ok?'Claude bağlantısı başarılı ✓':(d.error?.message||'Hata');
+    } else if(id==='openai'){
+      const r=await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':'Bearer '+key}});
+      ok=r.ok;msg=ok?'OpenAI bağlantısı başarılı ✓':'Geçersiz key';
+    } else if(id==='groq'){
+      const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
+      ok=r.ok;msg=ok?'Groq bağlantısı başarılı ✓':'Geçersiz key';
+    } else if(id==='github'){
+      const r=await fetch('https://api.github.com/user',{headers:{'Authorization':'Bearer '+key}});
+      const d=await r.json();ok=!!d.login;msg=ok?('GitHub: '+d.login+' ✓'):'Geçersiz token';
+    }
+    showTR(id,ok?'ok':'err',msg);
+    setBadge(id,ok?'ok':'no');
+    setDot(id,ok?'ok':'err');
+    if(ok)toast('✓ '+id.toUpperCase()+' doğrulandı');
+    else toast('✗ '+id.toUpperCase()+' hatalı','e');
+  }catch(e){showTR(id,'err','Bağlantı hatası: '+e.message);setBadge(id,'no');}
+}
+function showTR(id,type,msg){
+  const el=document.getElementById('tr-'+id);if(!el)return;
+  el.className='test-result tr-'+type;el.textContent=msg;el.style.display='block';
+}
+
+// ── CMD LINES ──
+function updateCmdLine(id,val){
+  const el=document.getElementById('cmd-'+id+'-line');if(!el)return;
+  el.className='tl-ok';
+  el.textContent=`export ${id.toUpperCase().replace('ANTHROPIC','ANTHROPIC_API_KEY').replace('OPENAI','OPENAI_API_KEY').replace('GROQ','GROQ_API_KEY').replace('GITHUB','GITHUB_TOKEN')}='${val.substring(0,8)}...' # ✓ kayıtlı`;
+}
+function copyAllCmds(){
+  const keys=['anthropic','openai','groq','github'];
+  const envMap={anthropic:'ANTHROPIC_API_KEY',openai:'OPENAI_API_KEY',groq:'GROQ_API_KEY',github:'GITHUB_TOKEN'};
+  const lines=keys.map(k=>{const v=getKey(k);return v?`export ${envMap[k]}='${v}'`:`# ${envMap[k]} kayıtlı değil`;});
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('✓ Komutlar kopyalandı!'));
+}
+
+// ── SYS STATUS ──
+function updateSysStatus(){
+  const has=getKey('anthropic')||getKey('openai')||getKey('groq');
+  const el=document.getElementById('sys-status');
+  if(el){el.textContent=has?'AKTİF ✓':'KEY GEREKİYOR';el.style.color=has?'var(--g)':'var(--y)';}
+}
+
+// ── PROVIDER & MODEL ──
+const MODELS={
+  anthropic:[
+    {id:'claude-sonnet-4-5-20250929',name:'Claude Sonnet 4.5',note:'En hızlı'},
+    {id:'claude-haiku-4-5-20251001',name:'Claude Haiku 4.5',note:'Ekonomik'},
+    {id:'claude-opus-4-6',name:'Claude Opus 4.6',note:'En güçlü'},
+  ],
+  openai:[
+    {id:'gpt-4o-mini',name:'GPT-4o Mini',note:'Hızlı & ucuz'},
+    {id:'gpt-4o',name:'GPT-4o',note:'Güçlü'},
+    {id:'o1-mini',name:'o1 Mini',note:'Akıl yürütme'},
+  ],
+  groq:[
+    {id:'llama-3.3-70b-versatile',name:'LLaMA 3.3 70B',note:'ÜCRETSİZ'},
+    {id:'mixtral-8x7b-32768',name:'Mixtral 8x7B',note:'ÜCRETSİZ'},
+    {id:'gemma2-9b-it',name:'Gemma2 9B',note:'ÜCRETSİZ'},
+  ]
+};
+let activeProvider='anthropic', activeModel='claude-sonnet-4-5-20250929';
+
+function switchProvider(p){
+  activeProvider=p;
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ptab-'+p).classList.add('active');
+  renderModels();
+}
+function renderModels(){
+  const grid=document.getElementById('model-grid');if(!grid)return;
+  grid.innerHTML=MODELS[activeProvider].map(m=>`
+    <div class="model-btn ${m.id===activeModel?'sel':''}" onclick="selectModel('${m.id}','${m.name}')">
+      <div class="mn">${m.name}</div>
+      <div class="mp">${m.note}</div>
+    </div>`).join('');
+}
+function selectModel(id,name){
+  activeModel=id;renderModels();
+  document.getElementById('active-model-display').textContent='AKTİF MODEL: '+name+' ('+id+')';
+  toast('Model: '+name);
+}
+
+// ── CHAT ──
+const SYS='Sen Quantum Nexus OS\'un AI asistanısın. Platform: otonom ajanlar, self-evolution, Wi-Fi CSI radar, API yönetimi. Türkçe, kısa ve yardımcı ol.';
+async function sendChat(){
+  const inp=document.getElementById('chat-inp');
+  const msg=inp.value.trim();if(!msg)return;
+  inp.value='';
+  const btn=document.getElementById('chat-btn');btn.disabled=true;btn.textContent='...';
+  const msgs=document.getElementById('chat-msgs');
+  msgs.innerHTML+=`<div class="msg usr"><div class="msg-lbl">SİZ</div><div class="bbl">${msg}</div></div>`;
+  msgs.scrollTop=9999;
+  const key=getKey(activeProvider);
+  if(!key){
+    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">SİSTEM</div><div class="bbl">API key gerekli → "API ANAHTARLAR" sekmesinden ekle.</div></div>`;
+    btn.disabled=false;btn.textContent='GÖNDER';return;
+  }
+  try{
+    let reply='';
+    if(activeProvider==='anthropic'){
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:activeModel,max_tokens:600,system:SYS,messages:[{role:'user',content:msg}]})});
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      reply=d.content?.[0]?.text||'—';
+    } else if(activeProvider==='openai'){
+      const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:activeModel,max_tokens:600,messages:[{role:'system',content:SYS},{role:'user',content:msg}]})});
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      reply=d.choices?.[0]?.message?.content||'—';
+    } else if(activeProvider==='groq'){
+      const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:activeModel,max_tokens:600,messages:[{role:'system',content:SYS},{role:'user',content:msg}]})});
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      reply=d.choices?.[0]?.message?.content||'—';
+    }
+    const label=activeModel.split('-').slice(0,2).join(' ').toUpperCase();
+    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">${label}</div><div class="bbl">${reply.replace(/\n/g,'<br>')}</div></div>`;
+  }catch(e){
+    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">HATA</div><div class="bbl">${e.message}</div></div>`;
+  }
+  msgs.scrollTop=9999;btn.disabled=false;btn.textContent='GÖNDER';
+}
+function qcmd(cmd){document.getElementById('chat-inp').value=cmd;sendChat();}
+
+// ── AJANLAR ──
+const AGENTS=[
+  {id:'arge',icon:'🔬',name:'AR-GE',color:'var(--q)',tasks:['DeepSeek analizi...','Yeni model değerlendirme','Benchmark geliştirme']},
+  {id:'kod',icon:'💻',name:'KODLAMA',color:'var(--p)',tasks:['Admin panel fix','API entegrasyon','Micro-SaaS şablonu']},
+  {id:'paz',icon:'📢',name:'PAZARLAMA',color:'var(--y)',tasks:['Product Hunt hazırlık','Twitter thread','SEO optimizasyon']},
+  {id:'guv',icon:'🛡',name:'GÜVENLİK',color:'var(--r)',tasks:['CVE-2025 tarama','OWASP güncelleme','Rate limit optimize']},
+  {id:'fin',icon:'💰',name:'FİNANS',color:'var(--g)',tasks:['Gelir analizi','API maliyet optimize','Abonelik modeli']},
+  {id:'veri',icon:'📊',name:'VERİ',color:'var(--o)',tasks:['KPI 18 metrik','Bounce %45→%27','A/B test: +%12']},
+  {id:'str',icon:'♟',name:'STRATEJİ',color:'var(--q)',tasks:['Q2 yol haritası','Öncelik: API→UX','Rakip analizi']},
+  {id:'evo',icon:'⟳',name:'EVRİM',color:'#A855F7',tasks:['Kodlama +14%','3 ajan optimize','Sağlık: %94']},
+];
+const agTimers={};let agActive=0,agTasks=0;
+
+function buildAgents(){
+  const g=document.getElementById('ag-grid');if(!g)return;
+  g.innerHTML=AGENTS.map(a=>`
+    <div class="ag" id="ag-${a.id}">
+      <div class="ag-top">
+        <div class="ag-name" style="color:${a.color}">${a.icon} ${a.name}</div>
+        <span class="ag-st st-idle" id="ast-${a.id}">HAZIR</span>
+      </div>
+      <div class="ag-task" id="atask-${a.id}">Bekliyor...</div>
+      <div class="ag-bar"><div class="ag-fill" id="afill-${a.id}" style="background:${a.color}"></div></div>
+      <div class="ag-btns">
+        <button class="ab ab-start" onclick="startAgent('${a.id}')">▶ BAŞLAT</button>
+        <button class="ab ab-stop" onclick="stopAgent('${a.id}')">■ DUR</button>
+      </div>
+    </div>`).join('');
+}
+function startAgent(id){
+  if(agTimers[id])return;
+  const a=AGENTS.find(x=>x.id===id);if(!a)return;
+  agActive++;document.getElementById('k-active').textContent=agActive;
+  document.getElementById('ast-'+id).className='ag-st st-run';
+  document.getElementById('ast-'+id).textContent='AKTİF';
+  document.getElementById('afill-'+id).style.width='100%';
+  let i=0;agTimers[id]=setInterval(()=>{
+    document.getElementById('atask-'+id).textContent=a.tasks[i%a.tasks.length];
+    agTasks++;document.getElementById('k-tasks').textContent=agTasks;i++;
+  },1800+Math.random()*1200);
+}
+function stopAgent(id){
+  if(agTimers[id]){clearInterval(agTimers[id]);delete agTimers[id];}
+  agActive=Math.max(0,agActive-1);document.getElementById('k-active').textContent=agActive;
+  document.getElementById('ast-'+id).className='ag-st st-idle';
+  document.getElementById('ast-'+id).textContent='HAZIR';
+  document.getElementById('afill-'+id).style.width='0';
+}
+function startAllAgents(){AGENTS.forEach(a=>startAgent(a.id));}
+function stopAllAgents(){AGENTS.forEach(a=>stopAgent(a.id));}
+async function aiAgentAnalysis(){
+  const key=getKey(activeProvider);if(!key){toast('API key gerekli!','w');return;}
+  toast('🧠 AI ajan analizi yapılıyor...');
+  qcmd('8 otonom ajanın şu anki durumunu ve öncelikli görevlerini özetle');
+  switchTab('chat',document.querySelectorAll('.tab')[1]);
+}
+
+// ── EVO ──
+const EVO_LINES=[
+  ['el-info','⟳ Self-Evolution başlatıldı'],
+  ['el-evo','Ψ analizi: sistem taranıyor...'],
+  ['el-ok','✓ AR-GE: 3 optimizasyon fırsatı tespit edildi'],
+  ['el-info','LLM → agent_core.py analiz ediliyor...'],
+  ['el-ok','✓ agent_core.py: %12 performans artışı'],
+  ['el-ok','✓ swarm_manager.py: gecikme %8 azaldı'],
+  ['el-w','⚠ revenue_engine.py: NO_CHANGE'],
+  ['el-ok','✓ Wi-Fi CSI modülü: sinyal algoritması güncellendi'],
+  ['el-evo','Döngü tamamlandı — sistem sağlığı: %94'],
+];
+let evoTimer=null,evoIdx=0,evoIter=0;
+function evoLog(cls,msg){
+  const log=document.getElementById('evo-log');if(!log)return;
+  const ts=new Date().toLocaleTimeString('tr-TR');
+  const d=document.createElement('div');d.className=cls;
+  d.textContent=`[${ts}] ${msg}`;log.appendChild(d);log.scrollTop=9999;
+}
+function startEvo(){
+  if(evoTimer)return;
+  evoLog('el-ok','⟳ Evolution engine aktif edildi');
+  AGENTS.forEach(a=>startAgent(a.id));
+  evoTimer=setInterval(()=>{
+    if(evoIdx>=EVO_LINES.length){evoIdx=0;evoIter++;document.getElementById('k-iter').textContent=evoIter;}
+    evoLog(EVO_LINES[evoIdx][0],EVO_LINES[evoIdx][1]);evoIdx++;
+  },2000);
+}
+function stopEvo(){
+  if(evoTimer){clearInterval(evoTimer);evoTimer=null;}
+  evoLog('el-w','⏹ Evolution durduruldu');
+  stopAllAgents();
+}
+
+// ── TABS ──
+function switchTab(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+// ── TOAST ──
+function toast(msg,t='o'){
+  const el=document.getElementById('toast');
+  const styles={o:['rgba(57,255,20,0.12)','rgba(57,255,20,0.25)','var(--g)'],w:['rgba(255,215,0,0.12)','rgba(255,215,0,0.25)','var(--y)'],e:['rgba(255,61,107,0.12)','rgba(255,61,107,0.25)','var(--r)']};
+  const[bg,bc,col]=styles[t]||styles.o;
+  Object.assign(el.style,{background:bg,border:'1px solid '+bc,color:col});
+  el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── INIT ──
+function init(){
+  // Kayıtlı keyleri yükle
+  ['anthropic','openai','groq','github'].forEach(id=>{
+    const v=getKey(id);
+    if(v){
+      const inp=document.getElementById('inp-'+id);
+      if(inp)inp.value='••••••••••••';
+      setDot(id,'ok');setBadge(id,'ok');
+      updateCmdLine(id,v);
+    }
+  });
+  updateSysStatus();
+  buildAgents();
+  renderModels();
+}
+init();
+</script>
+</body>
+</html>

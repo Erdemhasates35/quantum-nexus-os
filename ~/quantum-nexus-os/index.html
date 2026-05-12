@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>QUANTUM NEXUS OS v30 — SOVEREIGN ARCHITECT</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--c:#00e5ff;--vi:#d500f9;--gr:#00e676;--re:#ff3d3d;--am:#ffb300;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;color:#a0c0d8;font-family:'Share Tech Mono',monospace;font-size:12px;overflow:hidden;}
+.card{background:#0a1420;border:1px solid #163248;border-radius:4px;}
+.ct{color:var(--c);font-family:Orbitron,sans-serif;font-weight:900;letter-spacing:3px;}
+.scan-bar{height:3px;background:linear-gradient(90deg,transparent,var(--c),transparent);animation:scan 3s linear infinite;}
+@keyframes scan{0%{transform:translateX(-150%)}100%{transform:translateX(400%)}}
+.heatmap{position:relative;overflow:hidden;height:380px;background:#000;}
+.particle{position:absolute;width:3px;height:3px;background:var(--vi);border-radius:50%;box-shadow:0 0 15px var(--vi);}
+</style>
+</head>
+<body>
+
+<div id="boot"><!-- Boot ekranı önceki gibi --></div>
+
+<div id="os">
+  <div id="pgs">
+
+    <!-- L2 CSI — DERİN TARAMA -->
+    <div class="pg on" id="p1">
+      <div class="ct">📡 NEXMON CSI + MULTI-LAYER DEEP SCAN v30</div>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="ch">CSI HEATMAP + KONUM TAHMİNİ (RPi Nexmon)</div>
+            <div class="heatmap" id="heatmap"></div>
+            <div class="scan-bar"></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="ch">CANLI TESPİT + AKTİVİTE ANALİZİ</div>
+            <div id="deviceLog" class="term" style="height:340px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn bc" onclick="deepMultiScan()">🔍 DEEP MULTI-LAYER SCAN (CSI + NMAP + PROBE)</button>
+    </div>
+
+    <!-- L30 SOVEREIGN (Epik) -->
+    <div class="pg" id="p29">
+      <div class="ct" style="font-size:2.4em;text-align:center;margin:30px">👑 SOVEREIGN ARCHITECT v30</div>
+      <div id="sovlog" class="term" style="height:420px"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// WebSocket simülasyonu (gerçek backend ile entegre)
+const wsLog = document.getElementById('deviceLog');
+function addLog(msg, color='var(--gr)') {
+  const div = document.createElement('div');
+  div.style.color = color;
+  div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  wsLog.appendChild(div);
+  wsLog.scrollTop = wsLog.scrollHeight;
+}
+
+// CSI Heatmap Animasyonu
+function initHeatmap() {
+  const container = document.getElementById('heatmap');
+  for(let i=0; i<120; i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random()*100+'%';
+    p.style.top = Math.random()*100+'%';
+    p.style.animation = `particleFloat ${15+Math.random()*20}s linear infinite`;
+    container.appendChild(p);
+  }
+}
+
+// Derin Tarama
+function deepMultiScan() {
+  addLog("🚀 DEEP SCAN BAŞLADI — Nexmon CSI + Probe Request + NMAP", "var(--c)");
+  
+  setTimeout(() => addLog("📡 CSI DATA STREAM ACTIVE — 80MHz Channel 36-165"), 600);
+  setTimeout(() => {
+    addLog("✓ CİHAZ TESPİTİ: 48:12:34:AB:CD:EF • RSSI -38dBm • Est. Mesafe: 4.7m • Aktivite: Yürüyor (CSI Phase Shift)", "var(--gr)");
+    addLog("🔗 IP/URL Correlation: 192.168.1.47 → http://local-device:8080 (ALT URL tespit edildi)", "var(--am)");
+  }, 1400);
+  
+  setTimeout(() => addLog("🛡 KALKan MODÜLÜNE BİLDİRİLDİ — Otomatik izleme başlatıldı", "var(--vi)"), 2200);
+}
+
+window.onload = () => {
+  bootSequence();
+  initHeatmap();
+  setTimeout(() => addLog("🌐 QUANTUM NEXUS OS v30 FULLY INTEGRATED"), 800);
+};
+</script>
+</body>
+</html>

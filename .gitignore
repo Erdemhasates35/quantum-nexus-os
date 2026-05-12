@@ -1,0 +1,12 @@
+.env
+node_modules
+*.bak
+.vercel
+.env*.local
+.env
+.env.local
+__pycache__/
+.env
+.env.local
+__pycache__/
+.env.local
