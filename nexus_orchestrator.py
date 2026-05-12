@@ -58,7 +58,7 @@ async def main():
 
     await core.check_peripherals()
 
-    with Live(core.generate_dashboard(), refresh_per_second=4) as live:
+    with Live(core.generate_dashboard(), refresh_per_second=4):
         # Burada otonom döngü başlar
         while True:
             await asyncio.sleep(1)
