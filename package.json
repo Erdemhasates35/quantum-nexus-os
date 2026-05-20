@@ -1,38 +1,16 @@
 {
   "name": "quantum-nexus-os",
   "version": "15.5.0",
-  "description": "Erdem & Arel Empire - Sovereign AI & Quantum Governance Platform",
-  "main": "api.js",
-  "type": "commonjs",
+  "private": true,
   "scripts": {
-    "start": "node api.js",
-    "dev": "nodemon api.js",
-    "nexus-init": "bash start_nexus.sh",
-    "ghost-mode": "python3 main.py --mode ghost"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  "author": "erdem hasates",
-  "license": "ISC",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.92.0",
-    "@github/copilot-sdk": "^0.3.0",
-    "@jup-ag/lend": "^0.1.9",
-    "@jup-ag/limit-order-sdk": "^0.1.10",
-    "@solana/web3.js": "^1.95.4",
-    "@vercel/analytics": "^1.0.1",
-    "axios": "^1.6.0",
-    "bn.js": "^5.2.1",
-    "bs58": "^5.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "install.js": "^1.0.1",
-    "jito-ts": "^4.2.1",
-    "node-fetch": "^2.7.0",
-    "pnpm": "^10.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "socket.io": "^4.7.5",
-    "utf-8-validate": "^5.0.2"
+    "next": "16.2.6",
+    "react": "^18",
+    "react-dom": "^18"
   }
 }
-
