@@ -1,5 +1,32 @@
 {
+<<<<<<< HEAD
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs"
+=======
+  "version": 2,
+  "framework": "nextjs",
+  "regions": ["cdg1", "gru1", "hnd1", "iad1", "sfo1", "sin1"],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' wss://*.solana.com https://*.jup.ag https://api.jito.network;" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/index.html" }
+  ],
+  "functions": {
+    "api/quantum-engine/**/*.js": {
+      "maxDuration": 300,
+      "memory": 3008
+    }
+  }
+>>>>>>> 13b2f17c (🔥 FIX: Tüm yapılar korundu ve Vite ile birleştirildi)
 }

@@ -3,6 +3,7 @@
   "version": "15.5.0",
   "private": true,
   "scripts": {
+<<<<<<< HEAD
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -13,4 +14,54 @@
     "react": "^18",
     "react-dom": "^18"
   }
+=======
+    "start": "node api.js",
+    "dev": "nodemon api.js",
+    "nexus-init": "bash start_nexus.sh",
+    "ghost-mode": "python3 main.py --mode ghost",
+    "build": "wasm-pack build ./nexus-rust-core --target web && next build",
+    "lint": "next lint && black .",
+    "nexus-sync": "uv sync && git gc --aggressive --prune=now",
+    "mev-scan": "node scripts/jito-bundle-monitor.js",
+    "security-audit": "npm audit fix && npx snyk test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
+    "@github/copilot-sdk": "^0.3.0",
+    "@jup-ag/api": "^6.0.0",
+    "@jup-ag/lend": "^0.1.9",
+    "@jup-ag/limit-order-sdk": "^0.1.10",
+    "@solana/web3.js": "^1.95.4",
+    "@vercel/analytics": "^1.0.1",
+    "axios": "^1.6.0",
+    "bn.js": "^5.2.1",
+    "bs58": "^5.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "framer-motion": "^11.2.4",
+    "jito-ts": "^4.2.1",
+    "lucide-react": "^0.378.0",
+    "next": "14.2.3",
+    "node-fetch": "^2.7.0",
+    "pino": "^9.1.0",
+    "pnpm": "^10.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "socket.io": "^4.7.5",
+    "start-backend": "^1.0.1",
+    "utf-8-validate": "^5.0.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.3",
+    "nodemon": "^3.1.0",
+    "typescript": "^5.4.5",
+    "wasm-pack": "^0.12.1"
+  },
+  "author": "erdem hasates",
+  "license": "ISC"
+>>>>>>> 13b2f17c (🔥 FIX: Tüm yapılar korundu ve Vite ile birleştirildi)
 }
