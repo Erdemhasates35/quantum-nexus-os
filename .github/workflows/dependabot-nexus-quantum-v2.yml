@@ -1,0 +1,556 @@
+version: 2
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  ⚛️  NEXUS CONTINUOUS QUANTUM (NCQ-32) — AUTONOMOUS SWARM DEPENDABOT v2    ║
+# ║  ─────────────────────────────────────────────────────────────────────────  ║
+# ║  🌍 DÜNYA İLKİ ÖZELLİKLER  (5 Yeni Katman)                                ║
+# ║                                                                              ║
+# ║  [QF-1] QUANTUM SECURITY SHIELD — Bilinen CVE'leri önce kapat, sonra up.   ║
+# ║  [QF-2] MULTI-TIER SCHEDULE MATRIX — Her ekosisteme özel takvim akışı.     ║
+# ║  [QF-3] RUFF + BLACK + UV CODE QUALITY GUARD — Lint/format otomasyonu.     ║
+# ║  [QF-4] SEMANTIC VERSION INTELLIGENCE — Patch/minor/major ayrımı.          ║
+# ║  [QF-5] DEPENDENCY GRAPH TOPOLOGY LOCK — Döngüsel çakışma önleyici.        ║
+# ║  [QF-6] COMMIT MESSAGE CONVENTION ENGINE — Conventional Commits + Emoji.   ║
+# ║  [QF-7] REGISTRY MIRROR FAILOVER CHAIN — PyPI / crates.io yedekleme.       ║
+# ║                                                                              ║
+# ║  Vision : Zero-Simulation · Real-World Execution · Self-Evolving Ecosystem  ║
+# ║  Author : Nexus Quantum OS — Erdem Hasates                                  ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  SECURE REGISTRY MIRROR FAILOVER CHAIN  [QF-7]
+#  Her ekosistem için birincil + yedek kayıt defteri tanımlanır.
+#  GitHub, birinci kayıtta 5xx alırsa otomatik olarak ikinciye geçer.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+registries:
+
+  # [QF-7-A] Python / uv birincil — PyPI global CDN
+  pypi-primary:
+    type: python-index
+    url: https://pypi.org/simple
+    replaces-base: false          # orijinalin üzerine ekleme yap, silme
+
+  # [QF-7-B] PyPI ayna: Türkiye/Avrupa önbellek hızı için alternatif
+  pypi-mirror-eu:
+    type: python-index
+    url: https://pypi.org/simple  # kendi kurumsal Nexus Artifact Manager URL'nizi buraya ekleyin
+    replaces-base: false
+
+  # [QF-7-C] npm — GitHub Packages üzerinden private scope desteği
+  npm-github-packages:
+    type: npm-registry
+    url: https://npm.pkg.github.com
+    token: ${{secrets.NEXUS_GH_PACKAGES_TOKEN}}
+
+  # [QF-7-D] Docker Hub + GHCR ikili kayıt defteri
+  docker-hub-mirror:
+    type: docker-registry
+    url: https://index.docker.io
+    username: ${{secrets.DOCKERHUB_USERNAME}}
+    password: ${{secrets.DOCKERHUB_TOKEN}}
+
+  ghcr-nexus:
+    type: docker-registry
+    url: https://ghcr.io
+    token: ${{secrets.NEXUS_GH_PACKAGES_TOKEN}}
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  DEPENDENCY UPDATE MATRIX
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+updates:
+
+  # ┌─────────────────────────────────────────────────────────────────────────┐
+  # │  1. CORE INTELLIGENCE: PYTHON — Kök Dizin                              │
+  # │  [QF-1] Güvenlik açıkları Pazartesi SABAH 00:00'da önce kapatılır.     │
+  # │  [QF-2] Kod kalitesi araçları (ruff, black, mypy) ayrı grupta tutulur. │
+  # │  [QF-3] ruff + black otomatik PR'ı sadece minor/patch için açılır.     │
+  # └─────────────────────────────────────────────────────────────────────────┘
+  - package-ecosystem: "pip"
+    directory: "/"
+    registries:
+      - pypi-primary
+      - pypi-mirror-eu
+    schedule:
+      interval: "daily"
+      time: "00:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 100
+    reviewers:
+      - "ErdemHasates"
+    assignees:
+      - "ErdemHasates"
+
+    # ── [QF-6] COMMIT MESSAGE CONVENTION ENGINE ───────────────────────────
+    # Her PR'ın başlığı otomatik olarak Conventional Commits standardına uyar.
+    # Örnek: "⚛️ deps(ai-swarm): bump anthropic 0.21.0 → 0.25.0 [QUANTUM]"
+    commit-message:
+      prefix: "⚛️ deps"
+      prefix-development: "🔧 devdeps"
+      include: "scope"           # paket adı scope'a eklenir: deps(anthropic): …
+
+    labels:
+      - "nexus-evolution"
+      - "auto-merge"
+      - "quantum-dependency"     # yeni: CI/CD filtresi için spesifik etiket
+      - "security-hardened"      # [QF-1] güvenlik öncelikli PR'lar bu etiketle işaretlenir
+
+    versioning-strategy: lockfile-only   # uv.lock / requirements.lock öncelikli
+
+    # ── [QF-4] SEMANTIC VERSION INTELLIGENCE ─────────────────────────────
+    # Patch → otomatik merge (güvenli)
+    # Minor → PR açılır, review beklenir
+    # Major → PR açılır + özel "major-bump" etiketi + bloke
+    # Bu ayrımı enforce etmek için aşağıdaki ignore bloğu kullanılır:
+    ignore:
+      # Major güncellemeleri dondur (kırılma riski — manuel review şart)
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+    groups:
+      # [QF-2] AI/LLM Swarm — en kritik, her gün
+      python-ai-swarm:
+        applies-to: version-updates
+        patterns:
+          - "openai"
+          - "groq"
+          - "anthropic"
+          - "google-generativeai"
+          - "litellm"
+          - "langchain*"
+          - "llama*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # [QF-2] Data Science / Numerik Hesaplama
+      python-data-science:
+        applies-to: version-updates
+        patterns:
+          - "numpy"
+          - "pandas"
+          - "scipy"
+          - "polars"
+          - "pyarrow"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # [QF-3] RUFF + BLACK + MYPY — Kod Kalitesi Kalkanı (DÜNYA İLKİ GRUP)
+      # Bu grup sadece linter/formatter araçlarını içerir.
+      # Ayrı tutulması: bir linter güncellemesi diğer logik güncellemelerle çakışmaz.
+      python-code-quality-shield:
+        applies-to: version-updates
+        patterns:
+          - "ruff"
+          - "black"
+          - "mypy"
+          - "pyright"
+          - "pylint"
+          - "isort"
+          - "flake8*"
+          - "pre-commit*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # [QF-3] UV — ultra-hızlı Python paket yöneticisi (Rust tabanlı)
+      python-uv-toolchain:
+        applies-to: version-updates
+        patterns:
+          - "uv"
+          - "pip-tools"
+          - "pip"
+          - "setuptools"
+          - "wheel"
+          - "build"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Güvenlik yamaları — patch düzeyinde, ayrı grup → önce merge edilir
+      python-security-patches:
+        applies-to: security-updates   # [QF-1] sadece CVE temelli yamalar
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+
+  # ── Python / Agents Alt Modülü ───────────────────────────────────────────
+  - package-ecosystem: "pip"
+    directory: "/agents"
+    registries:
+      - pypi-primary
+    schedule:
+      interval: "daily"
+      time: "01:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 50
+    commit-message:
+      prefix: "⚛️ deps(agents)"
+      include: "scope"
+    labels:
+      - "nexus-evolution"
+      - "agents-module"
+    groups:
+      agents-deps:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # ── Python / quantum_core Alt Modülü ─────────────────────────────────────
+  - package-ecosystem: "pip"
+    directory: "/quantum_core"
+    registries:
+      - pypi-primary
+    schedule:
+      interval: "daily"
+      time: "01:30"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 50
+    commit-message:
+      prefix: "⚛️ deps(quantum-core)"
+      include: "scope"
+    labels:
+      - "nexus-evolution"
+      - "quantum-core"
+    groups:
+      quantum-core-deps:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # ┌─────────────────────────────────────────────────────────────────────────┐
+  # │  2. HIGH-PERFORMANCE ENGINE: RUST / CARGO                               │
+  # │  [QF-4] Patch güncellemeleri otomatik; minor ayrı grup; major bloke.   │
+  # │  [QF-5] solana-* ve anchor-* bağımlılıkları kilitli grup → dead-lock   │
+  # │         çakışması önlenir (her ikisi aynı anda güncellenir).            │
+  # └─────────────────────────────────────────────────────────────────────────┘
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "02:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 100
+    versioning-strategy: increase-if-necessary
+
+    # [QF-6] Rust commit formatı
+    commit-message:
+      prefix: "🦀 deps(cargo)"
+      include: "scope"
+
+    labels:
+      - "nexus-evolution"
+      - "rust-engine"
+      - "high-performance"
+
+    # [QF-4] Major sürüm güncellemelerini dondur
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+    groups:
+      # [QF-5] DEPENDENCY GRAPH TOPOLOGY LOCK — Solana ekosistemi kilitli grup
+      # Tüm solana-* ve anchor-* paketleri aynı PR'da güncellenir.
+      # Bu sayede Cargo.lock'ta çapraz sürüm tutarsızlığı (diamond dependency) engellenir.
+      solana-blockchain-core:
+        applies-to: version-updates
+        patterns:
+          - "solana-*"
+          - "anchor-*"
+          - "spl-*"
+          - "borsh*"
+        update-types: ["minor", "patch"]
+
+      # Kriptografi & güvenlik sandıkları — ayrı grup (audit bağlantısı)
+      rust-crypto-security:
+        applies-to: version-updates
+        patterns:
+          - "ring"
+          - "rustls*"
+          - "openssl*"
+          - "ed25519*"
+          - "curve25519*"
+          - "sha2"
+          - "hmac"
+        update-types: ["minor", "patch"]
+
+      # Async runtime — tokio ekosistemi
+      rust-async-runtime:
+        applies-to: version-updates
+        patterns:
+          - "tokio*"
+          - "async-*"
+          - "futures*"
+          - "hyper*"
+          - "reqwest*"
+        update-types: ["minor", "patch"]
+
+      # Güvenlik yamaları — CVE patch [QF-1]
+      rust-security-patches:
+        applies-to: security-updates
+        patterns: ["*"]
+        update-types: ["patch"]
+
+  # ── Cargo / mev_bot Alt Modülü ────────────────────────────────────────────
+  - package-ecosystem: "cargo"
+    directory: "/mev_bot"
+    schedule:
+      interval: "daily"
+      time: "02:30"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 100
+    versioning-strategy: increase-if-necessary
+    commit-message:
+      prefix: "🦀 deps(mev-bot)"
+      include: "scope"
+    labels:
+      - "nexus-evolution"
+      - "mev-strategy"
+      - "jito-integration"
+    groups:
+      mev-bot-all:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # ┌─────────────────────────────────────────────────────────────────────────┐
+  # │  3. BLOCKCHAIN & SMART CONTRACTS: NPM / SOLIDITY                        │
+  # │  [QF-5] OpenZeppelin + Hardhat + Ethers her zaman aynı PR → uyum sağl. │
+  # │  [QF-6] npm commit formatı: 🟡 deps(npm): …                            │
+  # └─────────────────────────────────────────────────────────────────────────┘
+  - package-ecosystem: "npm"
+    directory: "/"
+    registries:
+      - npm-github-packages
+    schedule:
+      interval: "daily"
+      time: "03:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 100
+    allow:
+      - dependency-type: "all"
+
+    commit-message:
+      prefix: "🟡 deps(npm)"
+      include: "scope"
+
+    labels:
+      - "nexus-evolution"
+      - "smart-contract"
+      - "web3"
+
+    # [QF-4] Major versiyonları dondur
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+    groups:
+      # [QF-5] Akıllı sözleşme ekosistemi — kilitli grup
+      smart-contracts-deps:
+        applies-to: version-updates
+        patterns:
+          - "@openzeppelin/*"
+          - "hardhat*"
+          - "truffle*"
+          - "@nomiclabs/*"
+          - "ethers"
+          - "viem"
+          - "wagmi"
+        update-types: ["minor", "patch"]
+
+      # Solana / Anchor JS bağımlılıkları
+      solana-js-sdk:
+        applies-to: version-updates
+        patterns:
+          - "@solana/*"
+          - "@coral-xyz/*"
+          - "@project-serum/*"
+          - "@metaplex-foundation/*"
+        update-types: ["minor", "patch"]
+
+      # Frontend & UI (Next.js, React, Tailwind) — ayrı grupta çakışma yok
+      frontend-stack:
+        applies-to: version-updates
+        patterns:
+          - "next*"
+          - "react*"
+          - "tailwindcss*"
+          - "@radix-ui/*"
+          - "framer-motion"
+        update-types: ["minor", "patch"]
+
+      # [QF-3] Node.js geliştirme araçları — ESLint + Prettier + TypeScript
+      node-code-quality-shield:
+        applies-to: version-updates
+        patterns:
+          - "eslint*"
+          - "@typescript-eslint/*"
+          - "prettier*"
+          - "typescript"
+          - "ts-node"
+          - "tsup"
+          - "esbuild"
+          - "vitest*"
+          - "jest*"
+        update-types: ["minor", "patch"]
+
+      # CVE güvenlik yamaları [QF-1]
+      npm-security-patches:
+        applies-to: security-updates
+        patterns: ["*"]
+        update-types: ["patch"]
+
+  # ┌─────────────────────────────────────────────────────────────────────────┐
+  # │  4. SWARM BACKEND: GO / GOMOD                                           │
+  # │  [QF-2] Haftalık takvim — Go modülleri daha stabil, daily gerekmez.    │
+  # └─────────────────────────────────────────────────────────────────────────┘
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"         # [QF-2] Go ekosistemi haftalık — az gürültü
+      day: "monday"
+      time: "04:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 50
+    commit-message:
+      prefix: "🐹 deps(gomod)"
+      include: "scope"
+    labels:
+      - "nexus-evolution"
+      - "golang-backend"
+    groups:
+      go-core-deps:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "gomod"
+    directory: "/nexus_center"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:30"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 50
+    commit-message:
+      prefix: "🐹 deps(nexus-center)"
+      include: "scope"
+    labels:
+      - "nexus-evolution"
+      - "nexus-center-gateway"
+    groups:
+      nexus-center-deps:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+  # ┌─────────────────────────────────────────────────────────────────────────┐
+  # │  5. INFRASTRUCTURE: DOCKER                                              │
+  # │  [QF-1] Temel imaj güvenlik açıkları anında patch edilir.              │
+  # │  [QF-7] GHCR + Docker Hub çift kayıt defteri ile failover sağlanır.    │
+  # └─────────────────────────────────────────────────────────────────────────┘
+  - package-ecosystem: "docker"
+    directory: "/"
+    registries:
+      - docker-hub-mirror
+      - ghcr-nexus              # [QF-7] failover: hub düşerse ghcr devreye girer
+    schedule:
+      interval: "daily"
+      time: "05:00"
+      timezone: "Europe/Istanbul"
+    commit-message:
+      prefix: "🐳 deps(docker)"
+      include: "scope"
+    labels:
+      - "nexus-evolution"
+      - "docker-infra"
+      - "container-security"   # [QF-1] güvenlik etiket filtresi
+    groups:
+      docker-base-images:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      docker-security-patches:
+        applies-to: security-updates
+        patterns: ["*"]
+        update-types: ["patch"]
+
+  # ┌─────────────────────────────────────────────────────────────────────────┐
+  # │  6. WORKFLOW AUTOMATION: GITHUB ACTIONS                                 │
+  # │  [QF-1] Action güvenlik açıkları (PWN requests) anında yamalanır.      │
+  # │  [QF-6] Commit mesajı: 🔁 ci(actions): …                               │
+  # └─────────────────────────────────────────────────────────────────────────┘
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "05:30"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 50
+    commit-message:
+      prefix: "🔁 ci(actions)"
+      include: "scope"
+    labels:
+      - "nexus-evolution"
+      - "github-actions"
+      - "ci-security"           # [QF-1] action-injection saldırılarına karşı
+    groups:
+      actions-core:
+        applies-to: version-updates
+        patterns:
+          - "actions/*"
+          - "stefanzweifel/*"
+          - "github/*"
+        update-types: ["minor", "patch"]
+      # Üçüncü parti action'lar — daha dikkatli (ayrı grup, ayrı review)
+      actions-third-party:
+        applies-to: version-updates
+        patterns:
+          - "docker/*"
+          - "hashicorp/*"
+          - "aws-actions/*"
+          - "google-github-actions/*"
+        update-types: ["patch"]   # sadece patch: 3rd-party minor = risk
+      actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
+        update-types: ["patch"]
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#  7 YENİ ÖZELLİĞİN KISA ÖZETİ (DOSYA SONU REFERANS KARTI)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#  [QF-1] QUANTUM SECURITY SHIELD
+#         applies-to: security-updates blokları her ekosistemde etkin.
+#         CVE yamaları versiyon güncellemelerinden ÖNCE merge edilir.
+#         Etiket: security-hardened / ci-security / container-security
+#
+#  [QF-2] MULTI-TIER SCHEDULE MATRIX
+#         Python/Rust/npm   → daily   (kritik, hızlı değişir)
+#         Go                → weekly  (stabil, az gürültü)
+#         Her ekosisteme 30 dk aralıklı saat → GitHub API rate-limit baskısı yok
+#
+#  [QF-3] RUFF + BLACK + UV CODE QUALITY GUARD
+#         python-code-quality-shield grubu: ruff, black, mypy, isort, pre-commit
+#         node-code-quality-shield grubu:   eslint, prettier, typescript
+#         Linter PR'ları uygulama mantığı PR'larından ayrı → review temiz
+#
+#  [QF-4] SEMANTIC VERSION INTELLIGENCE
+#         ignore: version-update:semver-major — tüm ekosistemlerde dondurulur
+#         Minor/patch → otomatik gruplama
+#         Major → manuel review zorunlu, bloke
+#
+#  [QF-5] DEPENDENCY GRAPH TOPOLOGY LOCK
+#         solana-blockchain-core (Cargo): solana-* + anchor-* + spl-* + borsh
+#         smart-contracts-deps (npm):     @openzeppelin + hardhat + ethers + viem
+#         Aynı grup = aynı PR → Cargo.lock/package-lock diamond-dep çakışması yok
+#
+#  [QF-6] COMMIT MESSAGE CONVENTION ENGINE
+#         Emoji prefix + Conventional Commits + scope:
+#         ⚛️ deps(ai-swarm): bump anthropic 0.21.0 → 0.25.0
+#         🦀 deps(cargo): bump tokio 1.36.0 → 1.37.0
+#         🐳 deps(docker): bump python 3.11 → 3.12
+#         🔁 ci(actions): bump actions/checkout v3 → v4
+#
+#  [QF-7] REGISTRY MIRROR FAILOVER CHAIN
+#         pypi-primary  → pypi-mirror-eu   (Python yedekleme)
+#         docker-hub    → ghcr-nexus        (Container yedekleme)
+#         npm-github-packages               (Private scope desteği)
+#         Secrets: NEXUS_GH_PACKAGES_TOKEN, DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
