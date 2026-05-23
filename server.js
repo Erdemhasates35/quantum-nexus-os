@@ -1,54 +1,18 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 /**
  * NEXUS SOVEREIGN CORE V2.5 - OMNIPOTENT EDITION
  * Master Admin: Erdem
  */
-require('dotenv').config();
->>>>>>> 3a183ad3 (Update: Quantum Nexus OS Core Synchronization)
 const express = require('express');
 const cors = require('cors');
-<<<<<<< HEAD
-require('dotenv').config();
 const axios = require('axios');
-=======
-=======
-const express = require('express');
-const cors = require('cors');
 require('dotenv').config();
-const axios = require('axios');
->>>>>>> d467fe17 (feat: Quantum Nexus OS v3.2 Multi-AI Ecosystem (Grok+Gemini+Claude+Groq+DeepSeek))
->>>>>>> 3a183ad3 (Update: Quantum Nexus OS Core Synchronization)
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-<<<<<<< HEAD
-app.post('/api/admin-ai', async (req, res) => {
-  try {
-    const { message } = req.body;
-    const response = await axios.post('https://api.anthropic.com/v1/messages', {
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 600,
-      system: 'Sen Quantum Nexus platform admin AI\'ısın...',
-      messages: [{ role: 'user', content: message }]
-    }, {
-      headers: {
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'Content-Type': 'application/json'
-      }
-    });
-    res.json(response.data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
-=======
-<<<<<<< HEAD
 // --- BEYİN TAKIMI YAPILANDIRMASI ---
 const Council = {
     CHAIRMAN: { name: "Claude 3.5 Sonnet", provider: "openrouter", model: "anthropic/claude-3.5-sonnet" },
@@ -64,6 +28,10 @@ const NEXUS_STATE = { Level: 50, Agents: 500, Uptime: "OMNIPOTENT_ACTIVE" };
 class NexusCore {
     static async callAI(member, prompt) {
         const key = process.env[`${member.provider.toUpperCase()}_API_KEY`];
+        if (!key) {
+            return `OFFLINE: ${member.name} - API key missing`;
+        }
+        
         let url = "";
         
         if (member.provider === "openrouter") url = "https://openrouter.ai/api/v1/chat/completions";
@@ -73,7 +41,10 @@ class NexusCore {
         try {
             const res = await axios.post(url, {
                 model: member.model,
-                messages: [{ role: "system", content: "Kusursuz otonom yönetim sağla." }, { role: "user", content: prompt }]
+                messages: [
+                    { role: "system", content: "Kusursuz otonom yönetim sağla." },
+                    { role: "user", content: prompt }
+                ]
             }, { headers: { "Authorization": `Bearer ${key}` } });
             return res.data.choices[0].message.content;
         } catch (e) {
@@ -95,36 +66,52 @@ class AgentManager {
 class EvolutionEngine {
     static async run() {
         console.log("\n--- 🌀 OTONOM EVRİM BAŞLADI ---");
-        const report = await NexusCore.callAI(Council.ANALYST, "Mevcut sistem kodunu geliştirme planı sun.");
-        const plan = await NexusCore.callAI(Council.ARCHITECT, `Planı teknik modüllere dök: ${report}`);
-        const code = await NexusCore.callAI(Council.ENGINEER, `Bu plan için Node.js kodu yaz: ${plan}`);
-        const audit = await NexusCore.callAI(Council.CHAIRMAN, `Kodu onayla. Güvenliyse 'DEPLOY_READY' yaz: ${code}`);
+        try {
+            // Ensure core_modules directory exists
+            const coreModulesDir = path.join(__dirname, 'core_modules');
+            if (!fs.existsSync(coreModulesDir)) {
+                fs.mkdirSync(coreModulesDir, { recursive: true });
+            }
 
-        if (audit.includes("DEPLOY_READY")) {
-            const fileName = `evo_v${NEXUS_STATE.Level}.js`;
-            fs.writeFileSync(`./core_modules/${fileName}`, code);
-            console.log(`✅ Evrim Tamamlandı: ${fileName}`);
-            NEXUS_STATE.Level += 10;
+            const report = await NexusCore.callAI(Council.ANALYST, "Mevcut sistem kodunu geliştirme planı sun.");
+            const plan = await NexusCore.callAI(Council.ARCHITECT, `Planı teknik modüllere dök: ${report}`);
+            const code = await NexusCore.callAI(Council.ENGINEER, `Bu plan için Node.js kodu yaz: ${plan}`);
+            const audit = await NexusCore.callAI(Council.CHAIRMAN, `Kodu onayla. Güvenliyse 'DEPLOY_READY' yaz: ${code}`);
+
+            if (audit.includes("DEPLOY_READY")) {
+                const fileName = `evo_v${NEXUS_STATE.Level}.js`;
+                fs.writeFileSync(path.join(coreModulesDir, fileName), code);
+                console.log(`✅ Evrim Tamamlandı: ${fileName}`);
+                NEXUS_STATE.Level += 10;
+            }
+        } catch (err) {
+            console.error(`❌ Evrim Hatası: ${err.message}`);
         }
     }
 }
 
 // --- ENDPOINTS ---
 app.get('/status', (req, res) => res.json(NEXUS_STATE));
-app.post('/command', async (req, res) => {
-    const result = await NexusCore.callAI(Council.CHAIRMAN, req.body.cmd);
-    res.send(result);
+
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        version: '2.5', 
+        agents: NEXUS_STATE.Agents,
+        level: NEXUS_STATE.Level,
+        timestamp: new Date().toISOString()
+    });
 });
 
-// --- BAŞLATICI ---
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, async () => {
-    console.log(`\n👑 NEXUS SOVEREIGN CORE AKTİF | PORT: ${PORT}\n`);
-    await AgentManager.init();
-    EvolutionEngine.run();
-    setInterval(() => EvolutionEngine.run(), 12 * 60 * 60 * 1000);
+app.post('/command', async (req, res) => {
+    try {
+        const result = await NexusCore.callAI(Council.CHAIRMAN, req.body.cmd);
+        res.json({ status: 'success', result });
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message });
+    }
 });
-=======
+
 app.post('/api/admin-ai', async (req, res) => {
   try {
     const { message } = req.body;
@@ -145,6 +132,17 @@ app.post('/api/admin-ai', async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
->>>>>>> d467fe17 (feat: Quantum Nexus OS v3.2 Multi-AI Ecosystem (Grok+Gemini+Claude+Groq+DeepSeek))
->>>>>>> 3a183ad3 (Update: Quantum Nexus OS Core Synchronization)
+// --- ERROR HANDLING ---
+app.use((err, req, res, next) => {
+    console.error('[ERROR]', err);
+    res.status(500).json({ error: 'Internal server error' });
+});
+
+// --- BAŞLATICI ---
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, async () => {
+    console.log(`\n👑 NEXUS SOVEREIGN CORE AKTİF | PORT: ${PORT}\n`);
+    await AgentManager.init();
+    EvolutionEngine.run();
+    setInterval(() => EvolutionEngine.run(), 12 * 60 * 60 * 1000);
+});
