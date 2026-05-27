@@ -1,5 +1,10 @@
-version: 2
-# ╔══════════════════════════════════════════════════════════════════════════════╗
+
+jobs:
+  build:
+     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+# ╔═══════ ═══════════════════════════════════════════════════════════════════════╗
 # ║  ⚛️  NEXUS CONTINUOUS QUANTUM (NCQ-32) — AUTONOMOUS SWARM DEPENDABOT v2    ║
 # ║  ─────────────────────────────────────────────────────────────────────────  ║
 # ║  🌍 DÜNYA İLKİ ÖZELLİKLER  (5 Yeni Katman)                                ║
