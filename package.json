@@ -1,46 +1,33 @@
 {
   "name": "quantum-nexus-os",
-  "version": "15.5.0",
-  "private": true,
+  "version": "2.0.0",
+  "description": "Multi-AI Unified Enterprise Platform",
+  "main": "api/index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && npm run nexus-sync",
-    "start": "node server.js",
-    "server-dev": "nodemon server.js",
-    "lint": "next lint && black . 2>/dev/null || true",
-    "nexus-init": "bash start_nexus.sh",
-    "ghost-mode": "python3 main.py --mode ghost",
-    "nexus-sync": "uv sync && git gc --aggressive --prune=now 2>/dev/null || true",
-    "mev-scan": "node scripts/jito-bundle-monitor.js 2>/dev/null || true",
-    "security-audit": "npm audit fix && npx snyk test 2>/dev/null || true"
+    "dev": "concurrently \"next dev\" \"python api/agents.py\" \"go run api/swarm.go\"",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,py,go,json,css}\""
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.92.0",
-    "@solana/web3.js": "^1.95.4",
-    "@vercel/analytics": "^1.0.1",
-    "axios": "^1.6.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "framer-motion": "^11.2.4",
-    "lucide-react": "^0.378.0",
-    "next": "14.2.3",
-    "pino": "^9.1.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "socket.io": "^4.7.5",
-    "zod": "^3.23.8"
+    "next": "^15.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "axios": "^1.7.0",
+    "@anthropic-ai/sdk": "^0.37.0",
+    "groq-sdk": "^0.5.0",
+    "openai": "^4.68.0",
+    "chart.js": "^4.4.0",
+    "framer-motion": "^10.18.0",
+    "zustand": "^4.5.0",
+    "socket.io-client": "^4.7.0",
+    "mongoose": "^8.5.0",
+    "pg": "^8.11.0"
   },
   "devDependencies": {
-    "@types/node": "^20.12.12",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.3",
-    "nodemon": "^3.1.0",
-    "typescript": "^5.4.5"
-  },
-  "author": "erdem hasates",
-  "license": "ISC",
-  "engines": {
-    "node": ">=18.0.0"
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "concurrently": "^8.2.0"
   }
 }

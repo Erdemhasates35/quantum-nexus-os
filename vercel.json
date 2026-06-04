@@ -1,32 +1,25 @@
 {
-<<<<<<< HEAD
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs"
-=======
   "version": 2,
-  "framework": "nextjs",
-  "regions": ["cdg1", "gru1", "hnd1", "iad1", "sfo1", "sin1"],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' wss://*.solana.com https://*.jup.ag https://api.jito.network;" }
-      ]
-    }
-  ],
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/index.html" }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
+  "env": {
+    "ANTHROPIC_API_KEY": "@anthropic_api_key",
+    "GROQ_API_KEY": "@groq_api_key",
+    "OPENAI_API_KEY": "@openai_api_key",
+    "XAI_API_KEY": "@xai_api_key",
+    "GOOGLE_API_KEY": "@google_api_key",
+    "DEEPSEEK_API_KEY": "@deepseek_api_key",
+    "COHERE_API_KEY": "@cohere_api_key",
+    "MISTRAL_API_KEY": "@mistral_api_key",
+    "PERPLEXITY_API_KEY": "@perplexity_api_key",
+    "MONGODB_URI": "@mongodb_uri",
+    "POSTGRES_URI": "@postgres_uri"
+  },
   "functions": {
-    "api/quantum-engine/**/*.js": {
-      "maxDuration": 300,
-      "memory": 3008
-    }
-  }
->>>>>>> 13b2f17c (🔥 FIX: Tüm yapılar korundu ve Vite ile birleştirildi)
+    "api/ai.js": {"memory": 3008, "maxDuration": 60},
+    "api/agents.py": {"memory": 3008, "maxDuration": 120, "runtime": "python3.11"},
+    "api/swarm.go": {"memory": 2048, "maxDuration": 60}
+  },
+  "headers": [{"source": "/(.*)", "headers": [{"key": "X-Content-Type-Options", "value": "nosniff"}, {"key": "X-Frame-Options", "value": "DENY"}]}],
+  "redirects": [{"source": "/todo", "destination": "/", "permanent": true}, {"source": "/index-old.html", "destination": "/", "permanent": true}]
 }
