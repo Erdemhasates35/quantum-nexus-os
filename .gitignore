@@ -1,52 +1,10 @@
-# Dependencies
 node_modules/
-__pycache__/
-*.pyc
-.Python
-venv/
-ENV/
-.venv/
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Build
 .next/
 out/
 build/
-dist/
-
-# IDE
+*.log
+.env
+.env.local
+.DS_Store
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-
-# Cache
-.eslintcache
-.prettier-cache
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Secrets
-.env
-*.key
-*.pem
-*.p8
-
-# Old/Backup files
-index-old.html
-admin-backup.txt
-**/backup/
-**/old/
