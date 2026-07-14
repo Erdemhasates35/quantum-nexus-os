@@ -1,4 +1,5 @@
-"""QUANTUM NEXUS OS — SELF-EVOLUTION ENGINE
+"""
+QUANTUM NEXUS OS — SELF-EVOLUTION ENGINE
 Sistem kendi kodunu okur, LLM ile optimize eder, test eder, günceller.
 Termux/Android uyumlu. Python 3.10+
 """
@@ -14,21 +15,19 @@ from datetime import datetime
 from pathlib import Path
 
 # ── Renkler ──
-G = "\033[92m"  # yeşil
-Y = "\033[93m"  # sarı
-R = "\033[91m"  # kırmızı
-C = "\033[96m"  # cyan
-B = "\033[94m"  # mavi
-E = "\033[0m"  # reset
-BOLD = "\033[1m"
+G = '\033[92m'   # yeşil
+Y = '\033[93m'   # sarı
+R = '\033[91m'   # kırmızı
+C = '\033[96m'   # cyan
+B = '\033[94m'   # mavi
+E = '\033[0m'    # reset
+BOLD = '\033[1m'
 
-
-def log(msg, level="INFO"):
-    ts = datetime.now().strftime("%H:%M:%S")
-    colors = {"INFO": C, "OK": G, "WARN": Y, "ERR": R, "EVOLVE": B}
+def log(msg, level='INFO'):
+    ts = datetime.now().strftime('%H:%M:%S')
+    colors = {'INFO': C, 'OK': G, 'WARN': Y, 'ERR': R, 'EVOLVE': B}
     col = colors.get(level, C)
     print(f"{col}[{ts}] [{level}]{E} {msg}")
-
 
 def banner():
     print(f"""
@@ -39,11 +38,10 @@ def banner():
 ╚══════════════════════════════════════════════════╝
 {E}""")
 
-
 # ── Konfigürasyon ──
 CONFIG = {
     "target_files": [
-        "self_evolution.py",  # kendini de optimize edebilir
+        "self_evolution.py",   # kendini de optimize edebilir
         "agent_core.py",
         "swarm_manager.py",
         "revenue_engine.py",
@@ -59,9 +57,7 @@ CONFIG = {
 
 class EvolutionEngine:
     def __init__(self):
-        self.api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get(
-            "GROQ_API_KEY",
-        )
+        self.api_key = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("GROQ_API_KEY")
         self.provider = "anthropic" if os.environ.get("ANTHROPIC_API_KEY") else "groq"
         self.iteration = 0
         self.improvements = []
@@ -70,7 +66,7 @@ class EvolutionEngine:
     def read_file(self, filepath: str) -> str:
         """Hedef dosyayı oku"""
         try:
-            with open(filepath, encoding="utf-8") as f:
+            with open(filepath, 'r', encoding='utf-8') as f:
                 return f.read()
         except FileNotFoundError:
             log(f"Dosya bulunamadı: {filepath}", "WARN")
@@ -78,7 +74,7 @@ class EvolutionEngine:
 
     def backup_file(self, filepath: str):
         """Orijinal dosyayı yedekle"""
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        ts = datetime.now().strftime('%Y%m%d_%H%M%S')
         filename = Path(filepath).name
         backup_path = f"{CONFIG['backup_dir']}/{filename}.{ts}.bak"
         if os.path.exists(filepath):
@@ -92,10 +88,7 @@ class EvolutionEngine:
     def call_llm(self, code: str, filename: str) -> str:
         """LLM'e kodu gönder, optimize edilmiş halini al"""
         if not self.api_key:
-            log(
-                "API key bulunamadı! ANTHROPIC_API_KEY veya GROQ_API_KEY ayarlayın.",
-                "ERR",
-            )
+            log("API key bulunamadı! ANTHROPIC_API_KEY veya GROQ_API_KEY ayarlayın.", "ERR")
             return ""
 
         prompt = f"""Sen bir Python kod optimizasyon uzmanısın.
@@ -128,37 +121,30 @@ Optimize edilmiş kod:"""
 
             if self.provider == "anthropic":
                 url = "https://api.anthropic.com/v1/messages"
-                data = json.dumps(
-                    {
-                        "model": CONFIG["anthropic_model"],
-                        "max_tokens": 4000,
-                        "system": "Sen bir Python uzmanısın. Sadece optimize edilmiş Python kodu döndür.",
-                        "messages": [{"role": "user", "content": prompt}],
-                    },
-                ).encode()
+                data = json.dumps({
+                    "model": CONFIG["anthropic_model"],
+                    "max_tokens": 4000,
+                    "system": "Sen bir Python uzmanısın. Sadece optimize edilmiş Python kodu döndür.",
+                    "messages": [{"role": "user", "content": prompt}]
+                }).encode()
                 headers = {
                     "Content-Type": "application/json",
                     "x-api-key": self.api_key,
-                    "anthropic-version": "2023-06-01",
+                    "anthropic-version": "2023-06-01"
                 }
             else:  # groq
                 url = "https://api.groq.com/openai/v1/chat/completions"
-                data = json.dumps(
-                    {
-                        "model": CONFIG["groq_model"],
-                        "max_tokens": 4000,
-                        "messages": [
-                            {
-                                "role": "system",
-                                "content": "Sen bir Python uzmanısın. Sadece optimize edilmiş Python kodu döndür.",
-                            },
-                            {"role": "user", "content": prompt},
-                        ],
-                    },
-                ).encode()
+                data = json.dumps({
+                    "model": CONFIG["groq_model"],
+                    "max_tokens": 4000,
+                    "messages": [
+                        {"role": "system", "content": "Sen bir Python uzmanısın. Sadece optimize edilmiş Python kodu döndür."},
+                        {"role": "user", "content": prompt}
+                    ]
+                }).encode()
                 headers = {
                     "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self.api_key}",
+                    "Authorization": f"Bearer {self.api_key}"
                 }
 
             req = urllib.request.Request(url, data=data, headers=headers, method="POST")
@@ -167,7 +153,8 @@ Optimize edilmiş kod:"""
 
             if self.provider == "anthropic":
                 return result["content"][0]["text"]
-            return result["choices"][0]["message"]["content"]
+            else:
+                return result["choices"][0]["message"]["content"]
 
         except Exception as e:
             log(f"LLM çağrısı başarısız: {e}", "ERR")
@@ -193,11 +180,7 @@ Optimize edilmiş kod:"""
                 return llm_response[start:end].strip()
 
         # Ham kod
-        if (
-            llm_response.startswith("def ")
-            or llm_response.startswith("import ")
-            or llm_response.startswith("#")
-        ):
+        if llm_response.startswith("def ") or llm_response.startswith("import ") or llm_response.startswith("#"):
             return llm_response.strip()
 
         return ""
@@ -206,15 +189,13 @@ Optimize edilmiş kod:"""
         """Kodu geçici dosyaya yaz ve syntax/import testini çalıştır"""
         tmp_path = f"/tmp/nexus_test_{int(time.time())}.py"
         try:
-            with open(tmp_path, "w", encoding="utf-8") as f:
+            with open(tmp_path, 'w', encoding='utf-8') as f:
                 f.write(code)
 
             # Syntax kontrolü
             result = subprocess.run(
                 [sys.executable, "-m", "py_compile", tmp_path],
-                capture_output=True,
-                text=True,
-                timeout=CONFIG["test_timeout"],
+                capture_output=True, text=True, timeout=CONFIG["test_timeout"]
             )
 
             if result.returncode != 0:
@@ -223,14 +204,8 @@ Optimize edilmiş kod:"""
             # Basit import testi (sadece stdlib kullanan dosyalar için)
             if "import" in code and "anthropic" not in code and "groq" not in code:
                 result2 = subprocess.run(
-                    [
-                        sys.executable,
-                        "-c",
-                        f"import ast; ast.parse(open('{tmp_path}').read())",
-                    ],
-                    capture_output=True,
-                    text=True,
-                    timeout=10,
+                    [sys.executable, "-c", f"import ast; ast.parse(open('{tmp_path}').read())"],
+                    capture_output=True, text=True, timeout=10
                 )
                 if result2.returncode != 0:
                     return False, f"Parse hatası: {result2.stderr}"
@@ -247,18 +222,11 @@ Optimize edilmiş kod:"""
 
     def write_code(self, code: str, filepath: str):
         """Optimize edilmiş kodu dosyaya yaz"""
-        with open(filepath, "w", encoding="utf-8") as f:
+        with open(filepath, 'w', encoding='utf-8') as f:
             f.write(code)
         log(f"Dosya güncellendi: {filepath}", "OK")
 
-    def log_evolution(
-        self,
-        filepath: str,
-        before_hash: str,
-        after_hash: str,
-        success: bool,
-        details: str,
-    ):
+    def log_evolution(self, filepath: str, before_hash: str, after_hash: str, success: bool, details: str):
         """Evrim kaydını tut"""
         entry = {
             "timestamp": datetime.now().isoformat(),
@@ -268,9 +236,9 @@ Optimize edilmiş kod:"""
             "after_hash": after_hash,
             "success": success,
             "details": details,
-            "provider": self.provider,
+            "provider": self.provider
         }
-        with open(CONFIG["log_file"], "a", encoding="utf-8") as f:
+        with open(CONFIG["log_file"], 'a', encoding='utf-8') as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
     def evolve_file(self, filepath: str) -> bool:
@@ -318,9 +286,10 @@ Optimize edilmiş kod:"""
             self.log_evolution(filepath, before_hash, after_hash, True, message)
             log(f"✓ Evrim başarılı! {before_hash} → {after_hash}", "OK")
             return True
-        log(f"Test başarısız, geri alınıyor: {message}", "ERR")
-        self.log_evolution(filepath, before_hash, after_hash, False, message)
-        return False
+        else:
+            log(f"Test başarısız, geri alınıyor: {message}", "ERR")
+            self.log_evolution(filepath, before_hash, after_hash, False, message)
+            return False
 
     def run(self, target_files: list = None):
         """Ana evrim döngüsü"""
@@ -368,27 +337,18 @@ class SwarmCoordinator:
     """8 Ajan koordinasyonu — her ajan bir görevi paralel yürütür"""
 
     AGENTS = {
-        "ar_ge": {
-            "icon": "🔬",
-            "role": "Teknoloji araştırma, yeni model değerlendirme",
-        },
-        "kodlama": {"icon": "💻", "role": "Kod geliştirme, bug fix, optimizasyon"},
+        "ar_ge":     {"icon": "🔬", "role": "Teknoloji araştırma, yeni model değerlendirme"},
+        "kodlama":   {"icon": "💻", "role": "Kod geliştirme, bug fix, optimizasyon"},
         "pazarlama": {"icon": "📢", "role": "SEO, içerik, sosyal medya, affiliate"},
-        "guvenlik": {"icon": "🛡", "role": "Red team, CVE tarama, güvenlik testi"},
-        "finans": {"icon": "💰", "role": "Gelir analizi, DeFi, maliyet optimizasyon"},
-        "veri": {"icon": "📊", "role": "Veri analizi, KPI takibi, raporlama"},
-        "strateji": {
-            "icon": "♟",
-            "role": "Yol haritası, önceliklendirme, karar destek",
-        },
-        "evrim": {
-            "icon": "⟳",
-            "role": "Sistem self-improvement, ajan performans takibi",
-        },
+        "guvenlik":  {"icon": "🛡", "role": "Red team, CVE tarama, güvenlik testi"},
+        "finans":    {"icon": "💰", "role": "Gelir analizi, DeFi, maliyet optimizasyon"},
+        "veri":      {"icon": "📊", "role": "Veri analizi, KPI takibi, raporlama"},
+        "strateji":  {"icon": "♟", "role": "Yol haritası, önceliklendirme, karar destek"},
+        "evrim":     {"icon": "⟳", "role": "Sistem self-improvement, ajan performans takibi"},
     }
 
     def __init__(self):
-        self.states = dict.fromkeys(self.AGENTS, "idle")
+        self.states = {name: "idle" for name in self.AGENTS}
         self.task_queue = []
 
     def assign_task(self, agent: str, task: str):
@@ -412,7 +372,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Quantum Nexus OS — Self-Evolution Engine",
+        description="Quantum Nexus OS — Self-Evolution Engine"
     )
     parser.add_argument("--files", nargs="+", help="Evolve edilecek dosyalar")
     parser.add_argument("--swarm", action="store_true", help="Swarm durumunu göster")
@@ -434,14 +394,12 @@ def main():
         if not os.path.exists(log_file):
             print("Log dosyası henüz yok.")
             return
-        with open(log_file) as f:
+        with open(log_file, 'r') as f:
             entries = [json.loads(line) for line in f if line.strip()]
         print(f"\n{C}── EVRİM KAYITLARI ({len(entries)} giriş) ──{E}")
         for e in entries[-10:]:  # Son 10
             status = f"{G}✓{E}" if e["success"] else f"{R}✗{E}"
-            print(
-                f"  {status} {e['timestamp'][:16]} | {e['file']} | {e['before_hash']}→{e['after_hash']}",
-            )
+            print(f"  {status} {e['timestamp'][:16]} | {e['file']} | {e['before_hash']}→{e['after_hash']}")
         return
 
     engine = EvolutionEngine()
@@ -449,7 +407,7 @@ def main():
     if args.single:
         engine.evolve_file(args.single)
     else:
-        files = args.files or None
+        files = args.files if args.files else None
         engine.run(files)
 
 
