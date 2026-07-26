@@ -1,62 +1,17 @@
-# ⬡ QUANTUM NEXUS OS v2.0
+# QUANTUM NEXUS OS X∞
 
-## Multi-AI Unified Enterprise Platform
+Institutional-grade Solana Financial Intelligence Engine
 
-### 🚀 Features
+- Multi-RPC with auto-failover
+- Risk Engine (hard gate ≤ 20)
+- Jito Tip Optimizer + Bundle Engine
+- Flash Loan Research Engine
+- MEV Arbitrage Scanner
+- Enterprise Dashboard
 
-- **10+ AI Models Integrated**: Anthropic Claude, Groq, OpenAI GPT, xAI Grok, Google Gemini, DeepSeek, Cohere, Mistral, Perplexity, Together AI
-- **Autonomous Agent Swarm**: 8+ specialized agents (AR-GE, Security, Finance, Data, ML, Marketing, Strategy, Evolution)
-- **Multi-Stream Revenue**: API arbitrage, SaaS, DeFi, White-label, Affiliate
-- **Dual Database**: MongoDB + PostgreSQL
-- **Real-time Dashboards**: Live KPI monitoring, Agent status, Revenue tracking
-- **Self-Evolution Engine**: Automatic optimization and module updates
-- **Production Ready**: Vercel deployment, security hardened, enterprise-grade
+## Live Dashboard
+https://quantum-nexus-os-erdemhasates-quantum-nexus.vercel.app
 
-### 🛠 Setup
-
-```bash
-# Install dependencies
-npm install
-pip install -r requirements.txt
-
-# Add environment variables
-cp .env.example .env
-
-# Development
-npm run dev
-
-# Build for production
-npm run build
-npm start
-```
-
-### 🔑 API Keys Required
-
-- `ANTHROPIC_API_KEY` - Claude API
-- `GROQ_API_KEY` - Groq (free tier available)
-- `OPENAI_API_KEY` - GPT-4
-- `XAI_API_KEY` - Grok API
-- `GOOGLE_API_KEY` - Gemini
-- `DEEPSEEK_API_KEY` - DeepSeek Chat
-- `COHERE_API_KEY` - Cohere Command
-- `MISTRAL_API_KEY` - Mistral Large
-- `PERPLEXITY_API_KEY` - Perplexity Pro
-- `MONGODB_URI` - MongoDB connection
-- `POSTGRES_URI` - PostgreSQL connection
-
-### 📊 Dashboard
-
-Access the main dashboard at `/` after deployment.
-
-### 🚀 Deploy to Vercel
-
-```bash
-vercel link
-vercel env add ANTHROPIC_API_KEY
-# (repeat for all API keys)
-vercel deploy --prod
-```
-
-### 📝 License
-
-MIT
+## Security
+Private keys are NEVER stored.
+Only simulated / risk-approved paths are allowed.
