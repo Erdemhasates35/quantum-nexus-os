@@ -13,29 +13,26 @@ permissions:
   packages: write
   pull-requests: write
   issues: write
+  security-events: write
 
 jobs:
   # JOB 1: Üretim Seviyesi Güvenlik ve Bağımlılık Taraması
   security_gate:
     name: 🛡️ Enterprise Security & CVE Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout Code Base
         uses: actions/checkout@v4
 
       - name: Initialize Aquasecurity Trivy Scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v1
         with:
           scan-type: 'fs'
           ignore-unfixed: true
           format: 'table'
           severity: 'CRITICAL,HIGH'
           output: 'trivy-security-report.txt'
-
-      - name: Execute Google OSV-Scanner (Recursive Audit)
-        uses: google/osv-scanner-action/osv-scanner-action@v1
-        with:
-          scan-args: --recursive ./
 
       - name: Archive Security Artifacts
         if: always()
@@ -44,11 +41,23 @@ jobs:
           name: enterprise-security-reports
           path: trivy-security-report.txt
 
+  # JOB 1b: OSV Recursive Scan (uses Google's reusable OSV workflow)
+  osv_scan:
+    name: 🔍 OSV Recursive Scan
+    needs: security_gate
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.8
+    with:
+      scan-args: '--recursive ./'
+    permissions:
+      contents: read
+      security-events: write
+
   # JOB 2: Solana & Rust Yüksek Performanslı Derleme Hattı
   solana_rust_ci:
     name: 🦀 Solana & Rust Core Validator
-    needs: security_gate
+    needs: [security_gate, osv_scan]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
@@ -73,8 +82,9 @@ jobs:
   # JOB 3: Kuantum/Matematiksel Modüller ve Tip Güvenlik Hattı
   python_quantum_qa:
     name: 🧠 Quantum Math & Logic Analytics QA
-    needs: security_gate
+    needs: [security_gate, osv_scan]
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
