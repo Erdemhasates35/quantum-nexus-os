@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "project": "Quantum Nexus",
+  "policy": "non-destructive-integration",
+  "repositories": [
+    {
+      "name": "quantum-nexus-os",
+      "url": "https://github.com/Erdemhasates35/quantum-nexus-os",
+      "role": "primary-application-core"
+    },
+    {
+      "name": "quantum-nexus-unified-core",
+      "url": "https://github.com/Erdemhasates35/quantum-nexus-unified-core",
+      "role": "unified-core-source"
+    },
+    {
+      "name": "quantum-nexus-os-omega-admin",
+      "url": "https://github.com/Erdemhasates35/quantum-nexus-os-omega-admin",
+      "role": "control-plane-source"
+    },
+    {
+      "name": "honeycomb-execution-core",
+      "url": "https://github.com/Erdemhasates35/honeycomb-execution-core",
+      "role": "execution-engine-source"
+    }
+  ],
+  "runtime": {
+    "web": "Vercel",
+    "api": "FastAPI",
+    "mobile": "Expo",
+    "database": "Supabase/PostgreSQL",
+    "events": "Redis Streams with local/HTTP fallback",
+    "execution": "Go/Linux x64",
+    "operator": "Android + Termux"
+  },
+  "execution": {
+    "default_mode": "paper",
+    "supported_exchanges": ["binance", "bitget"],
+    "live_mode": "operator-controlled"
+  }
+}
