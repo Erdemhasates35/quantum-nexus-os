@@ -1,1 +1,60 @@
-[paste content from File 2 above]
+name: Quantum Nexus Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quantum-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  yaml-and-python:
+    name: YAML / Python validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Python compile gate
+        run: |
+          python - <<'PY'
+          import pathlib, py_compile
+          failures=[]
+          files=[p for p in pathlib.Path('.').rglob('*.py') if '.git' not in p.parts and 'node_modules' not in p.parts]
+          for p in files:
+              try: py_compile.compile(str(p), doraise=True)
+              except Exception as exc: failures.append((str(p), str(exc)))
+          if failures:
+              for path, error in failures: print(f"{path}: {error}")
+              raise SystemExit(1)
+          print(f"Python compile OK: {len(files)} files")
+          PY
+      - name: Git diff whitespace gate
+        run: git diff --check
+      - name: GitHub Actions lint
+        uses: raven-actions/actionlint@v2
+
+  node:
+    name: Node build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+          package-manager-cache: false
+      - name: Install dependencies
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Production build
+        run: npm run build
