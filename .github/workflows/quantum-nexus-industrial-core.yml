@@ -37,7 +37,6 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '22'
-          cache: npm
           package-manager-cache: false
 
       - name: Install Python dependencies when declared
@@ -79,18 +78,26 @@ jobs:
   docker_validation:
     name: Optional Docker validation
     needs: repository_quality
-    if: hashFiles('Dockerfile') != ''
+    if: always() && needs.repository_quality.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
+      - name: Detect Dockerfile
+        id: docker
+        run: |
+          if [ -f Dockerfile ]; then echo "available=true" >> "$GITHUB_OUTPUT"; else echo "available=false" >> "$GITHUB_OUTPUT"; fi
       - name: Build container without publishing
+        if: steps.docker.outputs.available == 'true'
         run: docker build --file Dockerfile --tag quantum-nexus-ci:${{ github.sha }} .
+      - name: No Dockerfile
+        if: steps.docker.outputs.available != 'true'
+        run: echo "No Dockerfile is defined; container validation is not applicable."
 
   tagged_release:
     name: Optional tagged release
     needs: repository_quality
-    if: startsWith(github.ref, 'refs/tags/v') && hashFiles('.releaserc', '.releaserc.json', '.releaserc.yml', '.releaserc.yaml', 'release.config.js', 'release.config.cjs') != ''
+    if: startsWith(github.ref, 'refs/tags/v') && needs.repository_quality.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -99,14 +106,28 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - name: Detect release configuration
+        id: release_config
+        run: |
+          if [ -f .releaserc ] || [ -f .releaserc.json ] || [ -f .releaserc.yml ] || [ -f .releaserc.yaml ] || [ -f release.config.js ] || [ -f release.config.cjs ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Setup Node.js
+        if: steps.release_config.outputs.available == 'true'
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
-          cache: npm
           package-manager-cache: false
       - name: Install release tooling
+        if: steps.release_config.outputs.available == 'true'
         run: npm install --no-save semantic-release @semantic-release/github
       - name: Publish release
+        if: steps.release_config.outputs.available == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+      - name: No release configuration
+        if: steps.release_config.outputs.available != 'true'
+        run: echo "No semantic-release configuration is defined; tagged release publication is skipped."
