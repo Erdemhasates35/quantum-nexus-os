@@ -5,7 +5,7 @@ anthropic==0.37.0
 groq==0.9.0
 openai==1.14.0
 requests==2.32.0
-mongodb==4.9.1
+pymongo==4.9.1
 psycopg2-binary==2.9.9
 pydantic==2.7.0
 aiohttp==3.9.0
