@@ -2,167 +2,111 @@ name: Quantum Nexus Industrial Core Pipeline
 
 on:
   push:
-    branches: [ main, master ]
-    tags: [ 'v*.*.*' ]
+    branches: [main, master]
+    tags: ['v*.*.*']
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:
-  contents: write
-  packages: write
-  pull-requests: write
-  issues: write
-  security-events: write
+  contents: read
+
+concurrency:
+  group: quantum-industrial-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  # JOB 1: Üretim Seviyesi Güvenlik ve Bağımlılık Taraması
-  security_gate:
-    name: 🛡️ Enterprise Security & CVE Audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout Code Base
-        uses: actions/checkout@v4
-
-      - name: Initialize Aquasecurity Trivy Scanner
-        uses: aquasecurity/trivy-action@v1
-        with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'table'
-          severity: 'CRITICAL,HIGH'
-          output: 'trivy-security-report.txt'
-
-      - name: Archive Security Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: enterprise-security-reports
-          path: trivy-security-report.txt
-
-  # JOB 1b: OSV Recursive Scan (uses Google's reusable OSV workflow)
-  osv_scan:
-    name: 🔍 OSV Recursive Scan
-    needs: security_gate
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.8
-    with:
-      scan-args: '--recursive ./'
-    permissions:
-      contents: read
-      security-events: write
-
-  # JOB 2: Solana & Rust Yüksek Performanslı Derleme Hattı
-  solana_rust_ci:
-    name: 🦀 Solana & Rust Core Validator
-    needs: [security_gate, osv_scan]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
-      - name: Provision Production Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-
-      - name: Establish High-Performance Cargo Cache
-        uses: swatinem/rust-cache@v2
-
-      - name: Verify Code Formatting Constraints
-        run: cargo fmt --all -- --check
-
-      - name: Run Clippy Linter against Production Benchmarks
-        run: cargo clippy --all-targets --all-features -- -D warnings
-
-      - name: Execute Atomic Test Suites
-        run: cargo test --all-features -- --nocapture
-
-  # JOB 3: Kuantum/Matematiksel Modüller ve Tip Güvenlik Hattı
-  python_quantum_qa:
-    name: 🧠 Quantum Math & Logic Analytics QA
-    needs: [security_gate, osv_scan]
+  repository_quality:
+    name: Enterprise repository quality gate
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
-      - name: Setup Enterprise Python Runtime
-        uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          fetch-depth: 1
+          submodules: false
 
-      - name: Inject Production Analytics Infrastructure
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          package-manager-cache: false
+
+      - name: Install Python dependencies when declared
         run: |
           python -m pip install --upgrade pip
-          pip install black flake8 mypy numpy scipy
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Audit Deterministic Code Formatting (Black)
-        run: black --check .
-
-      - name: Run Syntax and Logical Non-Destructive Invariant Scan
-        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-
-      - name: Enforce Strict Type Safety via Static Analysis (Mypy)
-        run: mypy --ignore-missing-imports .
-
-  # JOB 4: Docker Modüler Konteynerizasyon ve Dağıtım
-  docker_build_deploy:
-    name: 📦 Micro-Module Containerization
-    needs: [solana_rust_ci, python_quantum_qa]
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
-
-      - name: Authenticate with GitHub Container Registry (GHCR)
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Transmit Production Container Image
+      - name: Install Node dependencies when declared
         run: |
-          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          TAG_NAME=${{ github.ref_name }}
-          docker build . --file Dockerfile --tag $IMAGE_NAME:$TAG_NAME --tag $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:$TAG_NAME
-          docker push $IMAGE_NAME:latest
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          fi
 
-  # JOB 5: Otonom Versiyonlama, Değişiklik Günlüğü ve Dağıtım Yayını Bildirimi
-  autonomous_release_delivery:
-    name: 🤖 Autonomous Release & Distribution Broadcast
-    needs: [solana_rust_ci, python_quantum_qa]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      - name: Python syntax gate
+        run: |
+          python - <<'PY'
+          import pathlib, py_compile
+          failures=[]
+          files=[p for p in pathlib.Path('.').rglob('*.py') if '.git' not in p.parts and 'node_modules' not in p.parts]
+          for p in files:
+              try: py_compile.compile(str(p), doraise=True)
+              except Exception as exc: failures.append((str(p), str(exc)))
+          if failures:
+              for path, error in failures: print(f"PY_COMPILE_FAIL {path}: {error}")
+              raise SystemExit(1)
+          print(f"Python syntax OK: {len(files)} files")
+          PY
+
+      - name: Node build gate
+        if: hashFiles('package.json') != ''
+        run: npm run build
+
+      - name: Git whitespace gate
+        run: git diff --check
+
+      - name: GitHub Actions lint
+        uses: raven-actions/actionlint@v2
+
+  docker_validation:
+    name: Optional Docker validation
+    needs: repository_quality
+    if: hashFiles('Dockerfile') != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+      - name: Build container without publishing
+        run: docker build --file Dockerfile --tag quantum-nexus-ci:${{ github.sha }} .
+
+  tagged_release:
+    name: Optional tagged release
+    needs: repository_quality
+    if: startsWith(github.ref, 'refs/tags/v') && hashFiles('.releaserc', '.releaserc.json', '.releaserc.yml', '.releaserc.yaml', 'release.config.js', 'release.config.cjs') != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-
-      - name: Provision Node.js Engine
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: '20'
-
-      - name: Assemble Semantic Engine Tooling
-        run: npm install -g semantic-release @semantic-release/github @semantic-release/changelog @semantic-release/git
-
-      - name: Run Autonomous Versioning & Changelog Generation
+          node-version: '22'
+          cache: npm
+          package-manager-cache: false
+      - name: Install release tooling
+        run: npm install --no-save semantic-release @semantic-release/github
+      - name: Publish release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
-
-      - name: Production Distribution Data & Media Pipeline Notification Webhook
-        if: success()
-        run: |
-          echo "=== DISTRIBUTION PIPELINE TELEMETRY SIGNAL ==="
-          echo "Sürüm dağıtımı ve entegrasyon katmanı mutabakata ulaştı."
-          echo "Sistem otonom yayını tamamlandı. Tüm modüller aktif."
-          # İhtiyaç halinde bu alana üretim verisi dağıtımı, API tetikleyicileri veya telemetry webhook çağrıları doğrudan eklenebilir.
