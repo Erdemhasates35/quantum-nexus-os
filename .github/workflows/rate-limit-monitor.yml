@@ -1,1 +1,29 @@
-[paste content from File 3 above]
+name: GitHub API Rate Limit Monitor
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rate_limit:
+    name: Check GitHub API capacity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query API rate limit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remaining="$(gh api rate_limit --jq '.rate.remaining')"
+          limit="$(gh api rate_limit --jq '.rate.limit')"
+          reset="$(gh api rate_limit --jq '.rate.reset')"
+          echo "GitHub API rate remaining: ${remaining}/${limit}"
+          echo "Reset epoch: ${reset}"
+          if [ "${remaining}" -lt 100 ]; then
+            echo "GitHub API rate limit is critically low." >&2
+            exit 1
+          fi
