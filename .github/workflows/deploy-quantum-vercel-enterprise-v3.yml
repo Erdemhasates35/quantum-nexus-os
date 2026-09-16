@@ -29,36 +29,47 @@ jobs:
           cache: npm
           package-manager-cache: false
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
       - name: Production build
         run: npm run build
 
   deploy:
     name: Optional Vercel production deploy
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != ''
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: read
     steps:
+      - name: Check deployment credentials
+        id: credentials
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "Vercel deployment secrets are not configured; build verification remains successful."
+          fi
       - name: Checkout
+        if: steps.credentials.outputs.available == 'true'
         uses: actions/checkout@v5
       - name: Setup Node.js
+        if: steps.credentials.outputs.available == 'true'
         uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
           package-manager-cache: false
       - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+        if: steps.credentials.outputs.available == 'true'
+        run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
       - name: Deploy to Vercel
+        if: steps.credentials.outputs.available == 'true'
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
