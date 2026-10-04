@@ -18,6 +18,11 @@ def build_opportunity(
 ) -> Opportunity:
     amount = D(borrow_amount)
     spread = D(gross_spread)
+    if amount < ZERO or spread < ZERO:
+        raise ValueError("borrow amount and spread must be non-negative")
+    for value in (loan_fee_bps, swap_fee_bps, slippage_bps, gas_cost, priority_cost, min_profit):
+        if D(value) < ZERO:
+            raise ValueError("economic costs and thresholds must be non-negative")
     loan_fee = amount * D(loan_fee_bps) / D(10_000)
     swap_fees = amount * D(swap_fee_bps) / D(10_000)
     slippage = amount * D(slippage_bps) / D(10_000)
