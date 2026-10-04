@@ -7,7 +7,7 @@ def test_break_even_edge_is_exact():
         loan_fee_bps=Decimal("5"), swap_fee_bps=Decimal("10"),
         slippage_bps=Decimal("5"), gas_cost=Decimal("2"),
         priority_cost=Decimal("1"), amount=Decimal("1000"))
-    assert x == Decimal("220")
+    assert x == Decimal("50")
 
 
 def test_max_slippage_is_explicit():
