@@ -5,7 +5,11 @@ from web3 import Web3
 from eth_account import Account
 
 RECEIVER_ABI = [
-    {"inputs":[{"internalType":"address","name":"asset","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"bytes","name":"params","type":"bytes"}],"name":"executeFlashLoan","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {"inputs":[
+        {"internalType":"address","name":"asset","type":"address"},
+        {"internalType":"uint256","name":"amount","type":"uint256"},
+        {"internalType":"bytes","name":"params","type":"bytes"}
+    ],"name":"executeFlashLoan","outputs":[],"stateMutability":"nonpayable","type":"function"},
 ]
 
 
@@ -27,9 +31,31 @@ class LiveEvmExecutor:
         self.chain_id = chain_id
         self.receiver = Web3.to_checksum_address(receiver)
 
+    def encode_sponsored_params(
+        self,
+        *,
+        executor: str,
+        route: bytes,
+        sponsor: str,
+        sponsor_fee: int,
+        minimum_profit: int,
+    ) -> bytes:
+        return self.w3.codec.encode(
+            ["address", "bytes", "address", "uint256", "uint256"],
+            [
+                Web3.to_checksum_address(executor),
+                route,
+                Web3.to_checksum_address(sponsor),
+                sponsor_fee,
+                minimum_profit,
+            ],
+        )
+
     def preflight(self, asset: str, amount: int, params: bytes) -> bool:
         contract = self.w3.eth.contract(address=self.receiver, abi=RECEIVER_ABI)
-        contract.functions.executeFlashLoan(Web3.to_checksum_address(asset), amount, params).call({"from": self.account.address})
+        contract.functions.executeFlashLoan(
+            Web3.to_checksum_address(asset), amount, params
+        ).call({"from": self.account.address})
         return True
 
     def execute(self, asset: str, amount: int, params: bytes) -> TxResult:
@@ -41,7 +67,9 @@ class LiveEvmExecutor:
         base = self.w3.eth.get_block("latest").get("baseFeePerGas")
         priority = int(os.getenv("FLASH_MAX_PRIORITY_FEE_WEI", "1000000000"))
         max_fee = int(os.getenv("FLASH_MAX_FEE_WEI", str((base or 0) * 2 + priority)))
-        tx = contract.functions.executeFlashLoan(Web3.to_checksum_address(asset), amount, params).build_transaction({
+        tx = contract.functions.executeFlashLoan(
+            Web3.to_checksum_address(asset), amount, params
+        ).build_transaction({
             "from": self.account.address,
             "chainId": self.chain_id,
             "nonce": nonce,
