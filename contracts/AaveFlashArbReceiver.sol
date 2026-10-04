@@ -12,28 +12,43 @@ interface IFlashLoanSimpleReceiver {
 interface IPool {
     function flashLoanSimple(address receiverAddress,address asset,uint256 amount,bytes calldata params,uint16 referralCode) external;
 }
-interface IRouteExecutor { function execute(bytes calldata data) external; }
 
 contract AaveFlashArbReceiver is IFlashLoanSimpleReceiver {
+    struct RouteAction {
+        address target;
+        uint256 value;
+        bytes data;
+    }
+
     address public immutable owner;
     IPool public immutable pool;
-    mapping(address => bool) public approvedExecutors;
+    address public profitRecipient;
+    mapping(address => bool) public approvedTargets;
 
     error Unauthorized();
     error WrongCaller();
     error RouteFailed();
+    error TargetNotApproved();
     error InsufficientRepayment();
     error InsufficientProfit();
     error SponsorPaymentFailed();
+    error ProfitPaymentFailed();
 
-    constructor(address pool_) {
+    constructor(address pool_, address profitRecipient_) {
+        if (pool_ == address(0) || profitRecipient_ == address(0)) revert Unauthorized();
         owner = msg.sender;
         pool = IPool(pool_);
+        profitRecipient = profitRecipient_;
     }
 
-    function setExecutor(address executor, bool approved) external {
+    function setTarget(address target, bool approved) external {
         if (msg.sender != owner) revert Unauthorized();
-        approvedExecutors[executor] = approved;
+        approvedTargets[target] = approved;
+    }
+
+    function setProfitRecipient(address recipient) external {
+        if (msg.sender != owner || recipient == address(0)) revert Unauthorized();
+        profitRecipient = recipient;
     }
 
     function executeFlashLoan(address asset,uint256 amount,bytes calldata params) external {
@@ -41,10 +56,10 @@ contract AaveFlashArbReceiver is IFlashLoanSimpleReceiver {
         pool.flashLoanSimple(address(this),asset,amount,params,0);
     }
 
-    // params = (executor, route, sponsor, sponsorFee, minimumProfit).
-    // The relayer/sponsor fronts native gas. If and only if the atomic trade
-    // finishes with repayment + sponsorFee + minimumProfit, the receiver
-    // reimburses the sponsor from the same asset in the same transaction.
+    // params = (RouteAction[] actions, address sponsor, uint256 sponsorFee,
+    //           uint256 minimumProfit).
+    // The receiver itself calls each approved target, so DEX routers see the
+    // receiver as msg.sender and can use token approvals owned by the receiver.
     function executeOperation(
         address asset,
         uint256 amount,
@@ -55,29 +70,43 @@ contract AaveFlashArbReceiver is IFlashLoanSimpleReceiver {
         if (msg.sender != address(pool) || initiator != address(this)) revert WrongCaller();
 
         (
-            address executor,
-            bytes memory route,
+            RouteAction[] memory actions,
             address sponsor,
             uint256 sponsorFee,
             uint256 minimumProfit
-        ) = abi.decode(params, (address, bytes, address, uint256, uint256));
+        ) = abi.decode(params, (RouteAction[], address, uint256, uint256));
 
-        if (executor == address(0) || !approvedExecutors[executor]) revert RouteFailed();
+        if (actions.length == 0 || actions.length > 8) revert RouteFailed();
 
-        (bool ok,) = executor.call(abi.encodeCall(IRouteExecutor.execute, (route)));
-        if (!ok) revert RouteFailed();
+        for (uint256 i = 0; i < actions.length; i++) {
+            RouteAction memory action = actions[i];
+            if (action.target == address(0) || !approvedTargets[action.target]) {
+                revert TargetNotApproved();
+            }
+            (bool ok,) = action.target.call{value: action.value}(action.data);
+            if (!ok) revert RouteFailed();
+        }
 
         uint256 repayment = amount + premium;
+        uint256 balance = IERC20(asset).balanceOf(address(this));
         uint256 required = repayment + sponsorFee + minimumProfit;
-        if (IERC20(asset).balanceOf(address(this)) < required) revert InsufficientProfit();
+        if (balance < required) revert InsufficientProfit();
 
         if (sponsorFee > 0) {
             if (sponsor == address(0)) revert SponsorPaymentFailed();
             if (!IERC20(asset).transfer(sponsor, sponsorFee)) revert SponsorPaymentFailed();
         }
 
-        if (IERC20(asset).balanceOf(address(this)) < repayment) revert InsufficientRepayment();
-        IERC20(asset).approve(address(pool), repayment);
+        uint256 profit = balance - repayment - sponsorFee;
+        if (profit < minimumProfit) revert InsufficientProfit();
+        if (!IERC20(asset).approve(address(pool), repayment)) revert InsufficientRepayment();
+
+        if (profit > 0) {
+            if (!IERC20(asset).transfer(profitRecipient, profit)) revert ProfitPaymentFailed();
+        }
+
         return true;
     }
+
+    receive() external payable {}
 }
