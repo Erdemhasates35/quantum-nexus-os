@@ -1,11 +1,44 @@
-node_modules/
-.next/
-out/
-build/
-*.log
+# ============================================================
+# QUANTUM NEXUS OS — SECURITY BOUNDARY
+# ============================================================
+
+# Secrets / credentials
 .env
-.env.local
+.env.*
+!.env.example
+!.env.flashloan.example
+
+*.pem
+*.key
+*.p12
+*.keystore
+*.secret
+*private*
+*mnemonic*
+*seed*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Foundry build output
+cache/
+out/
+
+# Local runtime data
+*.log
+*.pid
+*.tmp
+*.swp
+*.swo
+
+# OS/editor
 .DS_Store
+Thumbs.db
 .vscode/
 .idea/
-__pycache__/
+
+# Local reports that may contain environment metadata
+INSTITUTIONAL_FLASHLOAN_AUDIT.txt
