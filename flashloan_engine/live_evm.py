@@ -1,24 +1,29 @@
 from __future__ import annotations
+
 import os
 from dataclasses import dataclass
 from web3 import Web3
 from eth_account import Account
 
 RECEIVER_ABI = [
-    {"inputs":[
-        {"internalType":"address","name":"asset","type":"address"},
-        {"internalType":"uint256","name":"amount","type":"uint256"},
-        {"internalType":"bytes","name":"params","type":"bytes"}
-    ],"name":"executeFlashLoan","outputs":[],"stateMutability":"nonpayable","type":"function"},
+    {
+        "inputs": [
+            {"internalType": "address", "name": "asset", "type": "address"},
+            {"internalType": "uint256", "name": "amount", "type": "uint256"},
+            {"internalType": "bytes", "name": "params", "type": "bytes"},
+        ],
+        "name": "executeFlashLoan",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+    },
 ]
-
 
 @dataclass(frozen=True)
 class TxResult:
     tx_hash: str
     block_number: int
     gas_used: int
-
 
 class LiveEvmExecutor:
     def __init__(self, rpc_url: str, private_key: str, receiver: str, chain_id: int):
@@ -34,20 +39,26 @@ class LiveEvmExecutor:
     def encode_sponsored_params(
         self,
         *,
-        executor: str,
-        route: bytes,
+        actions: list[tuple[str, int, bytes]],
         sponsor: str,
         sponsor_fee: int,
         minimum_profit: int,
     ) -> bytes:
+        encoded_actions = [
+            (
+                Web3.to_checksum_address(target),
+                int(value),
+                data,
+            )
+            for target, value, data in actions
+        ]
         return self.w3.codec.encode(
-            ["address", "bytes", "address", "uint256", "uint256"],
+            ["(address,uint256,bytes)[]", "address", "uint256", "uint256"],
             [
-                Web3.to_checksum_address(executor),
-                route,
+                encoded_actions,
                 Web3.to_checksum_address(sponsor),
-                sponsor_fee,
-                minimum_profit,
+                int(sponsor_fee),
+                int(minimum_profit),
             ],
         )
 
@@ -73,7 +84,6 @@ class LiveEvmExecutor:
             "from": self.account.address,
             "chainId": self.chain_id,
             "nonce": nonce,
-            "gas": 0,
             "maxPriorityFeePerGas": priority,
             "maxFeePerGas": max_fee,
         })
