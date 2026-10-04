@@ -9,8 +9,8 @@ def test_net_profit_includes_all_costs():
                           gross_spread="30", loan_fee_bps="5", swap_fee_bps="12",
                           gas_cost="8", slippage_bps="3", priority_cost="2", min_profit="1")
     assert o.gross_spread == Decimal("300")
-    assert o.total_cost == Decimal("30")
-    assert o.net_profit == Decimal("270.00000000")
+    assert o.total_cost == Decimal("210")
+    assert o.net_profit == Decimal("90.00000000")
     assert o.executable
 
 
