@@ -1,0 +1,24 @@
+name: Flashloan Quality Gate
+
+on:
+  push:
+    branches: ["main", "flashloan-institutional-engine", "flashloan-sponsored-execution"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r requirements-flashloan.txt
+      - run: python -m pytest -q tests/test_economics.py tests/test_orchestrator.py tests/test_controls.py tests/test_optimizer.py tests/test_edge.py tests/test_live_evm.py tests/test_gas_sponsorship.py
+      - run: python -m compileall -q flashloan_engine scripts/run_flashloan_engine.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - run: forge build --root .
