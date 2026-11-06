@@ -191,6 +191,22 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
   }
 }
 
+async function broadcastTelemetry(kind: TelemetryKind, id: string): Promise<boolean> {
+  const client = await pool.connect();
+  try {
+    await client.queryObject(
+      "select realtime.send($1::jsonb, $2, $3, true)",
+      [JSON.stringify({ kind, id }), "telemetry_updated", "nexus:telemetry:admin"],
+    );
+    return true;
+  } catch {
+    console.error("nexus_telemetry_broadcast_failed");
+    return false;
+  } finally {
+    client.release();
+  }
+}
+
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method !== "POST") return response({ error: "method_not_allowed" }, 405);
   if (!(req.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) {
@@ -207,7 +223,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
     if (typeof kind !== "string" || !Object.hasOwn(fields, kind)) return response({ error: "unsupported_kind" }, 400);
     const record = recordFor(kind as TelemetryKind, input.record);
     const id = await insertRecord(kind as TelemetryKind, record);
-    return response({ ok: true, kind, id }, 201);
+    const broadcasted = await broadcastTelemetry(kind as TelemetryKind, id);
+    return response({ ok: true, kind, id, broadcast: broadcasted ? "sent" : "unavailable" }, 201);
   } catch (error) {
     const message = error instanceof Error ? error.message : "request_rejected";
     if (/^(record_|unknown_|sensitive_|payload_|non_finite_|atomic_|invalid_|unsupported_)/.test(message)) {
