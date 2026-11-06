@@ -17,13 +17,35 @@ class FlashLoanOrchestrator:
         self.config.validate()
 
     def capabilities(self) -> dict:
+        rpc_configured = {
+            "ethereum": bool(self.config.ethereum_rpc),
+            "polygon": bool(self.config.polygon_rpc),
+            "gnosis": bool(self.config.gnosis_rpc),
+        }
         return {
-            "ethereum": NETWORKS["ethereum"].flash_loan_provider,
-            "polygon": NETWORKS["polygon"].flash_loan_provider,
-            "gnosis": NETWORKS["gnosis"].flash_loan_provider,
-            "solana": "Jupiter quote adapter; flash-loan execution not implemented",
-            "binance": "market-data/account observer; not a flash-loan lender",
+            "ethereum": {
+                "provider": NETWORKS["ethereum"].flash_loan_provider,
+                "rpc_configured": rpc_configured["ethereum"],
+            },
+            "polygon": {
+                "provider": NETWORKS["polygon"].flash_loan_provider,
+                "rpc_configured": rpc_configured["polygon"],
+            },
+            "gnosis": {
+                "provider": NETWORKS["gnosis"].flash_loan_provider,
+                "rpc_configured": rpc_configured["gnosis"],
+            },
+            "solana": {
+                "provider": "Jupiter quote adapter",
+                "flash_loan_execution_implemented": False,
+                "rpc_configured": bool(self.config.solana_rpc),
+            },
+            "binance": {
+                "role": "market-data/account observer",
+                "flash_loan_lender": False,
+            },
             "live_execution": self.config.live_execution,
+            "live_submission_implemented": False,
         }
 
     def evaluate(self, *, chain: Chain, asset: str, borrow_amount: str,
