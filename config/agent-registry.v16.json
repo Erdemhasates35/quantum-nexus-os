@@ -1,0 +1,46 @@
+{
+  "version": "16.0",
+  "core": [
+    ["S01","Jito Atomic Arbitrage","Yellowstone Sentinel","SVM Simulator","Jito Executor"],
+    ["S02","Rent Reclaim","Account Auditor","SPL Close Planner","Rent Reconciler"],
+    ["S03","Liquidity Migration","Migration Watcher","Token Security Guard","Risk-Gated Planner"],
+    ["S04","Wallet Graph Intelligence","Graph Analyzer","Risk Assessor","Mirror Auditor"],
+    ["S05","Token-2022 Fee Intelligence","Transfer Hook Monitor","Fee Harvester","Reward Allocator"],
+    ["S06","Cross-DEX Flash Arbitrage","Pool Graph Path Finder","Flash Liquidity Planner","Atomic Settler"],
+    ["S07","Relayer and Fee Abstraction","Signature Policy","Fee-Payer Risk","Batch Dispatcher"],
+    ["S08","Predictive Volatility and Margin","State Analyzer","Oracle Confidence","Margin Optimizer"],
+    ["S09","Private Orderflow and Auction","Privacy Router","Bundle Auction Model","Leader Router"],
+    ["S10","Autonomous Liquidity Rebalancing","Yield Hunter","Impermanent-Loss Guard","Compound Planner"]
+  ],
+  "academic": [
+    "Market Data Provenance Auditor",
+    "Microstructure Researcher",
+    "Counterfactual Simulator",
+    "Portfolio Risk Scientist",
+    "Capital Efficiency Analyst",
+    "Transaction Forensics",
+    "Fee Calibration Scientist",
+    "Protocol Compliance Auditor",
+    "Telemetry Reliability Engineer",
+    "Security Threat Analyst"
+  ],
+  "frontier": [
+    "Cross-Chain Intent Researcher",
+    "Intent Routing Optimizer",
+    "MEV Auction Researcher",
+    "Oracle Anomaly Detector",
+    "Adaptive Hedging Researcher",
+    "Yield Quality Analyst",
+    "Wallet Reputation Analyst",
+    "Privacy Engineering Researcher",
+    "Compute Budget Optimizer",
+    "Revenue Attribution Auditor"
+  ],
+  "states": ["DESIGNED","CONNECTED","OBSERVING","ARMED","SUBMITTED","LANDED","SETTLED","HALTED"],
+  "settlementEvidence": ["jito_bundle_status","solana_signature_status","finalized_slot","native_balance_delta","token_balance_delta"],
+  "walletStandards": {
+    "solana": ["Wallet Standard","Phantom","Solflare"],
+    "evmAndSolana": ["MetaMask Connect"],
+    "testKeyMode": "client-memory-only-test-clusters"
+  }
+}
