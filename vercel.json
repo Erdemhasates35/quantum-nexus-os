@@ -4,6 +4,10 @@
     {
       "src": "index.html",
       "use": "@vercel/static"
+    },
+    {
+      "src": "config/agent-registry.v16.json",
+      "use": "@vercel/static"
     }
   ],
   "routes": [

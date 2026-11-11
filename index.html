@@ -1,51 +1,156 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Todo — Local Storage App</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070b14">
+<meta name="description" content="Quantum Nexus OS — agent topology, wallet connectivity and deployment control center">
+<title>Quantum Nexus OS v16 — Control Center</title>
+<style>
+:root{color-scheme:dark;--bg:#070b14;--panel:#101827;--panel2:#0c1320;--line:#22324a;--text:#e9f3ff;--muted:#8da4bf;--cyan:#4de8ff;--violet:#b58cff;--green:#67e8b5;--amber:#ffcc70;--red:#ff7e91}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#14233a 0,transparent 45%),radial-gradient(ellipse at 85% 8%,#21163d 0,transparent 40%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}.shell{max-width:1440px;margin:auto;padding:28px 22px 64px}.top{display:flex;justify-content:space-between;gap:20px;align-items:center;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:14px}.mark{width:48px;height:48px;border:1px solid #3c6484;border-radius:15px;display:grid;place-items:center;color:var(--cyan);font-size:25px;box-shadow:0 0 28px #35d9ff24}.eyebrow{font-size:11px;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase}.brand h1{font-size:clamp(24px,4vw,38px);line-height:1.1;margin:3px 0}.sub{color:var(--muted);font-size:13px}.top-actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:1px solid #31506a;background:#13243a;color:var(--text);border-radius:10px;padding:10px 14px;font-weight:650;cursor:pointer}.btn.primary{background:linear-gradient(110deg,#087f9a,#6345a6);border-color:#57dfff}.btn:disabled{opacity:.5;cursor:not-allowed}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-top:22px}.panel{background:linear-gradient(155deg,#111d2eec,#0b1220f2);border:1px solid var(--line);border-radius:16px;padding:18px;min-width:0;box-shadow:0 12px 35px #0003}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-4{grid-column:span 4}.span-6{grid-column:span 6}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:13px}.section-head h2{font-size:16px;margin:0}.muted{color:var(--muted)}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.metric{padding:13px;border:1px solid #20334a;border-radius:12px;background:#0b1422}.metric strong{display:block;font-size:25px;color:var(--cyan);font-variant-numeric:tabular-nums}.metric small{color:var(--muted)}.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid #36506a;border-radius:999px;padding:3px 9px;font-size:11px;color:var(--muted);white-space:nowrap}.pill.design{color:var(--amber);border-color:#725b32}.pill.connected{color:var(--green);border-color:#27654f}.wallets{display:grid;gap:10px}.wallet{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid #20334a;border-radius:11px;background:#0b1422}.wallet-name{font-weight:650}.wallet-address{display:block;color:var(--muted);font-size:11px;overflow-wrap:anywhere}.wallet-status{font-size:11px;color:var(--muted)}.clusters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.cluster{border:1px solid #22354c;border-radius:13px;padding:14px;background:#0b1422}.cluster h3{font-size:14px;margin:0 0 10px}.agent{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid #1b2a3d;font-size:12px}.agent:first-of-type{border-top:0}.agent span:first-child{color:#d9e8f7}.support-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.support{padding:9px 10px;border:1px solid #20334a;border-radius:10px;background:#0b1422;font-size:12px}.support-profile{padding:11px 12px;border:1px solid #20334a;border-radius:10px;background:#0b1422}.support-profile strong{display:block;color:#d9e8f7;font-size:12px}.support-profile p{margin:6px 0 0;color:var(--muted);font-size:11px}.support-profile .evidence{color:#9fe6d1}.links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.project-link{display:block;padding:9px 10px;border:1px solid #20334a;border-radius:9px;background:#0b1422;font-size:12px;overflow-wrap:anywhere}.status-line{min-height:20px;color:var(--muted);font-size:12px;margin-top:8px}.foot{margin-top:22px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px}.notice{border-left:3px solid var(--amber);padding:10px 12px;background:#211b10;border-radius:0 9px 9px 0;color:#e7d4aa;font-size:12px}.search{width:100%;background:#091321;border:1px solid #2a4059;border-radius:9px;padding:10px;color:var(--text);margin-bottom:10px}
+@media(max-width:900px){.span-8,.span-4,.span-6{grid-column:span 12}.links{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.shell{padding:18px 12px 40px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.clusters,.support-grid{grid-template-columns:1fr}.links{grid-template-columns:1fr}.panel{padding:14px}}
+</style>
 </head>
 <body>
-  <main class="app">
-    <header>
-      <h1>Todo</h1>
-      <p class="subtitle">Small todo app with localStorage persistence</p>
-    </header>
+<main class="shell">
+  <header class="top">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">α</div>
+      <div><div class="eyebrow">Sovereign orchestration layer</div><h1>QUANTUM NEXUS OS <span style="color:var(--cyan)">v16</span></h1><div class="sub">Control Center · Termux ARM64 · Solana SVM · Supabase · Vercel</div></div>
+    </div>
+    <div class="top-actions"><a class="btn" href="https://github.com/Erdemhasates35/quantum-nexus-os">GitHub repository</a><a class="btn primary" href="https://github.com/Erdemhasates35/quantum-nexus-os/pull/58">v16 integration PR</a></div>
+  </header>
 
-    <section class="new-todo">
-      <input id="newTodoInput" type="text" placeholder="Add a new task and press Enter" aria-label="Add new todo">
-      <select id="prioritySelect" aria-label="Priority">
-        <option value="normal">Normal</option>
-        <option value="high">High</option>
-        <option value="low">Low</option>
-      </select>
-      <button id="addBtn" aria-label="Add todo">Add</button>
-    </section>
-
-    <section class="controls">
-      <div class="left">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="active">Active</button>
-        <button class="filter-btn" data-filter="completed">Completed</button>
+  <section class="grid">
+    <div class="panel span-12">
+      <div class="section-head"><h2>System overview</h2><span class="pill design">Registry loaded · execution handlers activate separately</span></div>
+      <div class="metrics">
+        <div class="metric"><strong id="coreCount">30</strong><small>Core strategy roles</small></div>
+        <div class="metric"><strong id="academicCount">20</strong><small>Academic control roles</small></div>
+        <div class="metric"><strong id="frontierCount">10</strong><small>Frontier research roles</small></div>
+        <div class="metric"><strong id="clusterCount">10</strong><small>Strategy clusters</small></div>
       </div>
+      <p class="sub" style="margin:12px 0 0">The registry is the verified topology. A role becomes operational only after its handler, provider connection and evidence-backed health checks are active.</p>
+    </div>
 
-      <div class="right">
-        <input id="searchInput" type="search" placeholder="Search tasks..." aria-label="Search todos">
-        <button id="clearCompleted">Clear completed</button>
+    <section class="panel span-4">
+      <div class="section-head"><h2>Wallet connections</h2><span class="pill">User-authorized</span></div>
+      <div class="wallets">
+        <div class="wallet"><div><span class="wallet-name">Phantom</span><span id="phantomAddress" class="wallet-address">Not connected</span></div><button class="btn" id="connectPhantom">Connect</button></div>
+        <div class="wallet"><div><span class="wallet-name">Solflare</span><span id="solflareAddress" class="wallet-address">Not connected</span></div><button class="btn" id="connectSolflare">Connect</button></div>
+        <div class="wallet"><div><span class="wallet-name">MetaMask · EVM</span><span id="metamaskAddress" class="wallet-address">Not connected</span></div><button class="btn" id="connectMetaMask">Connect</button></div>
       </div>
+      <div id="walletMessage" class="status-line" role="status">No wallet session has been requested.</div>
+      <p class="sub">Connections request public account access only. Signing and transaction submission remain separate, explicit user approvals.</p>
     </section>
 
-    <section id="todoList" class="todo-list" aria-live="polite" aria-label="Todo list">
-      <!-- Items inserted here -->
+    <section class="panel span-8">
+      <div class="section-head"><h2>Execution integrity</h2><span class="pill design">Evidence-gated states</span></div>
+      <div class="metrics">
+        <div class="metric"><strong>OBSERVE</strong><small>Live source data</small></div>
+        <div class="metric"><strong>ARM</strong><small>Risk checks passed</small></div>
+        <div class="metric"><strong>SUBMIT</strong><small>Signed request sent</small></div>
+        <div class="metric"><strong>SETTLE</strong><small>Finalized + reconciled</small></div>
+      </div>
+      <div class="notice" style="margin-top:13px">A bundle acknowledgement is not a landed transaction. A simulation is not a trade. Realized PnL requires finalized on-chain evidence and reconciled balance deltas. No zero-risk, zero-slippage or guaranteed-profit claim is made.</div>
     </section>
 
-    <footer class="footer">
-      <span id="countText">0 items</span>
-      <small>Saved locally in your browser</small>
-    </footer>
-  </main>
+    <section class="panel span-12">
+      <div class="section-head"><h2>10 strategy clusters · 30 core roles</h2><span class="pill design">DESIGNED until connected</span></div>
+      <div id="clusters" class="clusters"><div class="muted">Loading agent registry…</div></div>
+    </section>
 
-  <script src="app.js"></script>
+    <section class="panel span-6">
+      <div class="section-head"><h2>Academic control agents</h2><span class="pill">20 evidence-producing roles</span></div>
+      <div id="academic" class="support-grid"></div>
+    </section>
+    <section class="panel span-6">
+      <div class="section-head"><h2>Frontier research agents</h2><span class="pill">10 roles</span></div>
+      <div id="frontier" class="support-grid"></div>
+    </section>
+
+    <section class="panel span-12">
+      <div class="section-head"><h2>Vercel application directory</h2><span class="pill">53 verified project domains</span></div>
+      <input class="search" id="projectSearch" type="search" placeholder="Filter applications by name…" aria-label="Filter Vercel applications">
+      <div id="projects" class="links"></div>
+    </section>
+  </section>
+  <footer class="foot">α = 0.00729735256 is displayed as a scientific reference value only; it is not used as an unvalidated trading threshold. Dashboard source: v16 agent registry. No credentials are persisted by this page.</footer>
+</main>
+<script>
+const projects = [["quantum-nexus-os","https://quantum-nexus-os.vercel.app"],["quantum-nexus-os-7uz5","https://quantum-nexus-os-7uz5.vercel.app"],["quantum-nexus-os-xhb8","https://quantum-nexus-os-xhb8.vercel.app"],["quantum-nexus-os-n413","https://quantum-nexus-os-n413.vercel.app"],["quantum-nexus-os-awxu","https://quantum-nexus-os-awxu.vercel.app"],["quantum-nexus-solana-core-live","https://quantum-nexus-solana-core-live.vercel.app"],["quantum-nexus-solana-core-2026","https://quantum-nexus-solana-core-2026.vercel.app"],["quantum-nexus-real","https://quantum-nexus-real.vercel.app"],["quantum-nexus-ultimate","https://quantum-nexus-ultimate.vercel.app"],["quantum-nexus-unified","https://quantum-nexus-unified.vercel.app"],["quantum-nexus-unified-2g9a","https://quantum-nexus-unified-2g9a.vercel.app"],["quantum-nexus-unified-core","https://quantum-nexus-unified-core.vercel.app"],["quantum-nexus-unified-core-bi9r","https://quantum-nexus-unified-core-bi9r.vercel.app"],["quantum-nexus-unified-core-u61y","https://quantum-nexus-unified-core-u61y.vercel.app"],["quantum-nexus-unified-core-28h3","https://quantum-nexus-unified-core-28h3-eight.vercel.app"],["quantum-nexus-unified-core-7cqh","https://quantum-nexus-unified-core-7cqh.vercel.app"],["nexus-sovereign","https://nexus-sovereign-zeta.vercel.app"],["nexus-sovereign-os","https://nexus-sovereign-os.vercel.app"],["quantum-word-core","https://quantum-word-core.vercel.app"],["yapay-zeka-devleti","https://yapay-zeka-devleti.vercel.app"],["erdemin-yapay-zeka-devleti","https://erdemin-yapay-zeka-devleti.vercel.app"],["erdemin-yapay-zeka-devleti3536","https://erdemin-yapay-zeka-devleti3536.vercel.app"],["arelin-yapayzeka-parlementosu","https://arelin-yapayzeka-parlementosu.vercel.app"],["arelin-yapayzeka-2026parlementosu","https://arelin-yapayzeka-2026parlementosu.vercel.app"],["honeycomb-omega-x","https://honeycomb-omega-x.vercel.app"],["eve-slack-agent","https://eve-slack-agent-sigma-eight.vercel.app"],["eve-slack-agent-ge2f","https://eve-slack-agent-ge2f.vercel.app"],["eve-slack-agent-cceh","https://eve-slack-agent-cceh-one.vercel.app"],["legal-ai-platform","https://legal-ai-platform-eta.vercel.app"],["legal-ai-platform-mes8","https://legal-ai-platform-mes8.vercel.app"],["sesli","https://sesli-one.vercel.app"],["weth-flash-bot","https://weth-flash-bot.vercel.app"],["weth-flash-bot-fixed","https://weth-flash-bot-fixed.vercel.app"],["weth-flash-bot-fixed2","https://weth-flash-bot-fixed2.vercel.app"],["mongodb-starter","https://mongodb-starter-iota-ten-48.vercel.app"],["nextjs-with-supabase","https://nextjs-with-supabase-roan-seven.vercel.app"],["workflow-docs","https://workflow-docs-one.vercel.app"],["workflow-docs-z974","https://workflow-docs-z974.vercel.app"],["supabase-common","https://supabase-common.vercel.app"],["supabase-design-system","https://supabase-design-system-sandy.vercel.app"],["app","https://app-roan-two-78.vercel.app"],["nextjs-boilerplate","https://nextjs-boilerplate-ruby-seven-49.vercel.app"],["nextjs-boilerplate-s2f7","https://nextjs-boilerplate-s2f7.vercel.app"],["nuxtjs-boilerplate","https://nuxtjs-boilerplate-six-alpha.vercel.app"],["nuxt-ai-chat","https://nuxt-ai-chat-five-xi.vercel.app"],["anchor-web3js-nextjs","https://anchor-web3js-nextjs-iota.vercel.app"],["anchor-web3js-nextjs-a91y","https://anchor-web3js-nextjs-a91y.vercel.app"],["aws-dynamodb","https://aws-dynamodb-nine-azure.vercel.app"],["aws-dynamodb-erdem3536","https://aws-dynamodb-erdem3536.vercel.app"],["fdroiddata","https://fdroiddata.vercel.app"],["fdroiddata-9nj5","https://fdroiddata-9nj5.vercel.app"],["labs","https://labs-xi.vercel.app"],["statsig-flags-sdk-example","https://statsig-flags-sdk-example-two.vercel.app"]];
+
+function make(tag, cls, text) { const el=document.createElement(tag); if(cls) el.className=cls; if(text!==undefined) el.textContent=text; return el; }
+function renderProjects(filter="") {
+ const host=document.getElementById("projects"); host.replaceChildren();
+ projects.filter(([name])=>name.toLowerCase().includes(filter.toLowerCase())).forEach(([name,url])=>{
+  const a=make("a","project-link",name); a.href=url; a.target="_blank"; a.rel="noopener noreferrer"; host.append(a);
+ });
+}
+document.getElementById("projectSearch").addEventListener("input",e=>renderProjects(e.target.value));
+renderProjects();
+
+async function loadRegistry() {
+ const response=await fetch("/config/agent-registry.v16.json",{cache:"no-store"});
+ if(!response.ok) throw new Error("Agent registry could not be loaded ("+response.status+")");
+ const data=await response.json();
+ document.getElementById("coreCount").textContent=String(data.core.reduce((n,c)=>n+c.length-2,0));
+ document.getElementById("academicCount").textContent=String(data.academic.length);
+ document.getElementById("frontierCount").textContent=String(data.frontier.length);
+ document.getElementById("clusterCount").textContent=String(data.core.length);
+ const clusters=document.getElementById("clusters"); clusters.replaceChildren();
+ data.core.forEach(([id,name,...agents])=>{
+  const card=make("article","cluster"); card.append(make("h3",null,id+" · "+name));
+  agents.forEach(agent=>{const row=make("div","agent");row.append(make("span",null,agent),make("span","pill design","DESIGNED"));card.append(row);});
+  clusters.append(card);
+ });
+ const academicHost=document.getElementById("academic");academicHost.replaceChildren();
+ data.academicProfiles.forEach(profile=>{
+  const item=make("article","support-profile");
+  item.append(make("strong",null,profile.role));
+  item.append(make("p",null,profile.scope));
+  item.append(make("p","evidence","Evidence output: "+profile.evidence));
+  academicHost.append(item);
+ });
+ const frontierHost=document.getElementById("frontier");frontierHost.replaceChildren();
+ data.frontier.forEach(name=>{const item=make("div","support",name);frontierHost.append(item);});
+}
+loadRegistry().catch(error=>{document.getElementById("clusters").textContent=error.message;});
+
+function setWallet(id,address,message) {
+ document.getElementById(id).textContent=address||"Not connected";
+ document.getElementById("walletMessage").textContent=message;
+}
+async function connectSolana(kind) {
+ const button=document.getElementById(kind==="phantom"?"connectPhantom":"connectSolflare");
+ button.disabled=true;
+ try {
+  let provider;
+  if(kind==="phantom") provider=window.phantom?.solana || (window.solana?.isPhantom?window.solana:null);
+  else provider=window.solflare || (window.solana?.isSolflare?window.solana:null);
+  if(!provider) throw new Error(kind==="phantom"?"Phantom extension/provider not detected.":"Solflare extension/provider not detected.");
+  const result=await provider.connect();
+  const address=(result?.publicKey||provider.publicKey)?.toString();
+  if(!address) throw new Error("Wallet connected without a readable public address.");
+  setWallet(kind+"Address",address,kind+" connected. No transaction was signed or sent.");
+ } catch(error) {setWallet(kind+"Address","Not connected",error.message||"Wallet connection was cancelled.");}
+ finally {button.disabled=false;}
+}
+document.getElementById("connectPhantom").addEventListener("click",()=>connectSolana("phantom"));
+document.getElementById("connectSolflare").addEventListener("click",()=>connectSolana("solflare"));
+document.getElementById("connectMetaMask").addEventListener("click",async()=>{
+ const button=document.getElementById("connectMetaMask");button.disabled=true;
+ try {
+  if(!window.ethereum?.isMetaMask) throw new Error("MetaMask EVM provider not detected.");
+  const accounts=await window.ethereum.request({method:"eth_requestAccounts"});
+  if(!accounts?.length) throw new Error("No account was returned.");
+  const chain=await window.ethereum.request({method:"eth_chainId"});
+  setWallet("metamaskAddress",accounts[0], "MetaMask connected · chain "+chain+". No transaction was signed or sent.");
+ } catch(error) {setWallet("metamaskAddress","Not connected",error.message||"MetaMask connection was cancelled.");}
+ finally {button.disabled=false;}
+});
+</script>
 </body>
 </html>

@@ -1,0 +1,239 @@
+{
+  "version": "16.0",
+  "core": [
+    [
+      "S01",
+      "Jito Atomic Arbitrage",
+      "Yellowstone Sentinel",
+      "SVM Simulator",
+      "Jito Executor"
+    ],
+    [
+      "S02",
+      "Rent Reclaim",
+      "Account Auditor",
+      "SPL Close Planner",
+      "Rent Reconciler"
+    ],
+    [
+      "S03",
+      "Liquidity Migration",
+      "Migration Watcher",
+      "Token Security Guard",
+      "Risk-Gated Planner"
+    ],
+    [
+      "S04",
+      "Wallet Graph Intelligence",
+      "Graph Analyzer",
+      "Risk Assessor",
+      "Mirror Auditor"
+    ],
+    [
+      "S05",
+      "Token-2022 Fee Intelligence",
+      "Transfer Hook Monitor",
+      "Fee Harvester",
+      "Reward Allocator"
+    ],
+    [
+      "S06",
+      "Cross-DEX Flash Arbitrage",
+      "Pool Graph Path Finder",
+      "Flash Liquidity Planner",
+      "Atomic Settler"
+    ],
+    [
+      "S07",
+      "Relayer and Fee Abstraction",
+      "Signature Policy",
+      "Fee-Payer Risk",
+      "Batch Dispatcher"
+    ],
+    [
+      "S08",
+      "Predictive Volatility and Margin",
+      "State Analyzer",
+      "Oracle Confidence",
+      "Margin Optimizer"
+    ],
+    [
+      "S09",
+      "Private Orderflow and Auction",
+      "Privacy Router",
+      "Bundle Auction Model",
+      "Leader Router"
+    ],
+    [
+      "S10",
+      "Autonomous Liquidity Rebalancing",
+      "Yield Hunter",
+      "Impermanent-Loss Guard",
+      "Compound Planner"
+    ]
+  ],
+  "academic": [
+    "Bayesian Market Regime Scientist",
+    "Causal Inference and Counterfactual Scientist",
+    "Order-Flow Microstructure Scientist",
+    "Statistical Arbitrage Research Scientist",
+    "Volatility Surface and Tail-Risk Scientist",
+    "Liquidity Impact and Slippage Scientist",
+    "Portfolio Construction and Kelly Auditor",
+    "Capital Efficiency and Funding Scientist",
+    "Priority-Fee and Jito Tip Calibration Scientist",
+    "Market Data Provenance Scientist",
+    "Oracle Reliability and Depeg Scientist",
+    "On-Chain Forensics and Settlement Scientist",
+    "MEV Auction Game-Theory Scientist",
+    "Smart-Contract Formal Methods Scientist",
+    "Protocol Economics and Incentive Scientist",
+    "Cross-Chain Finality and Bridge-Risk Scientist",
+    "Model Validation and Drift Scientist",
+    "Experimental Design and Sequential-Testing Scientist",
+    "Adversarial Security Research Scientist",
+    "Protocol Policy and Compliance Scientist"
+  ],
+  "academicProfiles": [
+    {
+      "role": "Bayesian Market Regime Scientist",
+      "scope": "Bayesian regime inference with calibrated posterior probabilities and explicit uncertainty intervals.",
+      "evidence": "Versioned posterior forecasts, calibration curves, Brier score, regime-change timestamps."
+    },
+    {
+      "role": "Causal Inference and Counterfactual Scientist",
+      "scope": "Separates correlation from causal effect using matched controls, treatment-effect estimation and counterfactual replay.",
+      "evidence": "ATE/CATE estimates, confounder register, counterfactual replay report."
+    },
+    {
+      "role": "Order-Flow Microstructure Scientist",
+      "scope": "Measures signed flow, queue imbalance, toxic flow and adverse-selection exposure at venue and pool level.",
+      "evidence": "Imbalance series, toxicity metrics, adverse-selection decomposition."
+    },
+    {
+      "role": "Statistical Arbitrage Research Scientist",
+      "scope": "Tests stationarity, cointegration, residual half-life and regime-conditional spread stability.",
+      "evidence": "ADF/KPSS tests, cointegration diagnostics, half-life confidence interval."
+    },
+    {
+      "role": "Volatility Surface and Tail-Risk Scientist",
+      "scope": "Models realized/implied volatility, jumps, heavy tails and extreme-loss distributions.",
+      "evidence": "Volatility forecast, EVT tail estimate, VaR/ES backtest."
+    },
+    {
+      "role": "Liquidity Impact and Slippage Scientist",
+      "scope": "Estimates nonlinear market impact, depth decay and execution shortfall under realistic pool constraints.",
+      "evidence": "Impact curves, expected slippage bands, implementation-shortfall attribution."
+    },
+    {
+      "role": "Portfolio Construction and Kelly Auditor",
+      "scope": "Optimizes position sizing under drawdown, correlation, concentration and fractional-Kelly constraints.",
+      "evidence": "Constrained allocation, drawdown budget, sensitivity and ruin-probability report."
+    },
+    {
+      "role": "Capital Efficiency and Funding Scientist",
+      "scope": "Measures capital utilization, borrow cost, idle time, funding availability and return on deployed capital.",
+      "evidence": "Capital-time ledger, utilization ratio, net funding-cost attribution."
+    },
+    {
+      "role": "Priority-Fee and Jito Tip Calibration Scientist",
+      "scope": "Calibrates priority fees and bundle bids against congestion, inclusion probability and realized execution cost.",
+      "evidence": "Fee-bid response curve, inclusion calibration, cost-adjusted bid policy."
+    },
+    {
+      "role": "Market Data Provenance Scientist",
+      "scope": "Audits source lineage, slot/time alignment, freshness, duplicate observations and cross-provider disagreement.",
+      "evidence": "Immutable source manifest, freshness SLA, discrepancy and lineage report."
+    },
+    {
+      "role": "Oracle Reliability and Depeg Scientist",
+      "scope": "Detects stale, divergent or manipulated oracle inputs and models stablecoin/asset depeg exposure.",
+      "evidence": "Oracle confidence score, stale-feed incidents, depeg stress scenarios."
+    },
+    {
+      "role": "On-Chain Forensics and Settlement Scientist",
+      "scope": "Reconstructs transaction lifecycle and reconciles signatures, finalized slots, token/native deltas and fees.",
+      "evidence": "Signature-to-settlement trace, finalized-slot proof, balance reconciliation."
+    },
+    {
+      "role": "MEV Auction Game-Theory Scientist",
+      "scope": "Studies validator/leader incentives, bid competition, auction clearing and strategic response under uncertainty.",
+      "evidence": "Auction model, bid equilibrium analysis, inclusion-vs-cost frontier."
+    },
+    {
+      "role": "Smart-Contract Formal Methods Scientist",
+      "scope": "Defines protocol invariants and verifies transaction state transitions using property-based and formal methods.",
+      "evidence": "Invariant catalogue, property-test coverage, counterexample traces."
+    },
+    {
+      "role": "Protocol Economics and Incentive Scientist",
+      "scope": "Analyzes fee flows, emissions, reward dilution, incentive compatibility and protocol-level sustainability.",
+      "evidence": "Token-flow model, incentive stress test, fee/reward sustainability analysis."
+    },
+    {
+      "role": "Cross-Chain Finality and Bridge-Risk Scientist",
+      "scope": "Quantifies finality, message delivery, relayer assumptions, bridge exposure and cross-chain atomicity limits.",
+      "evidence": "Finality matrix, bridge threat model, settlement-risk envelope."
+    },
+    {
+      "role": "Model Validation and Drift Scientist",
+      "scope": "Runs walk-forward validation, leakage controls, calibration and drift detection for predictive models.",
+      "evidence": "Out-of-sample report, leakage audit, drift alarms and retraining criteria."
+    },
+    {
+      "role": "Experimental Design and Sequential-Testing Scientist",
+      "scope": "Designs powered experiments with preregistered hypotheses, stopping rules and multiple-testing controls.",
+      "evidence": "Experiment protocol, power analysis, sequential boundaries, reproducibility bundle."
+    },
+    {
+      "role": "Adversarial Security Research Scientist",
+      "scope": "Performs threat modelling, attack-surface analysis and adversarial simulation across wallets, agents and execution paths.",
+      "evidence": "STRIDE attack tree, exploitability ranking, reproducible security test cases."
+    },
+    {
+      "role": "Protocol Policy and Compliance Scientist",
+      "scope": "Maps protocol terms, jurisdictional constraints, sanctions controls and policy limits to executable controls.",
+      "evidence": "Control-to-policy matrix, exception register, audit evidence and enforcement tests."
+    }
+  ],
+  "frontier": [
+    "Cross-Chain Intent Researcher",
+    "Intent Routing Optimizer",
+    "MEV Auction Researcher",
+    "Oracle Anomaly Detector",
+    "Adaptive Hedging Researcher",
+    "Yield Quality Analyst",
+    "Wallet Reputation Analyst",
+    "Privacy Engineering Researcher",
+    "Compute Budget Optimizer",
+    "Revenue Attribution Auditor"
+  ],
+  "states": [
+    "DESIGNED",
+    "CONNECTED",
+    "OBSERVING",
+    "ARMED",
+    "SUBMITTED",
+    "LANDED",
+    "SETTLED",
+    "HALTED"
+  ],
+  "settlementEvidence": [
+    "jito_bundle_status",
+    "solana_signature_status",
+    "finalized_slot",
+    "native_balance_delta",
+    "token_balance_delta"
+  ],
+  "walletStandards": {
+    "solana": [
+      "Wallet Standard",
+      "Phantom",
+      "Solflare"
+    ],
+    "evmAndSolana": [
+      "MetaMask Connect"
+    ],
+    "testKeyMode": "client-memory-only-test-clusters"
+  }
+}

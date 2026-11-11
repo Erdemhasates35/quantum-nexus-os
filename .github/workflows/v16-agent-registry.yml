@@ -1,0 +1,43 @@
+name: v16 agent registry and deployment asset validation
+
+on:
+  pull_request:
+    paths:
+      - "config/agent-registry.v16.json"
+      - "scripts/validate-agent-registry.mjs"
+      - "scripts/validate-deployment-assets.mjs"
+      - "scripts/validate-todo-free.mjs"
+      - "index.html"
+      - "vercel.json"
+      - "docs/operations/vercel-project-url-index.md"
+      - ".github/workflows/v16-agent-registry.yml"
+  push:
+    branches:
+      - "nexus/v16-swarm-foundation-20261106"
+    paths:
+      - "config/agent-registry.v16.json"
+      - "scripts/validate-agent-registry.mjs"
+      - "scripts/validate-deployment-assets.mjs"
+      - "scripts/validate-todo-free.mjs"
+      - "index.html"
+      - "vercel.json"
+      - "docs/operations/vercel-project-url-index.md"
+      - ".github/workflows/v16-agent-registry.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-v16:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate agent registry
+        run: node scripts/validate-agent-registry.mjs
+      - name: Validate deployable static assets and project URLs
+        run: node scripts/validate-deployment-assets.mjs
+      - name: Enforce first-party debt-marker gate
+        run: node scripts/validate-todo-free.mjs
