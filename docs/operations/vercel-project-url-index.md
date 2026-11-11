@@ -1,6 +1,6 @@
 # Vercel Project URL Index
 
-Inventory of the 53 projects currently listed in the connected Vercel team. Each hostname below was returned by the project's domain listing and marked verified at inventory time. A verified domain does not by itself prove that the latest deployment is healthy or that the application route is functional.
+Inventory captured from the connected Vercel team on 2026-11-12. Each URL below is the exact project domain returned by the Vercel Domains API with `verified: true`. Domain verification is not a deployment-health or HTTP-route test.
 
 ## Quantum Nexus and Solana
 
@@ -67,6 +67,9 @@ Inventory of the 53 projects currently listed in the connected Vercel team. Each
 52. [labs](https://labs-xi.vercel.app)
 53. [statsig-flags-sdk-example](https://statsig-flags-sdk-example-two.vercel.app)
 
-## Usage
+## Verification boundary
 
-Open the Quantum Nexus and Solana section first. Then check the AI, trading, and supporting applications. Treat these as project entry points; the live deployment state and the correct production branch must be checked independently before relying on an interface for operations.
+- Project count returned by Vercel: 53.
+- Project domains returned with `verified: true`: 53.
+- This index records verified domain ownership only. It does not mark projects as healthy, deployed, or free of application errors.
+- Deployment state, source repository, branch, and latest build outcome must be evaluated separately.
