@@ -9,7 +9,15 @@ const registry = JSON.parse(readFileSync(registryPath, "utf8"));
 const errors = [];
 if (registry.version !== "16.0") errors.push("registry version must be 16.0");
 if (!Array.isArray(registry.core) || registry.core.length !== 10) errors.push("core must contain exactly ten clusters");
-if (!Array.isArray(registry.academic) || registry.academic.length !== 10) errors.push("academic group must contain ten roles");
+if (!Array.isArray(registry.academic) || registry.academic.length !== 20) errors.push("academic group must contain twenty roles");
+if (!Array.isArray(registry.academicProfiles) || registry.academicProfiles.length !== 20) errors.push("academic profiles must contain twenty evidence contracts");
+const profileNames = new Set((registry.academicProfiles ?? []).map((profile) => profile?.role));
+if (profileNames.size !== 20 || (registry.academic ?? []).some((role) => !profileNames.has(role))) {
+  errors.push("every academic role must have one unique evidence profile");
+}
+for (const profile of registry.academicProfiles ?? []) {
+  if (!profile?.role || !profile?.scope || !profile?.evidence) errors.push("academic profiles require role, scope, and evidence fields");
+}
 if (!Array.isArray(registry.frontier) || registry.frontier.length !== 10) errors.push("frontier group must contain ten roles");
 
 const clusterIds = new Set();
@@ -50,5 +58,5 @@ if (errors.length) {
   for (const error of errors) console.error("REGISTRY_INVALID:", error);
   process.exitCode = 1;
 } else {
-  console.log("REGISTRY_VALID: 10 clusters, 30 core roles, 10 academic roles, 10 frontier roles.");
+  console.log("REGISTRY_VALID: 10 clusters, 30 core roles, 20 academic roles, 10 frontier roles, 60 total roles.");
 }
