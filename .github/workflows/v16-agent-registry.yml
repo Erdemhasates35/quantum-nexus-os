@@ -18,6 +18,7 @@ on:
       - "config/agent-registry.v16.json"
       - "scripts/validate-agent-registry.mjs"
       - "scripts/validate-deployment-assets.mjs"
+      - "scripts/validate-todo-free.mjs"
       - "index.html"
       - "vercel.json"
       - "docs/operations/vercel-project-url-index.md"
