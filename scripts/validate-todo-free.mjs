@@ -44,5 +44,5 @@ if (findings.length) {
   console.error(`DEBT_MARKER_SCAN_FAILED: ${findings.length} first-party tracked marker(s).`);
   process.exitCode = 1;
 } else {
-  console.log(`DEBT_MARKER_SCAN_PASSED: ${files.length} tracked files inspected; no first-party TODO/FIXME/XXX markers. Vendored Nexmon sources and archived backups are excluded from application-source scope.`);
+  console.log(`DEBT_MARKER_SCAN_PASSED: ${files.length} tracked files inspected; no first-party debt markers. Vendored Nexmon sources and archived backups are excluded from application-source scope.`);
 }
