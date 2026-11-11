@@ -6,6 +6,7 @@ on:
       - "config/agent-registry.v16.json"
       - "scripts/validate-agent-registry.mjs"
       - "scripts/validate-deployment-assets.mjs"
+      - "scripts/validate-todo-free.mjs"
       - "index.html"
       - "vercel.json"
       - "docs/operations/vercel-project-url-index.md"
@@ -37,3 +38,5 @@ jobs:
         run: node scripts/validate-agent-registry.mjs
       - name: Validate deployable static assets and project URLs
         run: node scripts/validate-deployment-assets.mjs
+      - name: Enforce first-party debt-marker gate
+        run: node scripts/validate-todo-free.mjs
