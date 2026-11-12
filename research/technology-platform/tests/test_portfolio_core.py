@@ -1,4 +1,5 @@
 import unittest
+from math import nan, inf
 from portfolio_core import RiskLimits, TradeProposal, assess_trade, make_event, summarize_returns, validate_time_series
 
 class MetricsTests(unittest.TestCase):
@@ -10,6 +11,8 @@ class MetricsTests(unittest.TestCase):
     def test_invalid_return_rejected(self):
         with self.assertRaises(ValueError):
             summarize_returns([-1.0])
+        with self.assertRaises(ValueError):
+            summarize_returns([nan])
 
 class RiskTests(unittest.TestCase):
     def setUp(self):
@@ -20,6 +23,8 @@ class RiskTests(unittest.TestCase):
         self.assertEqual(assess_trade(TradeProposal(11, .5, 4, 2), self.limits).reason, "POSITION_LIMIT")
     def test_liquidity_limit(self):
         self.assertEqual(assess_trade(TradeProposal(2, .5, 4, 1), self.limits).reason, "LIQUIDITY_COVERAGE")
+    def test_non_finite_values_rejected(self):
+        self.assertEqual(assess_trade(TradeProposal(inf, .5, 4, 2), self.limits).reason, "NON_FINITE_VALUE")
 
 class DataQualityTests(unittest.TestCase):
     def test_duplicate_order_and_missing_detection(self):
