@@ -157,3 +157,19 @@ Track actual measurements rather than aspirational labels:
 - Keep all financial results net of realistic costs.
 - Keep each domain's data rights, licenses and privacy constraints explicit.
 - Preserve independent release cycles and existing production behavior.
+
+
+## 8. Primary references
+
+- Pythia paper (ICML/PMLR 2023): https://proceedings.mlr.press/v202/biderman23a.html
+- GPT-NeoX training library: https://github.com/EleutherAI/gpt-neox
+- FinRL / FinRL-Meta documentation: https://github.com/AI4Finance-Foundation/FinRL
+- Qlib platform and research documentation: https://github.com/microsoft/qlib
+- Qlib paper: https://www.microsoft.com/en-us/research/publication/qlib-an-ai-oriented-quantitative-investment-platform/
+- NautilusTrader architecture: https://nautilustrader.io/docs/latest/concepts/architecture/
+- ABIDES market simulation: https://github.com/abides-sim/abides
+- OLMo open model lifecycle: https://allenai.org/olmo2
+- DSPy ICLR 2024 paper: https://proceedings.iclr.cc/paper_files/paper/2024/hash/f1cf02ce09757f57c3b93c0db83181e0-Abstract-Conference.html
+- Vercel AI SDK: https://vercel.com/ai-sdk
+
+References are starting points for technical due diligence. Each adoption requires version pinning, license review, dependency and runtime inspection, reproducible benchmarks, and a compatibility assessment against the portfolio's actual code.
