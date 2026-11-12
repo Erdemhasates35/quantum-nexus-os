@@ -1,5 +1,6 @@
 """Deterministic proposal risk checks; not a broker or exchange gateway."""
 from dataclasses import dataclass
+from math import isfinite
 
 @dataclass(frozen=True)
 class RiskLimits:
@@ -25,6 +26,8 @@ def assess_trade(proposal: TradeProposal, limits: RiskLimits) -> RiskDecision:
                      limits.max_slippage_bps, limits.min_liquidity_coverage)
     proposal_values = (proposal.position_pct, proposal.daily_loss_pct,
                        proposal.estimated_slippage_bps, proposal.liquidity_coverage)
+    if not all(isfinite(v) for v in limits_values + proposal_values):
+        return RiskDecision(False, "NON_FINITE_VALUE")
     if any(v < 0 for v in limits_values + proposal_values):
         return RiskDecision(False, "INVALID_NEGATIVE_VALUE")
     if limits.max_position_pct > 100 or limits.max_daily_loss_pct > 100:
