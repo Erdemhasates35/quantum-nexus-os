@@ -70,3 +70,24 @@ For each repository, record:
 **Cohort D — Specialist systems:** legal-ai-platform and remaining scientific/technology repositories.
 
 No repository is merged, renamed, deleted, or rewritten by this inventory.
+
+
+## 6. Additional repositories identified in the 100-entry owner-affiliated catalog
+
+README-level review also identified:
+- `FinRL`: financial reinforcement-learning research framework; see [fork research notes](FORK_RESEARCH_NOTES.md).
+- `FinGPT`: financial LLM and sentiment/event intelligence research; see [fork research notes](FORK_RESEARCH_NOTES.md).
+- `heretic`: training-free LLM steering and scorer plugins; research-only evaluation candidate.
+- `Cirq`: quantum circuit construction, simulation, noise modelling and optimization.
+- `agent-skills`: Jupiter ecosystem skills for Codex and Claude Code.
+- `claude-code-source-code`: source-analysis repository with an explicit non-commercial/IP notice in its README.
+- `AI-Linux`: third-party-origin shell installer reference; upstream attribution appears in its README.
+
+The complete 100-entry owner-affiliated snapshot is in [ACCOUNT_REPOSITORY_CATALOG.md](ACCOUNT_REPOSITORY_CATALOG.md). It includes forks, empty repositories and upstream-derived code; it is not equivalent to 100 original projects.
+
+## 7. Empty / ambiguous repositories observed
+
+- `honeycomb`: README endpoint reports an empty repository.
+- `honeycomb-execution-core.`: README endpoint reports an empty repository.
+- `honeycomb-al` and `honeycomb_al`: README endpoint returned not-found for the queried path.
+- These are retained for exact repository-ID, tree and ancestry reconciliation; no deletion or consolidation is proposed.
