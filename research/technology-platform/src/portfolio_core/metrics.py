@@ -1,6 +1,6 @@
 """Dependency-free periodic return metrics. Returns must already be net of costs."""
 from dataclasses import dataclass
-from math import sqrt
+from math import isfinite, sqrt
 from statistics import mean, pstdev
 from typing import Iterable
 
@@ -20,13 +20,15 @@ def summarize_returns(returns: Iterable[float], periods_per_year: int = 252,
         raise ValueError("returns must contain at least one observation")
     if periods_per_year <= 0:
         raise ValueError("periods_per_year must be positive")
+    if not isfinite(risk_free_per_period) or not all(isfinite(x) for x in values):
+        raise ValueError("returns and risk-free rate must be finite")
     if any(x <= -1.0 for x in values):
         raise ValueError("simple returns must be greater than -100%")
-    if any(not (-1e6 < x < 1e6) for x in values):
-        raise ValueError("returns contain non-finite or unreasonable values")
     wealth, peak, max_dd = 1.0, 1.0, 0.0
     for value in values:
         wealth *= 1.0 + value
+        if not isfinite(wealth):
+            raise ValueError("compounded wealth overflowed")
         peak = max(peak, wealth)
         max_dd = max(max_dd, 1.0 - wealth / peak)
     vol = pstdev(values) if len(values) > 1 else 0.0
