@@ -18,6 +18,8 @@ A cross-repository research, architecture, and implementation program spanning q
 - [Engineering backlog and acceptance matrix](IMPLEMENTATION_BACKLOG.md)
 - [Termux / Android engineering playbook](TERMUX_ANDROID_PLAYBOOK.md)
 - [Evidence and benchmark protocol](EVIDENCE_PROTOCOL.md)
+- [100-entry account repository catalog](ACCOUNT_REPOSITORY_CATALOG.md)
+- [Fork research notes: FinRL, FinGPT, Heretic, Cirq, agents](FORK_RESEARCH_NOTES.md)
 
 ## Initial repository set
 
