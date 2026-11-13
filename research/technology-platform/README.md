@@ -15,6 +15,7 @@ A cross-repository research, architecture, and implementation program spanning q
 
 - [Portfolio inventory](REPOSITORY_INVENTORY.md)
 - [Repository ownership and fork provenance audit](REPOSITORY_OWNERSHIP_AUDIT.md)
+- [Multi-repository tree and runtime audit](MULTIREPO_TREE_AUDIT.md)
 - [Frontier research and novelty agenda](FRONTIER_RESEARCH_AND_NOVELTY.md)
 - [Reference architectures and research map](RESEARCH_ARCHITECTURE.md)
 - [Engineering backlog and acceptance matrix](IMPLEMENTATION_BACKLOG.md)
