@@ -39,7 +39,7 @@ Tree counts are snapshots, not performance or completeness claims. No tree in th
 - In live mode it logged that a signed REST order would be connected later, but still inserted a local position and returned Success=true without sending or receiving a venue order.
 - Close marked a local position closed without a venue close receipt.
 - The router therefore could misrepresent an internal state mutation as an executed exchange order.
-- PR #10 adds fail-closed behavior, tests, and Go CI gates. It is not merged; no live adapter is claimed.
+- PR #10 was merged on 2026-11-13. The Go router now fails closed for live and paper orders until real adapters are connected; Go tests and go vet passed in GitHub Actions. No live adapter is claimed.
 - 1,511 tracked paths have backup/recovery/broken/yedek-style names. Preserve them; classify before any cleanup.
 - The repository has Go, Node and Python manifests. Treat this as a polyglot repository until service boundaries and dependency ownership are documented.
 
