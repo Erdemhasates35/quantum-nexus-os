@@ -54,14 +54,16 @@ def summarize_tree(payload: dict[str, Any]) -> dict[str, Any]:
     paths = [x.get("path","") for x in entries if x.get("type") == "blob"]
     gitlinks = [{"path": x.get("path", ""), "sha": x.get("sha", "")} for x in entries if x.get("mode") == "160000" or x.get("type") == "commit"]
     gitmodules_present = ".gitmodules" in paths
-    manifests = sorted(p for p in paths if p.rsplit("/",1)[-1] in MANIFESTS)
+    excluded_segments = {"node_modules", ".next", ".venv", "venv", "vendor", "dist", "build", "out", "target", "__pycache__"}
+    manifests = sorted(p for p in paths if p.rsplit("/",1)[-1] in MANIFESTS and not (set(p.split("/")) & excluded_segments))
+    vendored_or_generated_files = sum(1 for p in paths if set(p.split("/")) & excluded_segments)
     workflows = sorted(p for p in paths if p.startswith(".github/workflows/") and p.endswith((".yml",".yaml")))
     roots = sorted(p for p in paths if "/" not in p)
     extensions = {}
     for path in paths:
         suffix = Path(path.rsplit("/",1)[-1]).suffix.lower() or "[no-extension]"
         extensions[suffix] = extensions.get(suffix,0)+1
-    return {"blob_count":len(paths),"root_files":roots,"manifests":manifests,"workflows":workflows,"gitlinks":gitlinks,"gitmodules_present":gitmodules_present,"submodule_config_status":("present" if gitmodules_present else ("missing_with_gitlinks" if gitlinks else "not_required")),"extension_counts":dict(sorted(extensions.items())),"tree_truncated":bool(payload.get("truncated",False))}
+    return {"blob_count":len(paths),"root_files":roots,"manifests":manifests,"workflows":workflows,"gitlinks":gitlinks,"gitmodules_present":gitmodules_present,"vendored_or_generated_file_count":vendored_or_generated_files,"submodule_config_status":("present" if gitmodules_present else ("missing_with_gitlinks" if gitlinks else "not_required")),"extension_counts":dict(sorted(extensions.items())),"tree_truncated":bool(payload.get("truncated",False))}
 
 def classify(record: dict[str, Any]) -> str:
     if record.get("archived"): return "archived"
