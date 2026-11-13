@@ -14,6 +14,10 @@ A cross-repository research, architecture, and implementation program spanning q
 ## Documents
 
 - [Portfolio inventory](REPOSITORY_INVENTORY.md)
+- [243-entry public repository index](PUBLIC_REPOSITORY_INDEX.md)
+- [Repository ownership and fork provenance audit](REPOSITORY_OWNERSHIP_AUDIT.md)
+- [Multi-repository tree and runtime audit](MULTIREPO_TREE_AUDIT.md)
+- [Frontier research and novelty agenda](FRONTIER_RESEARCH_AND_NOVELTY.md)
 - [Reference architectures and research map](RESEARCH_ARCHITECTURE.md)
 - [Engineering backlog and acceptance matrix](IMPLEMENTATION_BACKLOG.md)
 - [Termux / Android engineering playbook](TERMUX_ANDROID_PLAYBOOK.md)
@@ -40,6 +44,9 @@ This is a verified working set, not a claim that the full account inventory is c
 ## OMNIQUANT CORE implementation boundary
 
 - [OMNIQUANT CORE boundary and production gates](OMNIQUANT_CORE_BOUNDARY.md)
+- [Phase 02 read-only repository evidence scanner](PHASE_02_AUDIT_SCANNER.md)
+- [Quantum Nexus OS forensic findings](CORE_REPOSITORY_FORENSIC_FINDINGS.md)
+- Scanner: `tools/repo_audit.py`; tests: `tests/test_repo_audit.py`
 - [Python package configuration](pyproject.toml)
 - `src/omniquant_core/`: typed observation/intent/guard contracts and standalone fail-closed risk evaluator.
 - `tests/test_omniquant_core.py`: deterministic risk-policy and contract tests.
