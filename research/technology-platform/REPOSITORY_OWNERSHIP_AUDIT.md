@@ -64,3 +64,8 @@
 - Read source modules and tests for all strategy, execution, risk and data pipelines.
 - Produce dependency SBOMs and license inventory before any code-level merge.
 - Reconcile the unresolved names and 12 gitlinks without deleting or rewriting any source.
+
+## F. Requested named repositories not found under this account
+
+- Exact API lookup for Erdemhasates35/gpt-neox returned HTTP 404 / Not Found. GPT-NeoX is therefore treated as the external EleutherAI/gpt-neox research reference, not as an account-owned fork or an implementation target.
+- Exact API lookup for Erdemhasates35/ECC returned HTTP 404 / Not Found. The named ECC repository is not confirmed under this account; do not claim it is inventoried or integrated until its exact repository identity is established.
