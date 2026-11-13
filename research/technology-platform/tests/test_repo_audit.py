@@ -1,5 +1,8 @@
 import unittest
-from tools.repo_audit import classify, markdown_report, summarize_tree
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from repo_audit import classify, markdown_report, summarize_tree
 
 class RepositoryTreeTests(unittest.TestCase):
     def test_tree_finds_manifests_workflows_and_extensions(self):
