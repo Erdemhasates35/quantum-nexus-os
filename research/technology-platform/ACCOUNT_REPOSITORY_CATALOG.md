@@ -2,7 +2,7 @@
 
 **Snapshot:** 2026-11-12  
 **Source:** GitHub owner-affiliation repository listing for `Erdemhasates35`.  
-**Returned entries:** 100.  
+**Returned entries:** 100 (partial owner-affiliated snapshot; not the complete account inventory).\n\n**Correction from 2026-11-13:** GitHub repository search returned 243 unique public repositories across three pages. See [PUBLIC_REPOSITORY_INDEX.md](PUBLIC_REPOSITORY_INDEX.md). Private repositories and exact fork ancestry require separate authenticated metadata enumeration.  
 **Scope:** owner-affiliated repositories; this listing can include forks and empty repositories. It is not a count of original projects.
 
 | # | Repository | Default branch | Inspection state |
