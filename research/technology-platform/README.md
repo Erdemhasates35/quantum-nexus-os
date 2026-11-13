@@ -37,6 +37,14 @@ Confirmed from repository README retrieval on 2026-11-12:
 
 This is a verified working set, not a claim that the full account inventory is complete. The portfolio inventory document keeps observed facts separate from inference.
 
+## OMNIQUANT CORE implementation boundary
+
+- [OMNIQUANT CORE boundary and production gates](OMNIQUANT_CORE_BOUNDARY.md)
+- [Python package configuration](pyproject.toml)
+- `src/omniquant_core/`: typed observation/intent/guard contracts and standalone fail-closed risk evaluator.
+- `tests/test_omniquant_core.py`: deterministic risk-policy and contract tests.
+- The Scout → Cartographer → Judge → Guard → Executor multi-agent runtime, cloud intelligence adapters, live market feeds, order execution, and command-center UI remain unimplemented; see the boundary document before any production integration.
+
 ## Architecture principle
 
 The platform is not one giant runtime. It is a federation of bounded systems connected through explicit event schemas, APIs, model contracts, telemetry, and reproducible experiment records.
