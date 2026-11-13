@@ -122,3 +122,33 @@ Tree counts are snapshots, not performance or completeness claims. No tree in th
 - Contract source exists, but deployment address, verified bytecode, protocol approvals, live liquidity, funded signer and successful transaction receipt were not verified in this audit.
 - Before any live integration: require an independent Guard approval bound to chain/asset/amount/route/policy version, verify chain ID and contract bytecode, cap gas/fees, enforce replay/idempotency protection, reconcile receipt and post-state, and test failure/revert handling on a controlled chain.
 
+
+
+## 5. Vercel deployment control-plane verification
+
+**Inspection date:** 2026-11-13. Read-only Vercel project/deployment metadata and build events were inspected; no production deployment was initiated.
+
+### quantum-nexus-os
+- Project: quantum-nexus-os.
+- A READY production deployment exists for main commit 66f5df201a5d5484c21f9ac19d03712c9a3456bd (the Phase 01 merge).
+- Production aliases include quantum-nexus-os.vercel.app and the account-scoped main alias.
+- Vercel SSO protection is enabled for all deployment types except custom domains. Direct unauthenticated page testing was not completed.
+- The newest branch preview deployment was CANCELED; it is not the production deployment.
+
+### honeycomb-omega-x
+- The newest deployment record is ERROR with errorCode missing_root_layout.
+- Build logs show that deployment upload contained only src/app/page.tsx and package.json; src/app/layout.tsx was absent from that deployment artifact.
+- The current GitHub main tree does contain app/layout.tsx. The previously READY production deployment includes layout.tsx and retains the production aliases.
+- This points to an incomplete/incorrect deployment artifact or deployment source/root configuration, not proof that the current Git tree lacks a root layout.
+- No source code was changed based on this Vercel error.
+
+### legal-ai-platform
+- Latest inspected deployment is READY but has target=null (not a production target).
+- A previous production deployment is READY and has legal-ai-platform-eta.vercel.app as an alias.
+- A more recent main deployment record is ERROR; its build logs were not fully inspected in this pass.
+- No new production deployment was initiated.
+
+### Verification boundary
+- Vercel control-plane state is not equivalent to an authenticated end-to-end browser test.
+- Direct web opening of the three deployment domains was not accessible through the current web inspection path; SSO protection may apply.
+- Do not claim all live URLs are fully tested. A separate authenticated browser test must verify login, route rendering, API connectivity, telemetry, and role-based access on each production alias.
