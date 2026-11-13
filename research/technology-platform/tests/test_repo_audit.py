@@ -12,6 +12,15 @@ class RepositoryTreeTests(unittest.TestCase):
         self.assertEqual(result["manifests"],["pyproject.toml"])
         self.assertEqual(result["workflows"],[".github/workflows/ci.yml"])
         self.assertFalse(result["tree_truncated"])
+    def test_gitlinks_without_gitmodules_are_flagged(self):
+        payload={"truncated":False,"tree":[{"path":".tools/example","type":"commit","mode":"160000","sha":"abc123"}]}
+        result=summarize_tree(payload)
+        self.assertEqual(result["gitlinks"],[{"path":".tools/example","sha":"abc123"}])
+        self.assertEqual(result["submodule_config_status"],"missing_with_gitlinks")
+    def test_gitmodules_presence_is_detected(self):
+        result=summarize_tree({"tree":[{"path":".gitmodules","type":"blob"}]})
+        self.assertTrue(result["gitmodules_present"])
+        self.assertEqual(result["submodule_config_status"],"present")
     def test_truncated_tree_is_explicit(self):
         self.assertTrue(summarize_tree({"truncated":True,"tree":[]})["tree_truncated"])
     def test_fork_is_reference_only(self):
