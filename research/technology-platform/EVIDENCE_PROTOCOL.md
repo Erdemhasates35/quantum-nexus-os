@@ -82,3 +82,17 @@ Each release should link:
 ## 8. Data and model provenance
 
 Record dataset license, source, collection date, transformations, filters, deduplication, tokenizer, model license, training/inference code and third-party dependencies. Do not assume a repository's Apache/MIT code license automatically grants rights to every linked dataset or model artifact.
+
+
+## 9. Zero-simulation terminology — mandatory distinction
+
+The terms below are not interchangeable:
+
+- **Real historical market data:** exchange/vendor records captured from actual historical markets. Replaying them chronologically is evidence-based research, but a backtest still models decisions and usually models fills, fees, market impact and order priority.
+- **Live-feed shadow mode:** consumes current live market data and emits timestamped hypothetical intents, but sends no orders. It does not produce realized trading PnL or fill-quality evidence.
+- **Paper trading:** typically uses live market data but virtual capital and simulated order execution/fills. It is simulation, even when the feed is live.
+- **Live execution:** real authenticated orders and actual fills with capital at risk. It is the only one of these that yields realized execution evidence.
+
+Therefore, a literal prohibition of all simulation is incompatible with conventional backtesting and paper trading. Do not label paper fills as real execution. Under a strict zero-simulation policy, disable backtest and paper-trading claims; use live-feed shadow observation for pre-production validation, then separately authorized real-money canary execution. If historical-data replay is permitted, label it as historical replay/backtest and disclose the execution model.
+
+No synthetic market paths, fabricated fills, invented PnL, or placeholder performance results may be used as evidence under any interpretation.
