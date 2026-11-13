@@ -52,8 +52,9 @@ Tree counts are snapshots, not performance or completeness claims. No tree in th
 - When reported USDT balance is zero, the script substitutes the configured initial capital of 20.0 as current capital. That is not an observed account balance and must not be reported as real equity.
 - The model trains on recent OHLCV samples without a chronological out-of-sample evaluation in the reviewed path.
 - Confidence is calculated as 1 minus the standard deviation of three model predictions. This is not a calibrated probability or empirically validated confidence score.
-- The GitHub Actions workflow schedules execution every 10 minutes and injects exchange credentials from GitHub Secrets.
-- The Actions run query returned no workflow runs in the requested recent page; scheduled execution is configured, but successful live runs were not evidenced.
+- The prior GitHub Actions workflow scheduled execution every 10 minutes and injected exchange credentials from GitHub Secrets.
+- On 2026-11-13 the workflow was changed on main to manual-only, execution-disabled status; no secrets are loaded and no trading script is started.
+- The Python source still contains a direct live order path if invoked outside that workflow. Keep it excluded until the independent Guard and controls are implemented.
 
 **Decision:** exclude this engine from autonomous capital allocation until account-state handling, independent Guard approval, calibrated confidence, loss controls, idempotency, reconciliation, live telemetry and out-of-sample evidence are implemented and verified. No live order was submitted during this audit.
 
