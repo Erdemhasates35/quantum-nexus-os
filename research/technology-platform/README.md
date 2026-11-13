@@ -14,6 +14,7 @@ A cross-repository research, architecture, and implementation program spanning q
 ## Documents
 
 - [Portfolio inventory](REPOSITORY_INVENTORY.md)
+- [Execution status and release gates](EXECUTION_STATUS_AND_RELEASE_GATES.md)
 - [243-entry public repository index](PUBLIC_REPOSITORY_INDEX.md)
 - [Repository ownership and fork provenance audit](REPOSITORY_OWNERSHIP_AUDIT.md)
 - [Multi-repository tree and runtime audit](MULTIREPO_TREE_AUDIT.md)
