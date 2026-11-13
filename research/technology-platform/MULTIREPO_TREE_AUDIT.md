@@ -152,3 +152,14 @@ Tree counts are snapshots, not performance or completeness claims. No tree in th
 - Vercel control-plane state is not equivalent to an authenticated end-to-end browser test.
 - Direct web opening of the three deployment domains was not accessible through the current web inspection path; SSO protection may apply.
 - Do not claim all live URLs are fully tested. A separate authenticated browser test must verify login, route rendering, API connectivity, telemetry, and role-based access on each production alias.
+
+
+## 6. Honeycomb Omega X UI truthfulness remediation
+
+- PR #2 merged on 2026-11-13.
+- Removed hardcoded equity/PnL/latency/fill-rate values, static ONLINE agent states, sample BTC/ETH positions, random signals, generated log events and random provider test results.
+- Removed frontend API-key entry; provider integrations now report NOT CONFIGURED until server-side health checks exist.
+- Trade and command-bar controls are disabled until authenticated Guard and Executor APIs are connected.
+- Added a static check that rejects random telemetry generators and known false metric/status patterns.
+- GitHub Actions verified: truthfulness check, npm dependency installation, TypeScript typecheck and Next.js production build all succeeded.
+- Vercel deployment was not updated: the team exceeded the Vercel 100-deployments-per-day API quota, with a 24-hour retry window. The prior production deployment remains READY; the newly merged UI is not yet deployed or browser-verified.
