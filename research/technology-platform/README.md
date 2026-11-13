@@ -14,6 +14,7 @@ A cross-repository research, architecture, and implementation program spanning q
 ## Documents
 
 - [Portfolio inventory](REPOSITORY_INVENTORY.md)
+- [243-entry public repository index](PUBLIC_REPOSITORY_INDEX.md)
 - [Repository ownership and fork provenance audit](REPOSITORY_OWNERSHIP_AUDIT.md)
 - [Multi-repository tree and runtime audit](MULTIREPO_TREE_AUDIT.md)
 - [Frontier research and novelty agenda](FRONTIER_RESEARCH_AND_NOVELTY.md)
