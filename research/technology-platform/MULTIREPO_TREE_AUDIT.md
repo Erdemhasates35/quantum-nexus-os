@@ -87,3 +87,38 @@ Tree counts are snapshots, not performance or completeness claims. No tree in th
 3. Exclude all live order paths from OMNIQUANT until the independent Guard and venue receipt checks are enforced.
 4. Keep all existing backup/recovery files and vendored dependency trees untouched until a checksum-backed cleanup PR is reviewed.
 5. Do not claim a deployment, scheduled run, live trade, profitability or model calibration without corresponding run/receipt/telemetry evidence.
+
+
+## 4. Quantum Nexus OS — source-level engine map
+
+### Repository tree composition
+
+- 760 tree entries, 748 blobs; GitHub did not mark the recursive tree as truncated.
+- Major top-level areas: nexmon_csi (247 entries), node_modules (144), .next (50), nexus (27), research (26), flashloan_engine (20), logs (17), backups (13), .tools (10), scripts (8), tests (8), config (7), contracts (2).
+- File types include C/header sources, TypeScript, Python, JSON, JavaScript, shell scripts and workflow YAML.
+- Tracked node_modules, .next, logs and backup/archive paths require provenance and reproducibility review; do not delete in-place.
+- nexmon_csi is a wireless channel-state-information research/code subtree. It is a separate scientific/wireless domain, not a financial execution dependency.
+
+### Flashloan engine — observed module responsibilities
+
+- economics.py: Decimal-based gross/net profit, loan fee, swap fee, gas, slippage and priority-cost accounting.
+- risk.py: fail-closed threshold checks for route trust, slippage, gas and minimum net profit.
+- circuit_breaker.py: consecutive-failure and realized-loss trip conditions.
+- optimizer.py: candidate size ranking by net profit, gas efficiency, ROI and latency.
+- provenance.py / audit.py: canonical JSON fingerprints, quote-age check and opportunity audit record.
+- routes.py: executor allowlist, hop limit and calldata presence validation.
+- executor.py: plan-only path; submit returns live_execution_disabled or live_submission_not_implemented.
+- live_evm.py: separate direct EVM transaction path; it can preflight and broadcast a signed transaction only when FLASHLOAN_LIVE_EXECUTION=true.
+- solana.py: Jupiter quote retrieval and implied-return calculation; no Solana flash-loan transaction execution is implemented.
+- binance.py: ticker and signed account read; it is not an on-chain flash-loan lender or a Binance order executor.
+- AaveFlashArbReceiver.sol: owner-controlled target allowlist, atomic flashloan callback, repayment/sponsor-fee/minimum-profit invariant.
+
+### Integration and production gaps
+
+- scripts/run_flashloan_engine.py only constructs the orchestrator and prints capabilities; it does not run an end-to-end market-data-to-order cycle.
+- The orchestrator's economic/risk evaluation is not wired to the direct LiveEvmExecutor.execute method through a separately deployed Guard authorization boundary.
+- SafeExecutor.submit explicitly refuses live submission; direct LiveEvmExecutor.execute is a distinct code path that can broadcast if called with the environment flag and a configured signer.
+- Existing tests validate deterministic economics, control boundaries and ABI encoding; they do not prove live RPC execution, deployed receiver correctness, on-chain profit or end-to-end Guard enforcement.
+- Contract source exists, but deployment address, verified bytecode, protocol approvals, live liquidity, funded signer and successful transaction receipt were not verified in this audit.
+- Before any live integration: require an independent Guard approval bound to chain/asset/amount/route/policy version, verify chain ID and contract bytecode, cap gas/fees, enforce replay/idempotency protection, reconcile receipt and post-state, and test failure/revert handling on a controlled chain.
+
