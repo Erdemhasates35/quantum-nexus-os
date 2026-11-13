@@ -53,3 +53,17 @@
 - Preserve tracked logs, backups and archives until reviewed; inventory first, no deletion.
 - Keep execution credentials isolated from LLMs and research agents. Guard must remain a separate, fail-closed authorization boundary.
 - No trading profitability, live execution, 24/7 availability or world-first claim is supported by this review.
+
+
+## P1 — flashloan live transaction path is not integrated with independent Guard
+
+- The repository contains Decimal-based economics, a risk gate, a circuit breaker, opportunity provenance and a plan-only SafeExecutor.
+- SafeExecutor.submit currently returns live_submission_not_implemented; the normal script entrypoint prints capabilities only.
+- A separate LiveEvmExecutor.execute method can broadcast a signed EVM transaction when FLASHLOAN_LIVE_EXECUTION=true and a configured RPC, key and receiver are supplied.
+- That direct transaction path is not wired to the orchestrator's risk decision through an independent Guard approval. It does not itself enforce a signed, intent-bound Guard authorization, post-trade position reconciliation or replay/idempotency policy.
+- Solana integration is quote-only in the inspected module; Binance integration is ticker/account observation, not order execution.
+- AaveFlashArbReceiver.sol contains an atomic repayment/profit invariant and approved-target allowlist, but no deployment address, verified deployed bytecode, live transaction receipt or protocol approval was evidenced in this audit.
+- Existing tests cover deterministic economics, control primitives and ABI encoding; they do not establish live execution or profitability.
+
+**Decision:** preserve the existing engine and its plan-only behavior. Do not connect LiveEvmExecutor to OMNIQUANT Executor until independent Guard authorization, chain/contract verification, fee caps, idempotency, transaction receipt validation and post-state reconciliation are implemented and tested. No transaction was sent during this audit.
+
