@@ -121,9 +121,11 @@ For each candidate record:
 - FinRL three-layer architecture: https://finrl.readthedocs.io/en/latest/start/three_layer.html
 - FinRL repository and FinRL-X direction: https://github.com/AI4Finance-Foundation/FinRL
 - FinWorld, *An All-in-One Open-Source Platform for End-to-End Financial AI Research and Deployment*: https://openreview.net/pdf/07462e399a3d0906a45bce1fb7cd28dc762f8e31.pdf
-- AxumQuant public architecture overview: https://github.com/axumquant/axum-trading-platform
-- OpenQnt: https://github.com/sinatooor/openqnt
-- Agentic Quantitative Trading survey: https://ideas.repec.org/p/arx/papers/2608.31041.html
+- TradeMaster research platform: https://github.com/TradeMaster-NTU/TradeMaster
+- Qlib: https://github.com/microsoft/qlib
+- NautilusTrader architecture: https://nautilustrader.io/docs/latest/concepts/architecture/
+- Agentic Quantitative Trading survey (arXiv:2608.31041): https://arxiv.org/abs/2608.31041
+- FinWorld (KDD 2026): https://arxiv.org/abs/2508.02292
 - Qlib: https://github.com/microsoft/qlib
 - NautilusTrader architecture: https://nautilustrader.io/docs/latest/concepts/architecture/
 
