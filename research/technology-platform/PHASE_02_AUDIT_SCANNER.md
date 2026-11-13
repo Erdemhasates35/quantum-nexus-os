@@ -8,7 +8,7 @@ The earlier 100-entry owner-affiliated catalog was not a complete original-proje
 - Requires GITHUB_TOKEN or GH_TOKEN in the environment. The token is never printed or written to reports.
 - Requests repositories with owner affiliation and filters them to the requested owner login.
 - Records fork, parent and source metadata; fork repositories are classified as reference-only.
-- Recursively inventories default-branch Git trees and identifies manifests and GitHub Actions workflows.
+- Recursively inventories default-branch Git trees and identifies manifests, GitHub Actions workflows, gitlinks/submodules and missing .gitmodules configuration.
 - Writes JSON and Markdown evidence into a new directory. Existing output directories are rejected to prevent overwrite.
 - Reports truncated trees and API failures explicitly.
 
