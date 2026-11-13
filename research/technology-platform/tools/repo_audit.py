@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 API = "https://api.github.com"
@@ -72,7 +72,7 @@ def audit_repository(item: dict[str, Any], token: str) -> dict[str, Any]:
     if not name or not branch:
         record["tree_error"] = "missing repository name or default branch"
         return record
-    url = f"{API}/repos/{name}/git/trees/{branch.replace('/', '%2F')}?recursive=1"
+    url = f"{API}/repos/{name}/git/trees/{quote(branch, safe='')}?recursive=1"
     try:
         tree, _ = get_json(url, token)
         record["tree"] = summarize_tree(tree)
@@ -91,12 +91,12 @@ def markdown_report(owner: str, records: list[dict[str, Any]], created: str) -> 
     return "\n".join(lines)
 
 def run(owner: str, output: Path, token: str) -> tuple[int, Path, Path]:
-    if output.exists():
-        raise FileExistsError(f"refusing to overwrite existing output directory: {output}")
-    output.mkdir(parents=True,exist_ok=False)
     items=list_owned_repositories(owner,token)
     records=[audit_repository(x,token) for x in items]
     created=datetime.now(timezone.utc).isoformat()
+    if output.exists():
+        raise FileExistsError(f"refusing to overwrite existing output directory: {output}")
+    output.mkdir(parents=True,exist_ok=False)
     payload={"schema_version":1,"owner":owner,"created_at":created,"repository_count":len(records),"records":records}
     jp,mp=output/"inventory.json",output/"inventory.md"
     with jp.open("x",encoding="utf-8") as f: json.dump(payload,f,ensure_ascii=False,indent=2); f.write("\n")
