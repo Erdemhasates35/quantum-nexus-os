@@ -50,7 +50,10 @@ def list_owned_repositories(owner: str, token: str) -> list[dict[str, Any]]:
     return found
 
 def summarize_tree(payload: dict[str, Any]) -> dict[str, Any]:
-    paths = [x.get("path","") for x in payload.get("tree",[]) if x.get("type") == "blob"]
+    entries = payload.get("tree", [])
+    paths = [x.get("path","") for x in entries if x.get("type") == "blob"]
+    gitlinks = [{"path": x.get("path", ""), "sha": x.get("sha", "")} for x in entries if x.get("mode") == "160000" or x.get("type") == "commit"]
+    gitmodules_present = ".gitmodules" in paths
     manifests = sorted(p for p in paths if p.rsplit("/",1)[-1] in MANIFESTS)
     workflows = sorted(p for p in paths if p.startswith(".github/workflows/") and p.endswith((".yml",".yaml")))
     roots = sorted(p for p in paths if "/" not in p)
@@ -58,7 +61,7 @@ def summarize_tree(payload: dict[str, Any]) -> dict[str, Any]:
     for path in paths:
         suffix = Path(path.rsplit("/",1)[-1]).suffix.lower() or "[no-extension]"
         extensions[suffix] = extensions.get(suffix,0)+1
-    return {"blob_count":len(paths),"root_files":roots,"manifests":manifests,"workflows":workflows,"extension_counts":dict(sorted(extensions.items())),"tree_truncated":bool(payload.get("truncated",False))}
+    return {"blob_count":len(paths),"root_files":roots,"manifests":manifests,"workflows":workflows,"gitlinks":gitlinks,"gitmodules_present":gitmodules_present,"submodule_config_status":("present" if gitmodules_present else ("missing_with_gitlinks" if gitlinks else "not_required")),"extension_counts":dict(sorted(extensions.items())),"tree_truncated":bool(payload.get("truncated",False))}
 
 def classify(record: dict[str, Any]) -> str:
     if record.get("archived"): return "archived"
@@ -82,10 +85,10 @@ def audit_repository(item: dict[str, Any], token: str) -> dict[str, Any]:
     return record
 
 def markdown_report(owner: str, records: list[dict[str, Any]], created: str) -> str:
-    lines = [f"# Read-only repository inventory — {owner}","",f"- Snapshot: {created}",f"- Repositories returned: {len(records)}","- Method: paginated GitHub REST owner-affiliation listing and recursive default-branch trees.","- Scope: metadata and paths only; source semantics, runtime, deployment and secret values are not inspected.","- Safety: GET-only; no GitHub repository is modified; token values are never written.","","| Repository | Classification | Branch | Language | License | Files | Manifests | Workflows | Tree |","|---|---|---|---|---|---:|---:|---:|---|"]
+    lines = [f"# Read-only repository inventory — {owner}","",f"- Snapshot: {created}",f"- Repositories returned: {len(records)}","- Method: paginated GitHub REST owner-affiliation listing and recursive default-branch trees.","- Scope: metadata and paths only; source semantics, runtime, deployment and secret values are not inspected.","- Safety: GET-only; no GitHub repository is modified; token values are never written.","","| Repository | Classification | Branch | Language | License | Files | Manifests | Workflows | Gitlinks | Submodule config | Tree |","|---|---|---|---|---|---:|---:|---:|---|"]
     for r in sorted(records,key=lambda x:(x.get("full_name") or "").casefold()):
         t=r.get("tree",{})
-        values=[r.get("full_name") or "",classify(r),r.get("default_branch") or "",r.get("language") or "",r.get("license_spdx") or "unknown",str(t.get("blob_count","—")),str(len(t.get("manifests",[]))),str(len(t.get("workflows",[]))),"truncated" if t.get("tree_truncated") else ("ok" if t else "unavailable")]
+        values=[r.get("full_name") or "",classify(r),r.get("default_branch") or "",r.get("language") or "",r.get("license_spdx") or "unknown",str(t.get("blob_count","—")),str(len(t.get("manifests",[]))),str(len(t.get("workflows",[]))),str(len(t.get("gitlinks",[]))),t.get("submodule_config_status","unavailable"),"truncated" if t.get("tree_truncated") else ("ok" if t else "unavailable")]
         lines.append("| "+" | ".join(v.replace("|","\\|").replace("\n"," ") for v in values)+" |")
     lines += ["","## Limitations","","- Non-fork status is not proof of authorship; commit history and provenance must be reviewed.","- Forks are reference-only and must not be modified under the portfolio policy.","- A tree inventory is not a source-code, dependency, security, test or deployment audit.","- Truncated trees require recursive subtree traversal; failed API requests remain explicit.", ""]
     return "\n".join(lines)
