@@ -14,6 +14,7 @@ A cross-repository research, architecture, and implementation program spanning q
 ## Documents
 
 - [Portfolio inventory](REPOSITORY_INVENTORY.md)
+- [Repository ownership and fork provenance audit](REPOSITORY_OWNERSHIP_AUDIT.md)
 - [Reference architectures and research map](RESEARCH_ARCHITECTURE.md)
 - [Engineering backlog and acceptance matrix](IMPLEMENTATION_BACKLOG.md)
 - [Termux / Android engineering playbook](TERMUX_ANDROID_PLAYBOOK.md)
