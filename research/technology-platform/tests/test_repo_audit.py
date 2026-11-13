@@ -17,6 +17,11 @@ class RepositoryTreeTests(unittest.TestCase):
         result=summarize_tree(payload)
         self.assertEqual(result["gitlinks"],[{"path":".tools/example","sha":"abc123"}])
         self.assertEqual(result["submodule_config_status"],"missing_with_gitlinks")
+    def test_dependency_directory_manifests_are_excluded(self):
+        payload={"tree":[{"path":"node_modules/example/package.json","type":"blob"},{"path":"package.json","type":"blob"}]}
+        result=summarize_tree(payload)
+        self.assertEqual(result["manifests"],["package.json"])
+        self.assertEqual(result["vendored_or_generated_file_count"],1)
     def test_gitmodules_presence_is_detected(self):
         result=summarize_tree({"tree":[{"path":".gitmodules","type":"blob"}]})
         self.assertTrue(result["gitmodules_present"])
