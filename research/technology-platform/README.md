@@ -41,6 +41,7 @@ This is a verified working set, not a claim that the full account inventory is c
 
 - [OMNIQUANT CORE boundary and production gates](OMNIQUANT_CORE_BOUNDARY.md)
 - [Phase 02 read-only repository evidence scanner](PHASE_02_AUDIT_SCANNER.md)
+- [Quantum Nexus OS forensic findings](CORE_REPOSITORY_FORENSIC_FINDINGS.md)
 - Scanner: `tools/repo_audit.py`; tests: `tests/test_repo_audit.py`
 - [Python package configuration](pyproject.toml)
 - `src/omniquant_core/`: typed observation/intent/guard contracts and standalone fail-closed risk evaluator.
