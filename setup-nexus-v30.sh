@@ -227,6 +227,33 @@ app.post("/api/security/scan", async (req, res) => {
     return res.status(502).json({ status: "unavailable", reason: error.message });
   }
 });
+app.get("/api/csi/status", async (_req, res) => {
+  const endpoint = process.env.NEXMON_CSI_URL;
+  if (!endpoint) return res.status(503).json({ status: "unavailable", reason: "Nexmon CSI capture service is not configured" });
+  try {
+    const headers = process.env.NEXMON_CSI_TOKEN ? { authorization: "Bearer " + process.env.NEXMON_CSI_TOKEN } : {};
+    const response = await fetch(endpoint.replace(/\\/$/, "") + "/status", { headers, signal: AbortSignal.timeout(8000) });
+    const data = await response.json();
+    if (!response.ok || data.connected !== true || typeof data.observedAt !== "string") throw new Error("CSI status response not verified");
+    return res.json({ status: "connected", channel: data.channel ?? null, observedAt: data.observedAt, heatmap: Array.isArray(data.heatmap) ? data.heatmap : [] });
+  } catch (error) {
+    return res.status(503).json({ status: "unavailable", reason: error.message });
+  }
+});
+app.post("/api/csi/scan", async (_req, res) => {
+  const endpoint = process.env.NEXMON_CSI_URL;
+  const token = process.env.NEXMON_CSI_TOKEN;
+  if (process.env.CSI_SCAN_AUTHORIZED !== "true") return res.status(403).json({ status: "blocked", reason: "CSI capture authorization not enabled by operator" });
+  if (!endpoint || !token) return res.status(503).json({ status: "unavailable", reason: "Nexmon CSI capture service is not configured" });
+  try {
+    const response = await fetch(endpoint.replace(/\\/$/, "") + "/scan", { method: "POST", headers: { authorization: "Bearer " + token, "content-type": "application/json" }, body: JSON.stringify({ requestedAt: new Date().toISOString() }), signal: AbortSignal.timeout(15000) });
+    const data = await response.json();
+    if (!response.ok || typeof data.scanId !== "string" || typeof data.status !== "string") throw new Error("CSI scan response schema or HTTP status invalid");
+    return res.status(202).json({ status: data.status, scanId: data.scanId, observedAt: data.observedAt || null, devices: Array.isArray(data.devices) ? data.devices : [], heatmap: Array.isArray(data.heatmap) ? data.heatmap : [] });
+  } catch (error) {
+    return res.status(502).json({ status: "unavailable", reason: error.message });
+  }
+});
 app.get("/api/telemetry", (_req, res) => {
   const memory = process.memoryUsage();
   return res.json({
