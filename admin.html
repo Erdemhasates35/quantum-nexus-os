@@ -145,7 +145,7 @@ tr:hover td{background:rgba(255,215,0,0.03);}
         <div class="kpi-icon">👥</div>
         <div class="kpi-val" style="color:var(--q)" id="k-users">0</div>
         <div class="kpi-label">AKTİF KULLANICI</div>
-        <div class="kpi-change up">↑ +847 bu saat</div>
+        <div class="kpi-change up">USER LEDGER NOT CONNECTED</div>
       </div>
       <div class="kpi">
         <div class="kpi-icon">⚡</div>
@@ -201,7 +201,7 @@ tr:hover td{background:rgba(255,215,0,0.03);}
       <div class="table-card">
         <div class="tc-title">
           AJAN AKTİVİTE
-          <span class="tc-count">247 aktif</span>
+          <span class="tc-count">WORKER HEARTBEAT NOT CONNECTED</span>
         </div>
         <table>
           <thead><tr><th>AJAN GRUBU</th><th>DURUM</th><th>GÖREV</th></tr></thead>
@@ -219,7 +219,7 @@ tr:hover td{background:rgba(255,215,0,0.03);}
 
     <!-- AI COMMAND CENTER -->
     <div class="ai-cmd">
-      <div class="ai-cmd-title">⚡ AI KOMUT MERKEZİ — CLAUDE API CANLI</div>
+      <div class="ai-cmd-title">⚡ AI KOMUT MERKEZİ — SERVER-SIDE PROVIDER</div>
       <div class="ai-cmd-grid">
         <button class="quick-cmd" onclick="quickCmd('Günlük gelir raporu özeti ver')">📊 Gelir Raporu</button>
         <button class="quick-cmd" onclick="quickCmd('Hangi ajan grubu bugün en yüksek performansı gösterdi?')">🤖 Ajan Analizi</button>
@@ -342,20 +342,20 @@ async function sendAdminAI(){
   const out=document.getElementById('ai-output');
   out.textContent='Claude analiz ediyor...';
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('/api/ai/anthropic',{
       method:'POST',
       headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({
         model:'claude-sonnet-4-5-20250929',
         max_tokens:600,
-        system:`Sen Quantum Nexus platform admin AI'ısın. Platform: AI tools directory, otonom ajan sistemi, çoklu gelir akışı. Günlük gelir: $31K, kullanıcı: 8.4K, ajan: 247. Türkçe, kısa ve eyleme geçirilebilir tavsiyeler ver.`,
+        system:`Sen Quantum Nexus platform admin AI'ısın. Platform: AI tools directory, otonom ajan sistemi, çoklu gelir akışı. Gelir, kullanıcı ve worker sayıları doğrulanmadı; sayı üretme. Türkçe, kısa ve eyleme geçirilebilir tavsiyeler ver.`,
         messages:[{role:'user',content:msg}]
       })
     });
     const data=await resp.json();
     out.textContent=data.content?.[0]?.text||'Yanıt alınamadı.';
   }catch(e){
-    out.textContent=`[Deploy sonrası Claude API aktif]\n\nSoru: "${msg}"\n\nGerçek deploy'da platform verilerinize dayalı AI analizi burada görünecek.`;
+    out.textContent=`Server-side Anthropic provider unavailable\n\nSoru: "${msg}"\n\nNo mock response is generated. Configure ANTHROPIC_API_KEY on the runtime server.`;
   }
 }
 
