@@ -168,6 +168,34 @@ app.get("/api/revenue/summary", async (_req, res) => {
     return res.status(503).json({ status: "unavailable", verified: false, reason: error.message });
   }
 });
+app.post("/api/security/scan", async (req, res) => {
+  const endpoint = process.env.SECURITY_SCAN_URL;
+  const token = process.env.SECURITY_SCAN_TOKEN;
+  const allowedHosts = (process.env.SCAN_ALLOWED_HOSTS || "").split(",").map((value) => value.trim().toLowerCase()).filter(Boolean);
+  let target;
+  try { target = new URL(String(req.body?.target || "")); } catch { return res.status(400).json({ error: "invalid_target_url" }); }
+  if (target.protocol !== "https:" || !allowedHosts.includes(target.hostname.toLowerCase())) {
+    return res.status(403).json({ error: "target_not_in_explicit_https_allowlist" });
+  }
+  if (!endpoint || !token) return res.status(503).json({ status: "unavailable", reason: "Authorized security scanner endpoint is not configured" });
+  const type = String(req.body?.type || "");
+  if (!["web", "api", "contract", "network", "mobile"].includes(type)) return res.status(400).json({ error: "unsupported_scan_type" });
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer " + token },
+      body: JSON.stringify({ target: target.toString(), type, requestedAt: new Date().toISOString() }),
+      signal: AbortSignal.timeout(15000)
+    });
+    const data = await response.json();
+    if (!response.ok || typeof data.scanId !== "string" || typeof data.status !== "string") {
+      throw new Error("Scanner response schema or HTTP status invalid");
+    }
+    return res.status(202).json({ status: "accepted", scanId: data.scanId, scannerStatus: data.status, events: Array.isArray(data.events) ? data.events : [] });
+  } catch (error) {
+    return res.status(502).json({ status: "unavailable", reason: error.message });
+  }
+});
 app.get("/api/telemetry", (_req, res) => {
   const memory = process.memoryUsage();
   return res.json({
