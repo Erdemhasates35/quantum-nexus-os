@@ -19,6 +19,7 @@ The v16 dashboard is not an autonomous trading engine and does not claim live or
 ## Security
 
 - Private keys must never be stored in browser code, committed files or logs.
+- Legacy mainnet signer scripts containing an embedded wallet key were removed from the active tree. Any key ever committed to Git history must be treated as compromised and rotated; deleting current files does not rewrite historical commits.
 - Wallet connection is not transaction authorization.
 - A quote, model output, simulated result or bundle acknowledgement is not a settled trade.
 - Realized PnL requires finalized transaction evidence and reconciled balance deltas.
