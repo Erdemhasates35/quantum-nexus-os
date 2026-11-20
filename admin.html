@@ -145,7 +145,7 @@ tr:hover td{background:rgba(255,215,0,0.03);}
         <div class="kpi-icon">👥</div>
         <div class="kpi-val" style="color:var(--q)" id="k-users">0</div>
         <div class="kpi-label">AKTİF KULLANICI</div>
-        <div class="kpi-change up">↑ +847 bu saat</div>
+        <div class="kpi-change up">USER LEDGER NOT CONNECTED</div>
       </div>
       <div class="kpi">
         <div class="kpi-icon">⚡</div>
@@ -155,8 +155,8 @@ tr:hover td{background:rgba(255,215,0,0.03);}
       </div>
       <div class="kpi">
         <div class="kpi-icon">🤖</div>
-        <div class="kpi-val" style="color:var(--p)" id="k-agents">0</div>
-        <div class="kpi-label">AKTİF AJAN</div>
+        <div class="kpi-val" style="color:var(--p)" id="k-agents" data-nexus-role-count>60</div>
+        <div class="kpi-label">KAYITLI ROL TANIMI</div>
         <div class="kpi-change up">↑ Oto-ölçekleme</div>
       </div>
       <div class="kpi">
@@ -201,7 +201,7 @@ tr:hover td{background:rgba(255,215,0,0.03);}
       <div class="table-card">
         <div class="tc-title">
           AJAN AKTİVİTE
-          <span class="tc-count">247 aktif</span>
+          <span class="tc-count">WORKER HEARTBEAT NOT CONNECTED</span>
         </div>
         <table>
           <thead><tr><th>AJAN GRUBU</th><th>DURUM</th><th>GÖREV</th></tr></thead>
@@ -219,7 +219,7 @@ tr:hover td{background:rgba(255,215,0,0.03);}
 
     <!-- AI COMMAND CENTER -->
     <div class="ai-cmd">
-      <div class="ai-cmd-title">⚡ AI KOMUT MERKEZİ — CLAUDE API CANLI</div>
+      <div class="ai-cmd-title">⚡ AI KOMUT MERKEZİ — SERVER-SIDE PROVIDER</div>
       <div class="ai-cmd-grid">
         <button class="quick-cmd" onclick="quickCmd('Günlük gelir raporu özeti ver')">📊 Gelir Raporu</button>
         <button class="quick-cmd" onclick="quickCmd('Hangi ajan grubu bugün en yüksek performansı gösterdi?')">🤖 Ajan Analizi</button>
@@ -252,44 +252,30 @@ function animCount(el,target,pre='',suf=''){
   const val=s>=1000?Math.floor(s/1000).toLocaleString()+'K':Math.floor(s).toLocaleString();
   el.textContent=pre+val+suf;},25);
 }
-animCount(document.getElementById('k-rev'),31100,'$');
-animCount(document.getElementById('k-users'),8472);
-animCount(document.getElementById('k-agents'),247);
-animCount(document.getElementById('k-threats'),1847);
+document.getElementById("k-rev").textContent="NO VERIFIED LEDGER";
+document.getElementById("k-users").textContent="—";
+document.getElementById("k-agents").textContent="60";
+document.getElementById("k-threats").textContent="—";
 
-let conv=18.4;
+let conv=null;
 const convEl=document.getElementById('k-conv');
 const convChg=document.getElementById('conv-change');
-setTimeout(()=>{convEl.textContent=conv+'%';convChg.className='kpi-change up';convChg.textContent='↑ Üst limit';},1500);
+convEl.textContent="—";convChg.textContent="VERİ KAYNAĞI BAĞLI DEĞİL";
 
-// Live conversion monitoring
-setInterval(()=>{
-  conv=+(14+Math.random()*8).toFixed(1);
-  convEl.textContent=conv+'%';
-  if(conv<15){
-    convEl.style.color='var(--r)';
-    convChg.className='kpi-change down';
-    convChg.textContent='↓ OTO-İTERASYON BAŞLADI';
-    document.getElementById('alert-bar').style.display='flex';
-  }else{
-    convEl.style.color='var(--y)';
-    convChg.className='kpi-change up';
-    convChg.textContent='↑ Normal seviye';
-  }
-  document.getElementById('k-api').textContent=Math.floor(8+Math.random()*12)+'ms';
-  document.getElementById('last-update').textContent='az önce';
-},5000);
+document.getElementById("k-api").textContent="—";
+document.getElementById("last-update").textContent="CANLI TELEMETRİ BEKLENİYOR";
 
 function dismissAlert(){document.getElementById('alert-bar').style.display='none';}
 
 // Revenue chart
 const rCanvas=document.getElementById('revenue-chart');
 const rCtx=rCanvas.getContext('2d');
-const rData=Array.from({length:24},(_,i)=>15000+Math.sin(i/3)*8000+Math.random()*4000);
+const rData=[];
 function resizeR(){rCanvas.width=rCanvas.parentElement.offsetWidth-48;}resizeR();window.addEventListener('resize',resizeR);
 function drawRevChart(){
   const W=rCanvas.width,H=140;rCanvas.height=H;
   rCtx.clearRect(0,0,W,H);
+  if(!rData.length){rCtx.fillStyle="rgba(255,255,255,0.5)";rCtx.font="12px monospace";rCtx.fillText("DOĞRULANMIŞ GELİR KAYDI BAĞLI DEĞİL",12,70);return;}
   const max=Math.max(...rData)*1.1,min=Math.min(...rData)*0.9;
   const xS=W/(rData.length-1),yS=H/(max-min);
   const grad=rCtx.createLinearGradient(0,0,0,H);
@@ -302,16 +288,17 @@ function drawRevChart(){
   rCtx.stroke();
 }
 drawRevChart();
-setInterval(()=>{rData.shift();rData.push(15000+Math.random()*12000);drawRevChart();},3000);
+
 
 // Pie chart
 const pCanvas=document.getElementById('pie-chart');
 const pCtx=pCanvas.getContext('2d');
 function resizeP(){pCanvas.width=pCanvas.parentElement.offsetWidth-48;}resizeP();window.addEventListener('resize',resizeP);
-const pieData=[{v:27,c:'#39FF14',l:'API Arbitraj'},{v:17,c:'#00FFD4',l:'SaaS'},{v:15,c:'#FFD700',l:'DeFi'},{v:15,c:'#7B2FFF',l:'White-label'},{v:10,c:'#FF6B35',l:'Afiliyat'},{v:16,c:'#FF3D6B',l:'Diğer'}];
+const pieData=[];
 function drawPie(){
   const W=pCanvas.width,H=140;pCanvas.height=H;
   pCtx.clearRect(0,0,W,H);
+  if(!pieData.length){pCtx.fillStyle="rgba(255,255,255,0.5)";pCtx.font="12px monospace";pCtx.fillText("GELİR KAYNAĞI KAYDI YOK",12,70);return;}
   const cx=H/2,cy=H/2,r=55,total=pieData.reduce((a,d)=>a+d.v,0);
   let angle=-Math.PI/2;
   pieData.forEach(d=>{
@@ -334,13 +321,7 @@ function drawPie(){
 drawPie();
 
 // Transactions
-const txData=[
-  {user:'user_8x4f',tool:'Claude 3.5',method:'stripe',amt:'$2.50'},
-  {user:'user_2k9d',tool:'Midjourney v7',method:'crypto',amt:'$0.80'},
-  {user:'user_7m3p',tool:'GPT-4o',method:'credits',amt:'$1.00'},
-  {user:'user_1n8s',tool:'Sora',method:'stripe',amt:'$4.00'},
-  {user:'user_5q2r',tool:'ElevenLabs',method:'apple',amt:'$1.20'},
-];
+const txData=[];
 const tbody=document.getElementById('tx-tbody');
 txData.forEach(t=>{
   tbody.innerHTML+=`<tr>
@@ -350,7 +331,7 @@ txData.forEach(t=>{
     <td style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--g)">${t.amt}</td>
   </tr>`;
 });
-document.getElementById('tx-count').textContent=Math.floor(1200+Math.random()*300)+' bugün';
+document.getElementById("tx-count").textContent="SETTLED LEDGER BAĞLI DEĞİL";
 
 // Claude AI Admin
 async function sendAdminAI(){
@@ -361,20 +342,20 @@ async function sendAdminAI(){
   const out=document.getElementById('ai-output');
   out.textContent='Claude analiz ediyor...';
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('/api/ai/anthropic',{
       method:'POST',
       headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({
         model:'claude-sonnet-4-5-20250929',
         max_tokens:600,
-        system:`Sen Quantum Nexus platform admin AI'ısın. Platform: AI tools directory, otonom ajan sistemi, çoklu gelir akışı. Günlük gelir: $31K, kullanıcı: 8.4K, ajan: 247. Türkçe, kısa ve eyleme geçirilebilir tavsiyeler ver.`,
+        system:`Sen Quantum Nexus platform admin AI'ısın. Platform: AI tools directory, otonom ajan sistemi, çoklu gelir akışı. Gelir, kullanıcı ve worker sayıları doğrulanmadı; sayı üretme. Türkçe, kısa ve eyleme geçirilebilir tavsiyeler ver.`,
         messages:[{role:'user',content:msg}]
       })
     });
     const data=await resp.json();
     out.textContent=data.content?.[0]?.text||'Yanıt alınamadı.';
   }catch(e){
-    out.textContent=`[Deploy sonrası Claude API aktif]\n\nSoru: "${msg}"\n\nGerçek deploy'da platform verilerinize dayalı AI analizi burada görünecek.`;
+    out.textContent=`Server-side Anthropic provider unavailable\n\nSoru: "${msg}"\n\nNo mock response is generated. Configure ANTHROPIC_API_KEY on the runtime server.`;
   }
 }
 
@@ -383,5 +364,6 @@ function quickCmd(cmd){
   sendAdminAI();
 }
 </script>
+<script src="/modules/nexus-live-telemetry.js"></script>
 </body>
 </html>

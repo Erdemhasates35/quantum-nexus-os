@@ -18,7 +18,7 @@ body{background:#000;color:#a0c0d8;font-family:'Share Tech Mono',monospace;font-
 </head>
 <body>
 
-<div id="boot"><!-- Boot ekranı önceki gibi --></div>
+<div id="boot"><div style="padding:16px;color:var(--am)">Runtime status is loaded from the authenticated CSI backend.</div></div>
 
 <div id="os">
   <div id="pgs">
@@ -29,19 +29,19 @@ body{background:#000;color:#a0c0d8;font-family:'Share Tech Mono',monospace;font-
       <div class="row">
         <div class="col">
           <div class="card">
-            <div class="ch">CSI HEATMAP + KONUM TAHMİNİ (RPi Nexmon)</div>
+            <div class="ch">NEXMON CSI HEATMAP · LIVE BACKEND ONLY</div>
             <div class="heatmap" id="heatmap"></div>
             <div class="scan-bar"></div>
           </div>
         </div>
         <div class="col">
           <div class="card">
-            <div class="ch">CANLI TESPİT + AKTİVİTE ANALİZİ</div>
+            <div class="ch">CSI CAPTURE STATUS · VERIFIED DEVICE RECORDS</div>
             <div id="deviceLog" class="term" style="height:340px;overflow-y:auto"></div>
           </div>
         </div>
       </div>
-      <button class="btn bc" onclick="deepMultiScan()">🔍 DEEP MULTI-LAYER SCAN (CSI + NMAP + PROBE)</button>
+      <button class="btn bc" onclick="deepMultiScan()">🔍 AUTHORIZED NEXMON CSI CAPTURE</button>
     </div>
 
     <!-- L30 SOVEREIGN (Epik) -->
@@ -54,47 +54,48 @@ body{background:#000;color:#a0c0d8;font-family:'Share Tech Mono',monospace;font-
 </div>
 
 <script>
-// WebSocket simülasyonu (gerçek backend ile entegre)
-const wsLog = document.getElementById('deviceLog');
-function addLog(msg, color='var(--gr)') {
-  const div = document.createElement('div');
-  div.style.color = color;
-  div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  wsLog.appendChild(div);
-  wsLog.scrollTop = wsLog.scrollHeight;
+const wsLog=document.getElementById("deviceLog");
+function addLog(message,color="var(--gr)"){
+  const row=document.createElement("div");row.style.color=color;row.textContent="["+new Date().toLocaleTimeString()+"] "+message;
+  wsLog.appendChild(row);wsLog.scrollTop=wsLog.scrollHeight;
 }
-
-// CSI Heatmap Animasyonu
-function initHeatmap() {
-  const container = document.getElementById('heatmap');
-  for(let i=0; i<120; i++){
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random()*100+'%';
-    p.style.top = Math.random()*100+'%';
-    p.style.animation = `particleFloat ${15+Math.random()*20}s linear infinite`;
-    container.appendChild(p);
+function renderHeatmap(samples){
+  const container=document.getElementById("heatmap");container.replaceChildren();
+  if(!Array.isArray(samples)||samples.length===0){
+    const state=document.createElement("div");state.textContent="NEXMON CSI BACKEND NOT CONNECTED";
+    state.style.cssText="padding:24px;color:var(--am);text-align:center";container.append(state);return;
   }
+  samples.forEach((sample,index)=>{
+    const value=Number(sample.amplitude??sample.value);
+    if(!Number.isFinite(value))return;
+    const cell=document.createElement("div");cell.className="particle";
+    cell.style.left=(Number(sample.x??(index%12)/12*100))+"%";
+    cell.style.top=(Number(sample.y??Math.floor(index/12)/Math.ceil(samples.length/12)*100))+"%";
+    cell.style.opacity=String(Math.max(0,Math.min(1,value)));
+    container.append(cell);
+  });
 }
-
-// Derin Tarama
-function deepMultiScan() {
-  addLog("🚀 DEEP SCAN BAŞLADI — Nexmon CSI + Probe Request + NMAP", "var(--c)");
-  
-  setTimeout(() => addLog("📡 CSI DATA STREAM ACTIVE — 80MHz Channel 36-165"), 600);
-  setTimeout(() => {
-    addLog("✓ CİHAZ TESPİTİ: 48:12:34:AB:CD:EF • RSSI -38dBm • Est. Mesafe: 4.7m • Aktivite: Yürüyor (CSI Phase Shift)", "var(--gr)");
-    addLog("🔗 IP/URL Correlation: 192.168.1.47 → http://local-device:8080 (ALT URL tespit edildi)", "var(--am)");
-  }, 1400);
-  
-  setTimeout(() => addLog("🛡 KALKan MODÜLÜNE BİLDİRİLDİ — Otomatik izleme başlatıldı", "var(--vi)"), 2200);
+async function bootSequence(){
+  try{
+    const response=await fetch("/api/csi/status",{cache:"no-store"});const data=await response.json();
+    if(!response.ok)throw new Error(data.reason||"CSI service unavailable");
+    addLog("Nexmon CSI connected · channel "+String(data.channel??"unreported"),"var(--gr)");
+    renderHeatmap(data.heatmap);
+  }catch(error){addLog("CSI unavailable: "+error.message,"var(--am)");renderHeatmap([]);}
 }
-
-window.onload = () => {
-  bootSequence();
-  initHeatmap();
-  setTimeout(() => addLog("🌐 QUANTUM NEXUS OS v30 FULLY INTEGRATED"), 800);
-};
+async function deepMultiScan(){
+  addLog("Authorized CSI scan requested…","var(--c)");
+  try{
+    const response=await fetch("/api/csi/scan",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});
+    const data=await response.json();
+    if(!response.ok)throw new Error(data.reason||"CSI scan unavailable");
+    addLog("Scan job accepted: "+data.scanId+" · "+data.status,"var(--gr)");
+    addLog("Verified device records: "+data.devices.length,"var(--c)");
+    for(const device of data.devices)addLog(JSON.stringify(device),"var(--gr)");
+    renderHeatmap(data.heatmap);
+  }catch(error){addLog("No scan performed: "+error.message,"var(--am)");}
+}
+window.addEventListener("load",bootSequence);
 </script>
 </body>
 </html>

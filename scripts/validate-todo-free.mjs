@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { extname } from "node:path";
 
 const ignoredPrefixes = [
@@ -19,8 +19,13 @@ const ignoredPrefixes = [
 const ignoredExtensions = new Set([".png",".jpg",".jpeg",".gif",".webp",".ico",".pdf",".zip",".gz",".wasm",".so",".a",".bin",".lock"]);
 const markerParts = [["TO","DO"].join(""), ["FIX","ME"].join(""), ["X","XX"].join("")];
 const markerPattern = new RegExp("(^|[^A-Za-z0-9_])(?:" + markerParts.join("|") + ")(?=$|[^A-Za-z0-9_])");
+const privateKeyLiteralPattern = /[1-9A-HJ-NP-Za-km-z]{80,90}/;
 const files = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" }).split("\0").filter(Boolean);
 const findings = [];
+const forbiddenPaths = ["archive/todo-app-original.html", "setup-nexus-v30.sh", "autonomous-swarm.html", "frontend/public/index.html", "admin.html", "public/index.html", "quantum-core.html", "revenue-nexus.html", "nexus-ultra.html", "index-1.html", "~/quantum-nexus-os/index.html", "red-team-1.html", "quantum-api-panel.html", "nexus_flashloan.js", "nexuss_flashloan.js", "nexusss_flashloan.js", "nexussss_flashloan.js"];
+for (const file of forbiddenPaths) {
+  if (existsSync(file)) findings.push({ file, line: 0, text: "forbidden archived application or unsafe installer remains" });
+}
 
 for (const file of files) {
   if (ignoredPrefixes.some((prefix) => file.startsWith(prefix))) continue;
@@ -34,6 +39,7 @@ for (const file of files) {
   const lines = source.split(/\r?\n/);
   for (let index = 0; index < lines.length; index++) {
     if (markerPattern.test(lines[index])) findings.push({ file, line: index + 1, text: lines[index].trim().slice(0, 180) });
+    if (privateKeyLiteralPattern.test(lines[index])) findings.push({ file, line: index + 1, text: "HARDCODED_PRIVATE_KEY_LITERAL" });
   }
 }
 

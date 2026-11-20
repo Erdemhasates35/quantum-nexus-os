@@ -249,19 +249,19 @@ footer {
 </nav>
 
 <section class="hero">
-  <div class="hero-eyebrow">QUANTUM NEXUS OS v∞.0 — TAMAMEN OTONOM — İNSAN MÜDAHALESİ: SIFIR</div>
+  <div class="hero-eyebrow">QUANTUM NEXUS OS v∞.0 — KONTROLLÜ YÜRÜTME — ÜRETİM ONAYI GEREKLİ</div>
   <h1 class="hero-title">NEXUS<br>EKOSİSTEM</h1>
-  <div class="hero-sub">SELF-EVOLVING · ACADEMIC-GRADE · ZERO-COST INFRASTRUCTURE · PERPETUAL REVENUE</div>
+  <div class="hero-sub">LIVE DATA INTEGRATIONS · 60 REGISTERED ROLES · VERIFIED EXECUTION EVIDENCE</div>
 
   <div class="formula-bar">
     Ψ(x,t) = Σₙ cₙφₙ(x)e^(-iEₙt/ℏ) &nbsp;|&nbsp; 𝓗̂Ψ = iℏ∂Ψ/∂t &nbsp;|&nbsp; ΔE·Δt ≥ ℏ/2 &nbsp;|&nbsp; S = -kB Σᵢ pᵢ ln(pᵢ)
   </div>
 
   <div class="stats-row">
-    <div class="stat"><div class="stat-val q" id="cnt-agents">0</div><div class="stat-label">OTONOM AJAN</div></div>
-    <div class="stat"><div class="stat-val p" id="cnt-models">0</div><div class="stat-label">AKADEMİK MODEL</div></div>
-    <div class="stat"><div class="stat-val r" id="cnt-uptime">99.97%</div><div class="stat-label">UPTIME</div></div>
-    <div class="stat"><div class="stat-val y" id="cnt-rev">$0</div><div class="stat-label">GÜNLÜK GELİR</div></div>
+    <div class="stat"><div class="stat-val q" id="cnt-agents" data-nexus-role-count>60</div><div class="stat-label">KAYITLI ROL TANIMI</div></div>
+    <div class="stat"><div class="stat-val p" id="cnt-models" data-nexus-academic-count>20</div><div class="stat-label">AKADEMİK KONTROL ROLÜ</div></div>
+    <div class="stat"><div class="stat-val r" id="cnt-uptime" data-nexus-uptime>—</div><div class="stat-label">UPTIME</div></div>
+    <div class="stat"><div class="stat-val y" id="cnt-rev" data-nexus-revenue>NO VERIFIED LEDGER</div><div class="stat-label">GÜNLÜK GELİR</div></div>
   </div>
 </section>
 
@@ -417,18 +417,12 @@ function animCount(el,target,prefix='',suffix='',dur=2000){
   let id=setInterval(()=>{start+=step;if(start>=target){start=target;clearInterval(id);}
   el.textContent=prefix+Math.floor(start).toLocaleString()+suffix;},16);
 }
-animCount(document.getElementById('cnt-agents'),247);
-animCount(document.getElementById('cnt-models'),89);
-animCount(document.getElementById('cnt-rev'),24891,'$');
+document.getElementById('cnt-agents').textContent='60';
+document.getElementById('cnt-models').textContent='20';
+document.getElementById('cnt-rev').textContent='NO VERIFIED LEDGER';
 
 // Ticker
-const tickers=[
-  {label:'GPT-4o SCORE',val:'+97.3',cls:'up'},{label:'CLAUDE PERF',val:'+96.8',cls:'up'},
-  {label:'SWARM AGENTS',val:'247',cls:''},{label:'REVENUE/DAY',val:'$24,891',cls:'up'},
-  {label:'UPTIME',val:'99.97%',cls:'up'},{label:'FREE INFRA',val:'78%',cls:'up'},
-  {label:'AUTO-UPDATES',val:'ON',cls:'up'},{label:'HUMAN INPUT',val:'0%',cls:''},
-  {label:'QUANTUM COHERENCE',val:'94%',cls:'up'},{label:'ACADEMIC GRADE',val:'PHD+',cls:'up'},
-];
+const tickers=[{label:'REGISTERED ROLES',val:'60',cls:''},{label:'ACADEMIC ROLES',val:'20',cls:''},{label:'ACTIVE WORKERS',val:'0',cls:''},{label:'SETTLED REVENUE',val:'NO LEDGER',cls:''},{label:'RUNTIME UPTIME',val:'NO TELEMETRY',cls:''},{label:'AI PROVIDERS',val:'CONFIG REQUIRED',cls:''},{label:'QUANTUM HARDWARE',val:'NOT CONNECTED',cls:''}];
 const ti=document.getElementById('ticker-inner');
 [...tickers,...tickers].forEach(t=>{
   const d=document.createElement('div');
@@ -437,5 +431,6 @@ const ti=document.getElementById('ticker-inner');
   ti.appendChild(d);
 });
 </script>
+<script src="/modules/nexus-live-telemetry.js"></script>
 </body>
 </html>
