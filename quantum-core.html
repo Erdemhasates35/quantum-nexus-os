@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANTUM CORE — Hibrit AI Çekirdeği</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
+:root{--q:#00FFD4;--p:#7B2FFF;--r:#FF3D6B;--g:#39FF14;--y:#FFD700;--bg:#03030A;--glass:rgba(0,255,212,0.04);--border:rgba(0,255,212,0.12);}
+*{margin:0;padding:0;box-sizing:border-box;cursor:none;}
+body{background:var(--bg);color:#E8E8FF;font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+#cursor{position:fixed;width:10px;height:10px;background:var(--q);border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:difference;}
+#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(0,255,212,0.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all 0.12s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 48px;background:rgba(3,3,10,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--q);letter-spacing:0.3em;}
+.nav-links{display:flex;gap:20px;}
+.nav-links a{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:0.12em;padding:7px 14px;border:1px solid transparent;border-radius:6px;transition:all 0.3s;}
+.nav-links a:hover,.nav-links a.active{color:var(--q);border-color:rgba(0,255,212,0.3);background:rgba(0,255,212,0.06);}
+.page-header{padding:120px 48px 48px;max-width:1400px;margin:0 auto;}
+.page-tag{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--q);letter-spacing:0.4em;margin-bottom:16px;}
+.page-title{font-family:'Orbitron',monospace;font-size:clamp(32px,6vw,64px);font-weight:900;line-height:1;margin-bottom:12px;background:linear-gradient(135deg,#FFF 0%,var(--q) 60%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;}
+.content{max-width:1400px;margin:0 auto;padding:0 48px 80px;}
+
+/* FORMULA BLOCKS */
+.formula-section{margin-bottom:48px;}
+.section-title{font-family:'Orbitron',monospace;font-size:14px;color:var(--q);letter-spacing:0.2em;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+.formula-card{background:rgba(123,47,255,0.06);border:1px solid rgba(123,47,255,0.18);border-radius:16px;padding:24px;transition:all 0.3s;}
+.formula-card:hover{border-color:rgba(123,47,255,0.4);box-shadow:0 0 40px rgba(123,47,255,0.08);}
+.formula-name{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--p);letter-spacing:0.2em;margin-bottom:10px;}
+.formula-eq{font-family:'Share Tech Mono',monospace;font-size:16px;color:#E8E8FF;margin-bottom:10px;line-height:1.6;word-break:break-all;}
+.formula-desc{font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;}
+
+/* QUANTUM VIZ */
+.quantum-viz{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:32px;margin-bottom:48px;}
+.viz-canvas-wrap{position:relative;height:280px;overflow:hidden;border-radius:12px;background:#020208;margin-bottom:20px;}
+#qcanvas{width:100%;height:100%;}
+.viz-info{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;}
+.viz-stat{text-align:center;}
+.viz-val{font-family:'Orbitron',monospace;font-size:22px;font-weight:700;}
+.viz-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;margin-top:4px;}
+
+/* SELF UPDATE */
+.update-engine{background:rgba(57,255,20,0.04);border:1px solid rgba(57,255,20,0.15);border-radius:20px;padding:32px;margin-bottom:48px;}
+.update-title{font-family:'Orbitron',monospace;font-size:14px;color:var(--g);letter-spacing:0.2em;margin-bottom:20px;}
+.update-log{background:#020208;border-radius:12px;padding:20px;height:200px;overflow-y:auto;font-family:'Share Tech Mono',monospace;font-size:12px;line-height:1.8;}
+.log-line{margin-bottom:4px;}
+.log-time{color:rgba(255,255,255,0.2);}
+.log-ok{color:var(--g);}
+.log-proc{color:var(--y);}
+.log-q{color:var(--q);}
+.log-err{color:var(--r);}
+.update-controls{display:flex;gap:12px;margin-top:16px;}
+.btn{font-family:'Share Tech Mono',monospace;font-size:12px;padding:10px 24px;border-radius:8px;border:none;cursor:pointer;letter-spacing:0.1em;transition:all 0.3s;}
+.btn-q{background:linear-gradient(135deg,var(--q),#00D4A8);color:#03030A;font-weight:700;}
+.btn-q:hover{box-shadow:0 0 24px rgba(0,255,212,0.4);}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.3);color:#fff;}
+
+/* HYBRID ARCH */
+.arch-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:48px;}
+.arch-card{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:28px;}
+.arch-card-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;margin-bottom:16px;}
+.arch-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-family:'Share Tech Mono',monospace;font-size:12px;}
+.arch-item:last-child{border:none;}
+.arch-key{color:rgba(255,255,255,0.4);}
+.arch-val{color:var(--q);}
+
+/* FREE INFRA TABLE */
+.infra-table{width:100%;border-collapse:collapse;margin-bottom:48px;}
+.infra-table th{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.2em;color:rgba(255,255,255,0.3);text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);}
+.infra-table td{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:14px;}
+.infra-table tr:hover td{background:rgba(0,255,212,0.03);}
+.badge{font-family:'Share Tech Mono',monospace;font-size:10px;padding:3px 10px;border-radius:4px;display:inline-block;}
+.badge-free{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.2);}
+.badge-paid{background:rgba(255,61,107,0.1);color:var(--r);border:1px solid rgba(255,61,107,0.2);}
+.badge-hybrid{background:rgba(255,215,0,0.1);color:var(--y);border:1px solid rgba(255,215,0,0.2);}
+
+footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.15);letter-spacing:0.15em;border-top:1px solid var(--border);}
+@media(max-width:768px){.arch-grid{grid-template-columns:1fr;}.nav-links{display:none;}.content,.page-header{padding-left:24px;padding-right:24px;}}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <div class="nav-logo">⬡ NEXUS OS</div>
+  <div class="nav-links">
+    <a href="index.html">HUB</a>
+    <a href="quantum-core.html" class="active">KUANTUM ÇEKIRDEĞI</a>
+    <a href="autonomous-swarm.html">SWARM ZEKASI</a>
+    <a href="revenue-nexus.html">GELİR ENJİNİ</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-tag">⚛ MODÜL 01 — KUANTUM HİBRİT AI ENJİNİ</div>
+  <h1 class="page-title">QUANTUM<br>CORE</h1>
+  <div class="page-sub">SCHRÖDINGER · DFT · VQE · HARTREE-FOCK · SELF-KALIBRASYON · AKADEMİK GRADE</div>
+</div>
+
+<div class="content">
+
+  <!-- QUANTUM VIZ -->
+  <div class="quantum-viz">
+    <div class="section-title">◈ CANLI KUANTUM DALGA FONKSİYONU VİZÜALİZASYONU</div>
+    <div class="viz-canvas-wrap">
+      <canvas id="qcanvas"></canvas>
+    </div>
+    <div class="viz-info">
+      <div class="viz-stat"><div class="viz-val" style="color:var(--q)" id="coherence">94.3%</div><div class="viz-label">KUANTUM TUTARLILIK</div></div>
+      <div class="viz-stat"><div class="viz-val" style="color:var(--p)" id="entangle">147</div><div class="viz-label">DOLAŞIK QUBIT</div></div>
+      <div class="viz-stat"><div class="viz-val" style="color:var(--g)" id="fidelity">99.1%</div><div class="viz-label">GATE FIDELITY</div></div>
+      <div class="viz-stat"><div class="viz-val" style="color:var(--y)" id="energy">-284.7 eV</div><div class="viz-label">TEMEL ENERJI</div></div>
+      <div class="viz-stat"><div class="viz-val" style="color:var(--r)" id="temp">15 mK</div><div class="viz-label">İŞLEM SICAKLIĞI</div></div>
+    </div>
+  </div>
+
+  <!-- FORMULAS -->
+  <div class="formula-section">
+    <div class="section-title">◈ AKADEMİK KUANTUM KİMYA FORMÜLLER — TEMELİMİZ</div>
+    <div class="formula-grid">
+
+      <div class="formula-card">
+        <div class="formula-name">SCHRÖDINGER DENKLEMİ (ZAMANA BAĞLI)</div>
+        <div class="formula-eq">iℏ ∂Ψ(r,t)/∂t = Ĥ Ψ(r,t)</div>
+        <div class="formula-desc">Kuantum sisteminin zaman evrimini tanımlar. AI modelimiz her güncelleme döngüsünde bu denklemi analog olarak çözerek enerji optimum noktasını arar.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">ZAMANDAN BAĞIMSIZ SCHRÖDINGER</div>
+        <div class="formula-eq">Ĥ|Ψ⟩ = E|Ψ⟩ &nbsp;|&nbsp; [-ℏ²/2m ∇² + V(r)]Ψ = EΨ</div>
+        <div class="formula-desc">Model mimarisini optimize etmek için kullanılan öz-değer problemi. En düşük enerji (E₀) en iyi model konfigürasyonuna karşılık gelir.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">HARTREE-FOCK METODU</div>
+        <div class="formula-eq">F̂φᵢ = εᵢφᵢ &nbsp;|&nbsp; F̂ = ĥ + Σⱼ(2Ĵⱼ - K̂ⱼ)</div>
+        <div class="formula-desc">Çok-elektron sistemlerini self-consistent field (SCF) yaklaşımıyla çözer. AI model katmanları arasındaki etkileşimi modellemek için uyarlanmıştır.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">YOĞUNLUK FONKSİYONEL TEORİSİ (DFT)</div>
+        <div class="formula-eq">E[ρ] = T[ρ] + Vₑₓₜ[ρ] + J[ρ] + Eₓc[ρ]</div>
+        <div class="formula-desc">Hohenberg-Kohn teoremi: tüm özellikler temel hal yoğunluğundan belirlenir. Model performansı bu fonksiyonelin minimizasyonu ile optimize edilir.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">VARIATIONAL QUANTUM EIGENSOLVER (VQE)</div>
+        <div class="formula-eq">E₀ ≤ ⟨Ψ(θ)|Ĥ|Ψ(θ)⟩ = E(θ)</div>
+        <div class="formula-desc">Hibrit klasik-kuantum algoritma. Kuantum devresi parametre θ'yı optimize ederken klasik optimizer gradyanları hesaplar. Üstel hızlanma sağlar.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">KUANTUM HATA DÜZELTME — SURFACE CODE</div>
+        <div class="formula-eq">d_min = 2t+1 &nbsp;|&nbsp; p_L ≈ (p/p_th)^⌈d/2⌉</div>
+        <div class="formula-desc">d-mesafeli surface code, t adet hatayı düzeltebilir. Eşik hata oranı p_th ≈ 1% altında kalındığında mantıksal qubit hata oranı üstel düşer.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">HEISENBERG BELİRSİZLİK İLKESİ</div>
+        <div class="formula-eq">ΔE·Δt ≥ ℏ/2 &nbsp;|&nbsp; Δx·Δp ≥ ℏ/2</div>
+        <div class="formula-desc">Model güncelleme döngüsü tasarımında temel kısıt. Enerji belirsizliği ve zaman çözünürlüğü arasındaki tradeoff yönetimi için kullanılır.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">VON NEUMANN ENTROPİSİ</div>
+        <div class="formula-eq">S(ρ̂) = -Tr(ρ̂ log ρ̂) = -Σᵢ λᵢ log λᵢ</div>
+        <div class="formula-desc">Kuantum sistemin bilgi entropisi. Model belirsizliğini ve bilgi sıkıştırma kapasitesini ölçmek için doğrudan kullanılır. Sıfır = tam bilgi.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">BERRY FAZASI — TOPOLOJİK HESAPLAMA</div>
+        <div class="formula-eq">γₙ = i∮ ⟨Ψₙ(R)|∇_R|Ψₙ(R)⟩·dR</div>
+        <div class="formula-desc">Parametre uzayındaki kapalı döngüde biriken geometrik faz. Gürültüye karşı dayanıklı topolojik kuantum hesaplama için temel yapı taşı.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">GROVER ARAMA ALGORİTMASI</div>
+        <div class="formula-eq">|Ψ_out⟩ = (2|Ψ⟩⟨Ψ| - I)·O|Ψ⟩ — O(√N)</div>
+        <div class="formula-desc">N elemanlı yapılandırılmamış veritabanında O(√N) adımda arama. Klasik O(N)'e karşı kuadratik hızlanma. Hiperparametre grid-search için uygulandı.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">KUANTUM ÖĞRENME — PAC SINIRI</div>
+        <div class="formula-eq">ε_Q ≤ ε_C / √(2πd_VC) — O(log N / N)</div>
+        <div class="formula-desc">Kuantum PAC öğrenme sınırı klasik sınırdan üstel hızda küçülür. Model genelleme garantisi akademik kanıtlı sınırlarla verilir.</div>
+      </div>
+
+      <div class="formula-card">
+        <div class="formula-name">WIGNER DAĞILIM FONKSİYONU</div>
+        <div class="formula-eq">W(x,p) = (1/πℏ)∫ψ*(x+y)ψ(x-y)e^(2ipy/ℏ)dy</div>
+        <div class="formula-desc">Faz uzayında kuantum durumun quasi-olasılık dağılımı. Negatif bölgeler kuantum girişim etkilerini temsil eder. Model yorumlanabilirliği için kullanılır.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SELF UPDATE ENGINE -->
+  <div class="update-engine">
+    <div class="update-title">⟳ OTONOM SELF-UPDATE ENJİNİ — CANLI LOG</div>
+    <div class="update-log" id="update-log">
+      <div class="log-line"><span class="log-time">[00:00:01]</span> <span class="log-ok">✓</span> <span class="log-q">NEXUS QUANTUM CORE başlatılıyor...</span></div>
+    </div>
+    <div class="update-controls">
+      <button class="btn btn-q" onclick="triggerUpdate()">⟳ GÜNCELLEME DÖNGÜSÜ BAŞLAT</button>
+      <button class="btn btn-ghost" onclick="clearLog()">LOG TEMİZLE</button>
+    </div>
+  </div>
+
+  <!-- HYBRID ARCH -->
+  <div class="arch-grid">
+    <div class="arch-card">
+      <div class="arch-card-title" style="color:var(--q)">⚛ KUANTUM KATMAN</div>
+      <div class="arch-item"><span class="arch-key">Qubit Sayısı</span><span class="arch-val">127 logical</span></div>
+      <div class="arch-item"><span class="arch-key">Gate Fidelity</span><span class="arch-val">>99.1%</span></div>
+      <div class="arch-item"><span class="arch-key">Coherence Time</span><span class="arch-val">~500 µs</span></div>
+      <div class="arch-item"><span class="arch-key">Algoritma</span><span class="arch-val">VQE + QAOA</span></div>
+      <div class="arch-item"><span class="arch-key">Hata Düzeltme</span><span class="arch-val">Surface Code d=5</span></div>
+      <div class="arch-item"><span class="arch-key">Backend</span><span class="arch-val">IBM Quantum (Free)</span></div>
+    </div>
+    <div class="arch-card">
+      <div class="arch-card-title" style="color:var(--p)">🖥 KLASİK HİBRİT KATMAN</div>
+      <div class="arch-item"><span class="arch-key">Optimizer</span><span class="arch-val">Adam + L-BFGS</span></div>
+      <div class="arch-item"><span class="arch-key">Framework</span><span class="arch-val">PennyLane + PyTorch</span></div>
+      <div class="arch-item"><span class="arch-key">Gradient</span><span class="arch-val">Parameter-shift rule</span></div>
+      <div class="arch-item"><span class="arch-key">Parallelism</span><span class="arch-val">DataParallel + DDP</span></div>
+      <div class="arch-item"><span class="arch-key">Precision</span><span class="arch-val">bf16 mixed</span></div>
+      <div class="arch-item"><span class="arch-key">Inference</span><span class="arch-val">Cloudflare Workers (Free)</span></div>
+    </div>
+  </div>
+
+  <!-- FREE INFRA TABLE -->
+  <div class="section-title">◈ SIFIR MALİYET ALTYAPI — AKADEMİK ENTEGRASYONu</div>
+  <table class="infra-table">
+    <thead>
+      <tr>
+        <th>SERVİS</th><th>KULLANIM</th><th>TIER</th><th>AYLIK LİMİT</th><th>AKADEMİK ALTERNATİF</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="font-weight:600">Vercel</td><td style="color:rgba(255,255,255,0.5)">Frontend hosting, edge functions</td><td><span class="badge badge-free">FREE</span></td><td style="color:var(--g)">100GB bandwidth</td><td style="color:rgba(255,255,255,0.4)">GitHub Pages</td></tr>
+      <tr><td style="font-weight:600">Supabase</td><td style="color:rgba(255,255,255,0.5)">PostgreSQL, realtime, auth</td><td><span class="badge badge-free">FREE</span></td><td style="color:var(--g)">500MB DB, 5GB storage</td><td style="color:rgba(255,255,255,0.4)">PlanetScale</td></tr>
+      <tr><td style="font-weight:600">Cloudflare Workers</td><td style="color:rgba(255,255,255,0.5)">Edge AI inference, routing</td><td><span class="badge badge-free">FREE</span></td><td style="color:var(--g)">100K req/day</td><td style="color:rgba(255,255,255,0.4)">Deno Deploy</td></tr>
+      <tr><td style="font-weight:600">IBM Quantum</td><td style="color:rgba(255,255,255,0.5)">Real quantum hardware access</td><td><span class="badge badge-free">FREE</span></td><td style="color:var(--g)">10 min/month</td><td style="color:rgba(255,255,255,0.4)">Google Cirq Simulator</td></tr>
+      <tr><td style="font-weight:600">Hugging Face</td><td style="color:rgba(255,255,255,0.5)">Model hosting, Spaces</td><td><span class="badge badge-free">FREE</span></td><td style="color:var(--g)">Unlimited public models</td><td style="color:rgba(255,255,255,0.4)">Replicate (pay-per-use)</td></tr>
+      <tr><td style="font-weight:600">Together AI</td><td style="color:rgba(255,255,255,0.5)">Open-source LLM inference</td><td><span class="badge badge-hybrid">HYBRID</span></td><td style="color:var(--y)">$25 free credits</td><td style="color:rgba(255,255,255,0.4)">Groq (free tier)</td></tr>
+      <tr><td style="font-weight:600">GitHub Actions</td><td style="color:rgba(255,255,255,0.5)">CI/CD, otomasyon, self-update</td><td><span class="badge badge-free">FREE</span></td><td style="color:var(--g)">2000 min/month</td><td style="color:rgba(255,255,255,0.4)">GitLab CI</td></tr>
+      <tr><td style="font-weight:600">Anthropic Claude API</td><td style="color:rgba(255,255,255,0.5)">Ana LLM zinciri</td><td><span class="badge badge-paid">PAID</span></td><td style="color:var(--r)">$3/M token</td><td style="color:rgba(255,255,255,0.4)">Llama3 (free)</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<footer>QUANTUM CORE — NEXUS OS © 2099 — AKADEMİK GRADE — Ψ∞</footer>
+
+<script>
+// Cursor
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';});
+function animRing(){rx+=(mx-rx-16)*0.12;ry+=(my-ry-16)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}animRing();
+
+// Quantum wave canvas
+const canvas=document.getElementById('qcanvas');
+const ctx=canvas.getContext('2d');
+let t=0;
+function resizeQ(){canvas.width=canvas.parentElement.offsetWidth;canvas.height=canvas.parentElement.offsetHeight;}
+resizeQ();window.addEventListener('resize',resizeQ);
+
+function drawQuantum(){
+  const W=canvas.width,H=canvas.height;
+  ctx.fillStyle='rgba(2,2,8,0.15)';ctx.fillRect(0,0,W,H);
+  t+=0.018;
+  // Multiple wave functions
+  const waves=[
+    {color:'rgba(0,255,212,0.7)',freq:2,amp:60,phase:0},
+    {color:'rgba(123,47,255,0.5)',freq:3,amp:40,phase:Math.PI/3},
+    {color:'rgba(255,61,107,0.4)',freq:5,amp:25,phase:Math.PI},
+    {color:'rgba(255,215,0,0.3)',freq:7,amp:15,phase:Math.PI*1.5},
+  ];
+  waves.forEach(w=>{
+    ctx.beginPath();
+    ctx.strokeStyle=w.color;ctx.lineWidth=1.5;
+    for(let x=0;x<W;x++){
+      const y=H/2+Math.sin(x/W*Math.PI*w.freq*2+t+w.phase)*w.amp*Math.exp(-Math.pow((x-W/2)/(W*0.35),2));
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  });
+  // Probability density
+  ctx.beginPath();
+  for(let x=0;x<W;x++){
+    const psi=Math.sin(x/W*Math.PI*4+t)*Math.exp(-Math.pow((x-W/2)/(W*0.3),2));
+    const y=H*0.75-psi*psi*120;
+    x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle='rgba(0,255,212,0.25)';ctx.lineWidth=1;ctx.stroke();
+  // Particles (quanta)
+  for(let i=0;i<5;i++){
+    const x=(Math.sin(t*0.7+i*1.3)*0.4+0.5)*W;
+    const y=H/2+Math.sin(x/W*Math.PI*4+t+i)*50;
+    ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle=`hsl(${(t*50+i*60)%360},100%,70%)`;ctx.fill();
+  }
+  requestAnimationFrame(drawQuantum);
+}drawQuantum();
+
+// Live metric updates
+setInterval(()=>{
+  document.getElementById('coherence').textContent=(90+Math.random()*8).toFixed(1)+'%';
+  document.getElementById('entangle').textContent=Math.floor(140+Math.random()*15);
+  document.getElementById('fidelity').textContent=(98.5+Math.random()*1.2).toFixed(1)+'%';
+  document.getElementById('energy').textContent=(-280-Math.random()*10).toFixed(1)+' eV';
+},3000);
+
+// Self-update log
+const logLines=[
+  {t:'proc',msg:'Schrödinger denklem çözümü başlatıldı — Crank-Nicolson metodu'},
+  {t:'q',msg:'VQE iterasyon #1: E(θ) = -284.3 eV — gradient hesaplanıyor'},
+  {t:'ok',msg:'Hartree-Fock SCF yakınsadı: 12 iterasyonda — ε < 1e-8 Hartree'},
+  {t:'proc',msg:'DFT B3LYP/6-311G** hesaplaması — exchange-correlation entegrasyonu'},
+  {t:'q',msg:'Quantum annealing: 2⁴⁷ konfigürasyon arandı — global minimum bulundu'},
+  {t:'ok',msg:'Model hiperparametre güncellendi: lr=3e-4, wd=0.01, depth=48'},
+  {t:'proc',msg:'Surface code hata düzeltme: 3 qubit hatası düzeltildi'},
+  {t:'ok',msg:'Yeni model checkpoint kaydedildi: acc=+0.8% — deploy edildi'},
+  {t:'q',msg:'Berry fazası hesaplandı: γ = 0.314π — topolojik koruma aktif'},
+  {t:'ok',msg:'Cloudflare Workers edge deploy tamamlandı — latency: 12ms'},
+  {t:'proc',msg:'GitHub Actions CI/CD: 247 test geçti — production push'},
+  {t:'ok',msg:'✓ Güncelleme döngüsü tamamlandı — bir sonraki: 6 saat sonra'},
+];
+let logIdx=0;
+const log=document.getElementById('update-log');
+function addLog(){
+  if(logIdx>=logLines.length)return;
+  const l=logLines[logIdx++];
+  const d=document.createElement('div');d.className='log-line';
+  const now=new Date();
+  d.innerHTML=`<span class="log-time">[${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}]</span> <span class="log-${l.t}">${l.msg}</span>`;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;
+  setTimeout(addLog,800+Math.random()*600);
+}
+setTimeout(addLog,500);
+
+function triggerUpdate(){logIdx=0;log.innerHTML='';addLog();}
+function clearLog(){log.innerHTML='';}
+</script>
+</body>
+</html>
