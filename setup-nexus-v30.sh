@@ -69,6 +69,7 @@ const MODULES = new Map([
   ["public.html", "public/index.html"],
   ["frontend.html", "frontend/public/index.html"],
   ["todo.html", "archive/todo-app-original.html"],
+  ["csi.html", "~/quantum-nexus-os/index.html"],
   ["nexus-live-telemetry.js", "nexus-live-telemetry.js"]
 ]);
 app.get("/modules/:file", async (req, res) => {
