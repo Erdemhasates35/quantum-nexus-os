@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { extname } from "node:path";
 
 const ignoredPrefixes = [
@@ -21,6 +21,10 @@ const markerParts = [["TO","DO"].join(""), ["FIX","ME"].join(""), ["X","XX"].joi
 const markerPattern = new RegExp("(^|[^A-Za-z0-9_])(?:" + markerParts.join("|") + ")(?=$|[^A-Za-z0-9_])");
 const files = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" }).split("\0").filter(Boolean);
 const findings = [];
+const forbiddenPaths = ["archive/todo-app-original.html", "setup-nexus-v30.sh"];
+for (const file of forbiddenPaths) {
+  if (existsSync(file)) findings.push({ file, line: 0, text: "forbidden archived application or unsafe installer remains" });
+}
 
 for (const file of files) {
   if (ignoredPrefixes.some((prefix) => file.startsWith(prefix))) continue;
