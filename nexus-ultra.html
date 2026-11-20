@@ -852,12 +852,12 @@ async function sendMsg(id){
     btn.disabled=false;btn.textContent='GÖNDER';return;
   }
   try{
-    const res=await fetch('/api/ai/anthropic',{method:'POST',headers:{'Content-Type':'application/json','},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,system:sysPrompts[id]||sysPrompts.home,messages:[{role:'user',content:msg}]})});
+    const res=await fetch('/api/ai/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,system:sysPrompts[id]||sysPrompts.home,messages:[{role:'user',content:msg}]})});
     const data=await res.json();
     const reply=data.content?.[0]?.text||'Yanıt alınamadı.';
     msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">CLAUDE AI</div><div class="bbl">${reply.replace(/\n/g,'<br>')}</div></div>`;
   }catch(e){
-    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">CLAUDE AI</div><div class="bbl">API bağlantı hatası. Key'i kontrol edin.</div></div>`;
+    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">CLAUDE AI</div><div class="bbl">Server-side AI provider unavailable; configure the provider environment key.</div></div>`;
   }
   msgs.scrollTop=9999;btn.disabled=false;btn.textContent='GÖNDER';
 }
@@ -866,7 +866,7 @@ async function sendAdmin(){
   const out=document.getElementById('ai-output');out.textContent='Claude analiz ediyor...';
   const btn=document.getElementById('admin-send');btn.disabled=true;
   const key=getApiKey();
-  if(!key){out.textContent='Admin AI için Anthropic API key gerekli → API Key Manager';btn.disabled=false;return;}
+  if(!key){out.textContent='Admin AI için Anthropic Configure ANTHROPIC_API_KEY on the runtime server.';btn.disabled=false;return;}
   try{
     const res=await fetch('/api/ai/anthropic',{method:'POST',headers:{'Content-Type':'application/json','},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,system:'Sen Quantum Nexus admin AI\'ısın. Yalnızca doğrulanmış sistem verilerini kullan. Gelir, kullanıcı ve worker sayıları doğrulanmadıysa sayı üretme. Türkçe, kısa ve eyleme geçirilebilir cevap ver.',messages:[{role:'user',content:msg}]})});
     const data=await res.json();out.textContent=data.content?.[0]?.text||'Yanıt alınamadı.';
