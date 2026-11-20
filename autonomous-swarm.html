@@ -102,7 +102,7 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
 
 <div class="content">
 
-  <!-- SWARM VIZ -->
+  <!-- REGISTERED ROLE MAP · NOT RUNNING WORKERS -->
   <div class="swarm-canvas-wrap">
     <canvas id="swarm-canvas"></canvas>
     <div class="swarm-overlay">
@@ -132,12 +132,12 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
       <div class="marl-card">
         <div class="marl-label">NASH EQUILIBRIUM — OPTIMAL STRATEJİ</div>
         <div class="marl-eq">∀i: Vᵢ(πᵢ*, π₋ᵢ*) ≥ Vᵢ(πᵢ, π₋ᵢ*)</div>
-        <div class="marl-desc">Nash dengesi: hiçbir ajan tek taraflı strateji değişikliğiyle iyileşemez. Swarm'ın kararlı çözüme yakınsaması bu denge noktasında garanti altında.</div>
+        <div class="marl-desc">Nash dengesi oyun-teorisi çözüm kavramıdır; yakınsama yalnızca belirli varsayımlar ve doğrulanmış algoritmalar altında incelenebilir.</div>
       </div>
       <div class="marl-card">
         <div class="marl-label">FEDERATED LEARNING — YAYILMA</div>
         <div class="marl-eq">w_global = Σᵢ (nᵢ/n) · wᵢ — FedAvg</div>
-        <div class="marl-desc">Her ajan yerel verisiyle eğitilir, yalnızca gradyanlar paylaşılır. Ham veri hiç merkeze gelmez. Gizlilik korumalı, dağıtık ağırlık güncelleme protokolü.</div>
+        <div class="marl-desc">Federated learning tasarım yaklaşımıdır. Çalışan eğitim workerı ve gradyan senkronizasyon kanıtı olmadan aktif kabul edilmez.</div>
       </div>
       <div class="marl-card">
         <div class="marl-label">KOLLEKTİF ÖDÜL FONKSİYONU</div>
@@ -145,14 +145,14 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
         <div class="marl-desc">Bireysel ödüllerin ağırlıklı toplamı + kolektif başarı bonusu. α ve β hiperparametreleri işbirliği vs rekabet dengesini otomatik ayarlar. Convergence: O(1/√T).</div>
       </div>
       <div class="marl-card">
-        <div class="marl-label">EMERGENT COMPLEXITY TEOREMİ</div>
+        <div class="marl-label">EMERGENT COMPLEXITY HYPOTHESIS</div>
         <div class="marl-eq">C(swarm) >> Σᵢ C(agentᵢ) — Superlinear</div>
-        <div class="marl-desc">Swarm'ın kolektif kapasitesi ajan kapasitelerinin toplamından üstel olarak büyüktür. Anderson's "More is Different" prensibi — emergent behavior garantisi.</div>
+        <div class="marl-desc">Bu araştırma hipotezidir; ölçüm, deney ve tekrarlanabilir sonuç olmadan teorem veya garanti olarak sunulamaz.</div>
       </div>
       <div class="marl-card">
         <div class="marl-label">AJAN SPAWNING ALGORİTMASI</div>
         <div class="marl-eq">N(t+1) = N(t) · e^(r·Δt) — Adaptive Growth</div>
-        <div class="marl-desc">Görev yüküne göre üstel büyüme: r=growth rate, Δt=zaman adımı. Kaynak limiti yaklaşınca logistik eğriye geçiş. Min:10, Max:∞ ajan.</div>
+        <div class="marl-desc">Worker ölçeklemesi kuyruk, CPU, bellek, bütçe ve rate-limit ölçümleriyle sınırlandırılmış kapasite politikası üzerinden yapılır.</div>
       </div>
     </div>
   </div>
@@ -163,7 +163,7 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
     <div class="pipe-step">
       <div class="pipe-step-num">01</div>
       <div class="pipe-step-title">PAZAR TARAMA</div>
-      <div class="pipe-step-desc">Web scraper ajanlar günlük 50K fırsat analiz eder</div>
+      <div class="pipe-step-desc">Gerçek veri kaynağı ve worker bağlantısı kurulduğunda fırsat taraması yapılır</div>
     </div>
     <div class="pipe-arrow">→</div>
     <div class="pipe-step">
@@ -216,31 +216,31 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
       <div class="emerge-icon">🤝</div>
       <div class="emerge-name">ALT-GRUP OLUŞUMU</div>
       <div class="emerge-desc">Benzer uzmanlaşmış ajanlar kendiliğinden mini-swarm'lar oluşturdu. Hiyerarşi programlanmadı.</div>
-      <div class="emerge-score">Gözlem: 1.203. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">🧩</div>
       <div class="emerge-name">GÖREV PAYLAŞIMI</div>
       <div class="emerge-desc">Karmaşık görevleri otomatik alt görevlere böldü ve dağıttı. Divide-and-conquer kendi kendine keşfedildi.</div>
-      <div class="emerge-score">Gözlem: 2.891. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">🛡</div>
       <div class="emerge-name">HATA TOLERANSI</div>
       <div class="emerge-desc">Bir ajan çöktüğünde diğerleri otomatik devralıyor. Hiçbir recovery kodu yazılmadı.</div>
-      <div class="emerge-score">Gözlem: 412. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">📡</div>
       <div class="emerge-name">KOLLEKTİF HAFIZA</div>
       <div class="emerge-desc">Swarm distributed memory formatını kendi geliştirdi. PostgreSQL → vector hybrid — insan yazmadı.</div>
-      <div class="emerge-score">Gözlem: 5.441. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">⚡</div>
       <div class="emerge-name">PARALEL ÖĞRENME</div>
       <div class="emerge-desc">Bir ajan bir şey öğrendiğinde diğerleri 47ms içinde öğreniyor. FedAvg'dan 3x hızlı protokol ortaya çıktı.</div>
-      <div class="emerge-score">Gözlem: 7.892. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
   </div>
 
@@ -261,14 +261,15 @@ function resizeC(){canvas.width=canvas.parentElement.offsetWidth;canvas.height=c
 resizeC();window.addEventListener('resize',resizeC);
 
 const agents=[];
-for(let i=0;i<80;i++){
-  const group=Math.floor(Math.random()*6);
-  const colors=['#00FFD4','#7B2FFF','#FF3D6B','#39FF14','#FFD700','#FF6B35'];
+const colors=['#00FFD4','#7B2FFF','#FF3D6B','#39FF14','#FFD700','#FF6B35'];
+for(let i=0;i<60;i++){
+  const group=i%6;
+  const angle=(i/60)*Math.PI*2;
+  const radius=Math.min(canvas.width,canvas.height)*0.34;
   agents.push({
-    x:Math.random()*canvas.width,y:Math.random()*canvas.height,
-    vx:(Math.random()-0.5)*1.2,vy:(Math.random()-0.5)*1.2,
-    group,color:colors[group],r:3+Math.random()*3,
-    energy:Math.random()
+    x:canvas.width/2+Math.cos(angle)*radius,
+    y:canvas.height/2+Math.sin(angle)*radius,
+    vx:0,vy:0,group,color:colors[group],r:3,energy:0.5
   });
 }
 
