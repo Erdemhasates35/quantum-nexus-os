@@ -210,7 +210,7 @@ app.post("/api/security/scan", async (req, res) => {
   }
   if (!endpoint || !token) return res.status(503).json({ status: "unavailable", reason: "Authorized security scanner endpoint is not configured" });
   const type = String(req.body?.type || "");
-  if (!["web", "api", "contract", "network", "mobile"].includes(type)) return res.status(400).json({ error: "unsupported_scan_type" });
+  if (!["web", "api", "contract", "network", "mobile", "social", "crypto", "code"].includes(type)) return res.status(400).json({ error: "unsupported_scan_type" });
   try {
     const response = await fetch(endpoint, {
       method: "POST",
@@ -222,7 +222,7 @@ app.post("/api/security/scan", async (req, res) => {
     if (!response.ok || typeof data.scanId !== "string" || typeof data.status !== "string") {
       throw new Error("Scanner response schema or HTTP status invalid");
     }
-    return res.status(202).json({ status: "accepted", scanId: data.scanId, scannerStatus: data.status, events: Array.isArray(data.events) ? data.events : [] });
+    return res.status(202).json({ status: "accepted", scanId: data.scanId, scannerStatus: data.status, reportUrl: typeof data.reportUrl === "string" && data.reportUrl.startsWith("https://") ? data.reportUrl : null, events: Array.isArray(data.events) ? data.events : [] });
   } catch (error) {
     return res.status(502).json({ status: "unavailable", reason: error.message });
   }
