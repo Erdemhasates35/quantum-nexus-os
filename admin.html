@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADMIN DASHBOARD — Nexus OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+:root{--q:#00FFD4;--p:#7B2FFF;--r:#FF3D6B;--g:#39FF14;--y:#FFD700;--bg:#03030A;}
+*{margin:0;padding:0;box-sizing:border-box;cursor:none;}
+body{background:var(--bg);color:#E8E8FF;font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+#cursor{position:fixed;width:10px;height:10px;background:var(--y);border-radius:50%;pointer-events:none;z-index:9999;}
+#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(255,215,0,0.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all 0.12s;}
+
+/* SIDEBAR NAV */
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+.sidebar{background:#050510;border-right:1px solid rgba(255,255,255,0.06);padding:24px 16px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar-logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;color:var(--y);letter-spacing:0.2em;padding:8px 12px;margin-bottom:24px;display:flex;align-items:center;gap:10px;}
+.s-section{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:0.2em;padding:0 12px;margin:16px 0 8px;}
+.s-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.45);font-family:'Share Tech Mono',monospace;font-size:12px;text-decoration:none;transition:all 0.3s;margin-bottom:2px;cursor:pointer;}
+.s-link:hover,.s-link.active{background:rgba(255,215,0,0.08);color:var(--y);border-left:2px solid var(--y);padding-left:10px;}
+.s-badge{font-size:9px;padding:1px 6px;border-radius:10px;background:rgba(255,61,107,0.2);color:var(--r);margin-left:auto;}
+
+/* MAIN */
+.main{padding:32px;overflow-y:auto;}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;}
+.page-title{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:var(--y);}
+.topbar-right{display:flex;gap:12px;align-items:center;}
+.topbar-stat{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);}
+.topbar-stat span{color:var(--g);}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+.kpi{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:22px;transition:all 0.3s;position:relative;overflow:hidden;}
+.kpi:hover{border-color:rgba(255,215,0,0.25);box-shadow:0 0 30px rgba(255,215,0,0.05);}
+.kpi-icon{font-size:28px;margin-bottom:12px;}
+.kpi-val{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;margin-bottom:4px;}
+.kpi-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;}
+.kpi-change{font-family:'Share Tech Mono',monospace;font-size:11px;margin-top:8px;}
+.kpi-change.up{color:var(--g);}
+.kpi-change.down{color:var(--r);}
+.kpi-spark{position:absolute;bottom:0;left:0;right:0;height:40px;opacity:0.15;}
+
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px;}
+.chart-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;}
+.chart-title{font-family:'Orbitron',monospace;font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:0.15em;margin-bottom:16px;}
+canvas{width:100%;display:block;}
+
+/* TABLES */
+.table-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.table-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px;}
+.tc-title{font-family:'Orbitron',monospace;font-size:12px;color:rgba(255,255,255,0.5);letter-spacing:0.15em;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.tc-count{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--y);}
+table{width:100%;border-collapse:collapse;}
+th{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.15em;text-align:left;padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);}
+td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;}
+tr:hover td{background:rgba(255,215,0,0.03);}
+.tag{font-family:'Share Tech Mono',monospace;font-size:10px;padding:2px 8px;border-radius:4px;display:inline-block;}
+.tag-q{background:rgba(0,255,212,0.1);color:var(--q);}
+.tag-p{background:rgba(123,47,255,0.1);color:var(--p);}
+.tag-g{background:rgba(57,255,20,0.1);color:var(--g);}
+.tag-r{background:rgba(255,61,107,0.1);color:var(--r);}
+
+/* AI COMMAND CENTER */
+.ai-cmd{background:rgba(123,47,255,0.05);border:1px solid rgba(123,47,255,0.15);border-radius:16px;padding:24px;margin-bottom:24px;}
+.ai-cmd-title{font-family:'Orbitron',monospace;font-size:13px;color:var(--p);letter-spacing:0.15em;margin-bottom:16px;}
+.ai-cmd-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+.quick-cmd{padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(123,47,255,0.2);border-radius:8px;color:rgba(255,255,255,0.6);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;transition:all 0.3s;}
+.quick-cmd:hover{background:rgba(123,47,255,0.1);color:var(--p);border-color:rgba(123,47,255,0.4);}
+.ai-output{background:#020208;border-radius:10px;padding:16px;min-height:100px;font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8;margin-bottom:12px;}
+.ai-cmd-input{display:flex;gap:10px;}
+.ai-cmd-input input{flex:1;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(123,47,255,0.2);border-radius:8px;color:#E8E8FF;font-family:'Share Tech Mono',monospace;font-size:12px;outline:none;}
+.ai-cmd-input input:focus{border-color:rgba(123,47,255,0.4);}
+.ai-cmd-input button{padding:10px 20px;background:linear-gradient(135deg,var(--p),#5B41DF);border:none;border-radius:8px;color:white;font-family:'Share Tech Mono',monospace;font-size:12px;cursor:pointer;font-weight:700;}
+
+/* AUTO-ITERATE ALERT */
+.alert-bar{background:rgba(255,61,107,0.08);border:1px solid rgba(255,61,107,0.2);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.alert-bar-text{font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.6);}
+.alert-bar-text strong{color:var(--r);}
+.alert-action{padding:8px 16px;background:rgba(255,61,107,0.15);border:1px solid rgba(255,61,107,0.3);border-radius:6px;color:var(--r);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .charts-row,.table-row{grid-template-columns:1fr;}
+  .ai-cmd-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">⬡ NEXUS ADMIN</div>
+
+    <div class="s-section">ANA MODÜLLER</div>
+    <div class="s-link active">📊 Dashboard</div>
+    <a class="s-link" href="index.html">🏠 Ana Hub</a>
+    <a class="s-link" href="quantum-core.html">⚛ Kuantum Çekirdeği</a>
+    <a class="s-link" href="autonomous-swarm.html">🧠 Swarm</a>
+    <a class="s-link" href="revenue-nexus.html">💎 Gelir</a>
+    <a class="s-link" href="red-team.html">🔐 Red Team <span class="s-badge">3 YENİ</span></a>
+
+    <div class="s-section">YÖNETİM</div>
+    <div class="s-link">👥 Kullanıcılar</div>
+    <div class="s-link">💳 Ödemeler</div>
+    <div class="s-link">⚙ Ayarlar</div>
+    <div class="s-link">📋 Loglar</div>
+
+    <div class="s-section">SİSTEM</div>
+    <div class="s-link">🔄 Oto-Güncelleme</div>
+    <div class="s-link">🌐 API Durumu</div>
+    <div class="s-link" style="margin-top:16px;color:rgba(255,61,107,0.6)">🚪 Çıkış</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title">KONTROL MERKEZİ</div>
+      <div class="topbar-right">
+        <div class="topbar-stat">Sistem: <span>ONLINE ✓</span></div>
+        <div class="topbar-stat">Son güncelleme: <span id="last-update">şimdi</span></div>
+      </div>
+    </div>
+
+    <!-- AUTO-ITERATE ALERT -->
+    <div class="alert-bar" id="alert-bar" style="display:none">
+      <div class="alert-bar-text"><strong>⟳ OTO-İTERASYON TETİKLENDİ:</strong> Checkout conversion %14.2 — minimum %15 altında. CTA rengi ve pozisyonu swap ediliyor...</div>
+      <button class="alert-action" onclick="dismissAlert()">TAMAM</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-val" style="color:var(--g)" id="k-rev">$0</div>
+        <div class="kpi-label">BUGÜNKÜ GELİR</div>
+        <div class="kpi-change up">↑ +12.4% dün</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-val" style="color:var(--q)" id="k-users">0</div>
+        <div class="kpi-label">AKTİF KULLANICI</div>
+        <div class="kpi-change up">↑ +847 bu saat</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-val" style="color:var(--y)" id="k-conv">0%</div>
+        <div class="kpi-label">CONVERSION RATE</div>
+        <div class="kpi-change" id="conv-change">— kontrol ediliyor</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🤖</div>
+        <div class="kpi-val" style="color:var(--p)" id="k-agents">0</div>
+        <div class="kpi-label">AKTİF AJAN</div>
+        <div class="kpi-change up">↑ Oto-ölçekleme</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">🔐</div>
+        <div class="kpi-val" style="color:var(--r)" id="k-threats">0</div>
+        <div class="kpi-label">ENGELLENMİŞ TEHDİT</div>
+        <div class="kpi-change down">3 kritik bu gün</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-icon">📡</div>
+        <div class="kpi-val" style="color:var(--q)" id="k-api">0ms</div>
+        <div class="kpi-label">API GECIKME</div>
+        <div class="kpi-change up">↓ Edge optimize</div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">◈ GELİR AKIŞI — SON 24 SAAT (CANLI)</div>
+        <canvas id="revenue-chart" height="140"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">◈ GELİR KAYNAKLARI</div>
+        <canvas id="pie-chart" height="140"></canvas>
+      </div>
+    </div>
+
+    <!-- TABLES -->
+    <div class="table-row">
+      <div class="table-card">
+        <div class="tc-title">
+          SON İŞLEMLER
+          <span class="tc-count" id="tx-count">0 bugün</span>
+        </div>
+        <table>
+          <thead><tr><th>KULLANICI</th><th>ARAÇ</th><th>YÖNTEM</th><th>TUTAR</th></tr></thead>
+          <tbody id="tx-tbody">
+          </tbody>
+        </table>
+      </div>
+      <div class="table-card">
+        <div class="tc-title">
+          AJAN AKTİVİTE
+          <span class="tc-count">247 aktif</span>
+        </div>
+        <table>
+          <thead><tr><th>AJAN GRUBU</th><th>DURUM</th><th>GÖREV</th></tr></thead>
+          <tbody>
+            <tr><td>LLM Zinciri</td><td><span class="tag tag-g">AKTİF</span></td><td style="color:rgba(255,255,255,0.4);font-size:12px">SaaS kopya yazıyor</td></tr>
+            <tr><td>Kod Ajanları</td><td><span class="tag tag-g">AKTİF</span></td><td style="color:rgba(255,255,255,0.4);font-size:12px">API test pipeline</td></tr>
+            <tr><td>Quant Ajanlar</td><td><span class="tag tag-q">OPTİMİZE</span></td><td style="color:rgba(255,255,255,0.4);font-size:12px">DeFi rebalance</td></tr>
+            <tr><td>Red Team</td><td><span class="tag tag-r">TARAMA</span></td><td style="color:rgba(255,255,255,0.4);font-size:12px">CVE tarama</td></tr>
+            <tr><td>Pazar Zekâsı</td><td><span class="tag tag-p">ANALİZ</span></td><td style="color:rgba(255,255,255,0.4);font-size:12px">2026 trendleri</td></tr>
+            <tr><td>Self-Evolution</td><td><span class="tag tag-g">AKTİF</span></td><td style="color:rgba(255,255,255,0.4);font-size:12px">Model kalibrasyon</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AI COMMAND CENTER -->
+    <div class="ai-cmd">
+      <div class="ai-cmd-title">⚡ AI KOMUT MERKEZİ — CLAUDE API CANLI</div>
+      <div class="ai-cmd-grid">
+        <button class="quick-cmd" onclick="quickCmd('Günlük gelir raporu özeti ver')">📊 Gelir Raporu</button>
+        <button class="quick-cmd" onclick="quickCmd('Hangi ajan grubu bugün en yüksek performansı gösterdi?')">🤖 Ajan Analizi</button>
+        <button class="quick-cmd" onclick="quickCmd('Bu haftaki güvenlik tehditleri özeti')">🛡 Tehdit Özeti</button>
+        <button class="quick-cmd" onclick="quickCmd('Conversion rate neden düştü, ne yapmalıyım?')">📈 Oto-İterasyon</button>
+        <button class="quick-cmd" onclick="quickCmd('Sıradaki 30 günlük büyüme stratejisi')">🚀 Büyüme Planı</button>
+        <button class="quick-cmd" onclick="quickCmd('Hangi gelir akışını genişletmeliyim?')">💡 Fırsat Analizi</button>
+      </div>
+      <div class="ai-output" id="ai-output">Komut seç veya yaz → Claude AI analiz eder</div>
+      <div class="ai-cmd-input">
+        <input id="admin-input" placeholder="Admin komutu veya analiz isteği..." onkeydown="if(event.key==='Enter')sendAdminAI()" />
+        <button onclick="sendAdminAI()">ÇALIŞTI</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Cursor
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';});
+function animRing(){rx+=(mx-rx-16)*0.12;ry+=(my-ry-16)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}animRing();
+
+// KPIs
+function animCount(el,target,pre='',suf=''){
+  let s=0,step=target/60;
+  const id=setInterval(()=>{s+=step;if(s>=target){s=target;clearInterval(id);}
+  const val=s>=1000?Math.floor(s/1000).toLocaleString()+'K':Math.floor(s).toLocaleString();
+  el.textContent=pre+val+suf;},25);
+}
+animCount(document.getElementById('k-rev'),31100,'$');
+animCount(document.getElementById('k-users'),8472);
+animCount(document.getElementById('k-agents'),247);
+animCount(document.getElementById('k-threats'),1847);
+
+let conv=18.4;
+const convEl=document.getElementById('k-conv');
+const convChg=document.getElementById('conv-change');
+setTimeout(()=>{convEl.textContent=conv+'%';convChg.className='kpi-change up';convChg.textContent='↑ Üst limit';},1500);
+
+// Live conversion monitoring
+setInterval(()=>{
+  conv=+(14+Math.random()*8).toFixed(1);
+  convEl.textContent=conv+'%';
+  if(conv<15){
+    convEl.style.color='var(--r)';
+    convChg.className='kpi-change down';
+    convChg.textContent='↓ OTO-İTERASYON BAŞLADI';
+    document.getElementById('alert-bar').style.display='flex';
+  }else{
+    convEl.style.color='var(--y)';
+    convChg.className='kpi-change up';
+    convChg.textContent='↑ Normal seviye';
+  }
+  document.getElementById('k-api').textContent=Math.floor(8+Math.random()*12)+'ms';
+  document.getElementById('last-update').textContent='az önce';
+},5000);
+
+function dismissAlert(){document.getElementById('alert-bar').style.display='none';}
+
+// Revenue chart
+const rCanvas=document.getElementById('revenue-chart');
+const rCtx=rCanvas.getContext('2d');
+const rData=Array.from({length:24},(_,i)=>15000+Math.sin(i/3)*8000+Math.random()*4000);
+function resizeR(){rCanvas.width=rCanvas.parentElement.offsetWidth-48;}resizeR();window.addEventListener('resize',resizeR);
+function drawRevChart(){
+  const W=rCanvas.width,H=140;rCanvas.height=H;
+  rCtx.clearRect(0,0,W,H);
+  const max=Math.max(...rData)*1.1,min=Math.min(...rData)*0.9;
+  const xS=W/(rData.length-1),yS=H/(max-min);
+  const grad=rCtx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(57,255,20,0.25)');grad.addColorStop(1,'rgba(57,255,20,0)');
+  rCtx.beginPath();
+  rData.forEach((v,i)=>{const x=i*xS,y=H-(v-min)*yS;i===0?rCtx.moveTo(x,y):rCtx.lineTo(x,y);});
+  rCtx.lineTo(W,H);rCtx.lineTo(0,H);rCtx.closePath();rCtx.fillStyle=grad;rCtx.fill();
+  rCtx.beginPath();rCtx.strokeStyle='rgba(57,255,20,0.7)';rCtx.lineWidth=2;
+  rData.forEach((v,i)=>{const x=i*xS,y=H-(v-min)*yS;i===0?rCtx.moveTo(x,y):rCtx.lineTo(x,y);});
+  rCtx.stroke();
+}
+drawRevChart();
+setInterval(()=>{rData.shift();rData.push(15000+Math.random()*12000);drawRevChart();},3000);
+
+// Pie chart
+const pCanvas=document.getElementById('pie-chart');
+const pCtx=pCanvas.getContext('2d');
+function resizeP(){pCanvas.width=pCanvas.parentElement.offsetWidth-48;}resizeP();window.addEventListener('resize',resizeP);
+const pieData=[{v:27,c:'#39FF14',l:'API Arbitraj'},{v:17,c:'#00FFD4',l:'SaaS'},{v:15,c:'#FFD700',l:'DeFi'},{v:15,c:'#7B2FFF',l:'White-label'},{v:10,c:'#FF6B35',l:'Afiliyat'},{v:16,c:'#FF3D6B',l:'Diğer'}];
+function drawPie(){
+  const W=pCanvas.width,H=140;pCanvas.height=H;
+  pCtx.clearRect(0,0,W,H);
+  const cx=H/2,cy=H/2,r=55,total=pieData.reduce((a,d)=>a+d.v,0);
+  let angle=-Math.PI/2;
+  pieData.forEach(d=>{
+    const slice=(d.v/total)*Math.PI*2;
+    pCtx.beginPath();pCtx.moveTo(cx,cy);pCtx.arc(cx,cy,r,angle,angle+slice);
+    pCtx.closePath();pCtx.fillStyle=d.c;pCtx.fill();
+    pCtx.beginPath();pCtx.moveTo(cx,cy);pCtx.arc(cx,cy,r,angle,angle+slice);
+    pCtx.strokeStyle='#03030A';pCtx.lineWidth=2;pCtx.stroke();
+    angle+=slice;
+  });
+  // Legend
+  let ly=10;
+  pieData.forEach(d=>{
+    pCtx.fillStyle=d.c;pCtx.fillRect(W-100,ly,10,10);
+    pCtx.fillStyle='rgba(255,255,255,0.5)';pCtx.font='10px Share Tech Mono';
+    pCtx.fillText(d.l+' '+d.v+'%',W-86,ly+9);
+    ly+=18;
+  });
+}
+drawPie();
+
+// Transactions
+const txData=[
+  {user:'user_8x4f',tool:'Claude 3.5',method:'stripe',amt:'$2.50'},
+  {user:'user_2k9d',tool:'Midjourney v7',method:'crypto',amt:'$0.80'},
+  {user:'user_7m3p',tool:'GPT-4o',method:'credits',amt:'$1.00'},
+  {user:'user_1n8s',tool:'Sora',method:'stripe',amt:'$4.00'},
+  {user:'user_5q2r',tool:'ElevenLabs',method:'apple',amt:'$1.20'},
+];
+const tbody=document.getElementById('tx-tbody');
+txData.forEach(t=>{
+  tbody.innerHTML+=`<tr>
+    <td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4)">${t.user}</td>
+    <td style="font-size:13px">${t.tool}</td>
+    <td><span class="tag ${t.method==='stripe'?'tag-q':t.method==='crypto'?'tag-p':'tag-g'}">${t.method}</span></td>
+    <td style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--g)">${t.amt}</td>
+  </tr>`;
+});
+document.getElementById('tx-count').textContent=Math.floor(1200+Math.random()*300)+' bugün';
+
+// Claude AI Admin
+async function sendAdminAI(){
+  const input=document.getElementById('admin-input');
+  const msg=input.value.trim();
+  if(!msg)return;
+  input.value='';
+  const out=document.getElementById('ai-output');
+  out.textContent='Claude analiz ediyor...';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-5-20250929',
+        max_tokens:600,
+        system:`Sen Quantum Nexus platform admin AI'ısın. Platform: AI tools directory, otonom ajan sistemi, çoklu gelir akışı. Günlük gelir: $31K, kullanıcı: 8.4K, ajan: 247. Türkçe, kısa ve eyleme geçirilebilir tavsiyeler ver.`,
+        messages:[{role:'user',content:msg}]
+      })
+    });
+    const data=await resp.json();
+    out.textContent=data.content?.[0]?.text||'Yanıt alınamadı.';
+  }catch(e){
+    out.textContent=`[Deploy sonrası Claude API aktif]\n\nSoru: "${msg}"\n\nGerçek deploy'da platform verilerinize dayalı AI analizi burada görünecek.`;
+  }
+}
+
+function quickCmd(cmd){
+  document.getElementById('admin-input').value=cmd;
+  sendAdminAI();
+}
+</script>
+</body>
+</html>
