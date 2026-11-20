@@ -209,10 +209,10 @@ input.target-input::placeholder{color:rgba(255,255,255,0.2);}
       </div>
       <div id="terminal-content">
         <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-info">Quantum Nexus Red Team Engine başlatıldı</span></div>
-        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ OWASP Top-10 modülü yüklendi</span></div>
+        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ Scanner provider not connected</span></div>
         <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ CVE-2025 veritabanı güncel (47,382 kayıt)</span></div>
         <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ AI analiz motoru aktif (Claude claude-sonnet-4-5)</span></div>
-        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-info">Hedef gir ve taramayı başlat →</span></div>
+        <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-info">Authorized HTTPS target and connected scanner required.</span></div>
       </div>
     </div>
 
@@ -267,49 +267,8 @@ function addTerminalLine(text,type='info'){
   terminal.scrollTop=terminal.scrollHeight;
 }
 
-const SCAN_SEQUENCES={};\n/* Historical sample sequence block retained below as inert reference. */\nconst SCAN_SEQUENCES_DISABLED={
-  web:[
-    {t:'cmd',m:'nmap -sV -sC --script=vuln hedef...'},
-    {t:'info',m:'HTTP başlıkları analiz ediliyor...'},
-    {t:'warn',m:'⚠ X-Frame-Options başlığı eksik — Clickjacking riski'},
-    {t:'warn',m:'⚠ Content-Security-Policy tanımlı değil'},
-    {t:'err',m:'✗ SQL Injection açığı tespit edildi: /api/search?q= parametresi'},
-    {t:'err',m:'✗ XSS (Reflected) bulundu: /login?redirect= parametresi'},
-    {t:'ok',m:'✓ HTTPS aktif — TLS 1.3'},
-    {t:'warn',m:'⚠ Eski jQuery versiyonu (3.3.1) — CVE-2019-11358'},
-    {t:'err',m:'✗ Admin paneli expose: /admin/dashboard — auth bypass mümkün'},
-    {t:'ok',m:'✓ CSRF token mevcut'},
-    {t:'info',m:'Analiz tamamlandı — rapor hazırlanıyor...'},
-  ],
-  api:[
-    {t:'cmd',m:'nuclei -u hedef-api.com -t api/...'},
-    {t:'info',m:'JWT token yapısı inceleniyor...'},
-    {t:'err',m:'✗ JWT alg:none saldırısı mümkün — imza doğrulama bypass'},
-    {t:'warn',m:'⚠ Rate limiting yok — brute force riski'},
-    {t:'err',m:'✗ BOLA açığı: /api/user/{id} — IDOR vulnerability'},
-    {t:'ok',m:'✓ HTTPS ve HSTS aktif'},
-    {t:'warn',m:'⚠ API versiyonlama yok — deprecated endpoint erişilebilir'},
-  ],
-  crypto:[
-    {t:'cmd',m:'slither contract.sol --detect all'},
-    {t:'err',m:'✗ Reentrancy açığı bulundu — withdraw() fonksiyonu'},
-    {t:'err',m:'✗ Integer overflow: SafeMath kullanılmıyor'},
-    {t:'warn',m:'⚠ tx.origin authentication — phishing riski'},
-    {t:'ok',m:'✓ Access control mekanizması mevcut'},
-    {t:'warn',m:'⚠ Flash loan saldırısına karşı koruma yetersiz'},
-  ],
-};
-
-const VULNS={};\n/* Historical sample findings block retained below as inert reference. */\nconst VULNS_DISABLED={
-  web:[
-    {sev:'critical',name:'SQL Injection',desc:'Login ve arama parametrelerinde doğrudan SQL sorgusu. Tam veritabanı erişimi mümkün.',cve:'CVE-2024-1234'},
-    {sev:'critical',name:'Admin Auth Bypass',desc:'/admin/dashboard endpoint\'i kimlik doğrulama olmadan erişilebilir durumda.',cve:'CVE-2024-5678'},
-    {sev:'high',name:'XSS Reflected',desc:'/login redirect parametresinde kullanıcı girdisi sanitize edilmiyor.',cve:'CVE-2024-9012'},
-    {sev:'medium',name:'Eski jQuery',desc:'jQuery 3.3.1 kullanılıyor. Prototype Pollution açığı mevcut.',cve:'CVE-2019-11358'},
-    {sev:'medium',name:'CSP Eksik',desc:'Content-Security-Policy başlığı tanımlanmamış. XSS etkisi artabilir.',cve:''},
-    {sev:'low',name:'Clickjacking',desc:'X-Frame-Options veya CSP frame-ancestors direktifi eksik.',cve:''},
-  ],
-};
+const SCAN_SEQUENCES={};
+const VULNS={};
 
 let scanning=false;
 let lastScanReportUrl=null;
