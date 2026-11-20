@@ -868,7 +868,7 @@ async function sendAdmin(){
   const key=getApiKey();
   if(!key){out.textContent='Admin AI için Anthropic Configure ANTHROPIC_API_KEY on the runtime server.';btn.disabled=false;return;}
   try{
-    const res=await fetch('/api/ai/anthropic',{method:'POST',headers:{'Content-Type':'application/json','},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,system:'Sen Quantum Nexus admin AI\'ısın. Yalnızca doğrulanmış sistem verilerini kullan. Gelir, kullanıcı ve worker sayıları doğrulanmadıysa sayı üretme. Türkçe, kısa ve eyleme geçirilebilir cevap ver.',messages:[{role:'user',content:msg}]})});
+    const res=await fetch('/api/ai/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5-20250929',max_tokens:600,system:'Sen Quantum Nexus admin AI\'ısın. Yalnızca doğrulanmış sistem verilerini kullan. Gelir, kullanıcı ve worker sayıları doğrulanmadıysa sayı üretme. Türkçe, kısa ve eyleme geçirilebilir cevap ver.',messages:[{role:'user',content:msg}]})});
     const data=await res.json();out.textContent=data.content?.[0]?.text||'Yanıt alınamadı.';
   }catch(e){out.textContent='Bağlantı hatası.';}
   btn.disabled=false;
