@@ -38,7 +38,7 @@
     .ai-icon{font-size:32px; margin-bottom:10px;}
     .ai-name{font-family:'Orbitron',monospace; font-size:13px; font-weight:700; margin-bottom:4px;}
     .ai-status{font-family:'Share Tech Mono',monospace; font-size:10px; color:rgba(255,255,255,0.4);}
-    .ai-card[data-status="active"] .ai-status{color:var(--g);}
+    .ai-card[data-status="unavailable"] .ai-status{color:var(--g);}
     
     /* DASHBOARD GRID */
     .dashboard{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px;}
@@ -98,23 +98,23 @@
       <div class="page-title">QUANTUM NEXUS v2.0</div>
       <div class="status-indicator">
         <div class="status-dot"></div>
-        <span>ALL SYSTEMS OPERATIONAL</span>
+        <span>LIVE STATUS CHECK REQUIRED</span>
       </div>
     </div>
     
     <!-- AI MODELS -->
     <div style="margin-bottom:32px;">
-      <h2 style="font-family:'Orbitron',monospace; font-size:14px; margin-bottom:16px; color:var(--q);">⚡ 10+ AI MODELS UNIFIED</h2>
+      <h2 style="font-family:'Orbitron',monospace; font-size:14px; margin-bottom:16px; color:var(--q);">⚡ AI PROVIDERS · SERVER CONFIGURATION REQUIRED</h2>
       <div class="ai-models">
         <div class="ai-card" data-model="anthropic" data-status="active">
           <div class="ai-icon">🤖</div>
           <div class="ai-name">Claude Opus</div>
-          <div class="ai-status">● ACTIVE</div>
+          <div class="ai-status">● CONFIG REQUIRED</div>
         </div>
         <div class="ai-card" data-model="groq">
           <div class="ai-icon">⚡</div>
           <div class="ai-name">Groq Llama</div>
-          <div class="ai-status">● READY</div>
+          <div class="ai-status">● CONFIG REQUIRED</div>
         </div>
         <div class="ai-card" data-model="openai">
           <div class="ai-icon">🔮</div>
@@ -162,19 +162,19 @@
     <!-- DASHBOARD -->
     <div class="dashboard">
       <div class="panel">
-        <div class="panel-title">📊 Active Agents</div>
-        <div class="kpi-value" id="agent-count">247</div>
-        <div class="kpi-label">Autonomous swarm running</div>
+        <div class="panel-title">📊 Registered Roles</div>
+        <div class="kpi-value" id="agent-count" data-nexus-role-count>60</div>
+        <div class="kpi-label">Registry definitions; worker heartbeat not connected</div>
       </div>
       <div class="panel">
         <div class="panel-title">💰 Daily Revenue</div>
-        <div class="kpi-value" id="revenue">$31.2K</div>
-        <div class="kpi-label">Multi-stream platform</div>
+        <div class="kpi-value" id="revenue" data-nexus-revenue>NO VERIFIED LEDGER</div>
+        <div class="kpi-label">Settled ledger not connected</div>
       </div>
       <div class="panel">
         <div class="panel-title">⚛ Quantum Score</div>
-        <div class="kpi-value" id="quantum-score">94.7%</div>
-        <div class="kpi-label">System optimization</div>
+        <div class="kpi-value" id="quantum-score">NOT MEASURED</div>
+        <div class="kpi-label">No quantum hardware telemetry connected</div>
       </div>
     </div>
     
@@ -238,16 +238,13 @@
     }
   }
   
-  // Live stats
-  setInterval(() => {
-    document.getElementById('agent-count').textContent = (240 + Math.floor(Math.random() * 20)).toString();
-    document.getElementById('revenue').textContent = '$' + (28 + Math.random() * 8).toFixed(1) + 'K';
-    document.getElementById('quantum-score').textContent = (92 + Math.random() * 5).toFixed(1) + '%';
-  }, 3000);
-  
+  document.getElementById('agent-count').textContent='60';
+  document.getElementById('revenue').textContent='NO VERIFIED LEDGER';
+  document.getElementById('quantum-score').textContent='NOT MEASURED';
   document.getElementById('prompt').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') sendCommand();
   });
 </script>
+<script src="/modules/nexus-live-telemetry.js"></script>
 </body>
 </html>
