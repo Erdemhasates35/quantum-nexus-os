@@ -168,6 +168,37 @@ app.get("/api/revenue/summary", async (_req, res) => {
     return res.status(503).json({ status: "unavailable", verified: false, reason: error.message });
   }
 });
+app.get("/api/integrations/status", (_req, res) => {
+  return res.json({ providers: {
+    anthropic: Boolean(process.env.ANTHROPIC_API_KEY),
+    openai: Boolean(process.env.OPENAI_API_KEY),
+    groq: Boolean(process.env.GROQ_API_KEY),
+    github: Boolean(process.env.GITHUB_TOKEN),
+    supabase: Boolean(process.env.NEXUS_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
+    stripe: Boolean(process.env.STRIPE_SECRET_KEY),
+    securityScanner: Boolean(process.env.SECURITY_SCAN_URL && process.env.SECURITY_SCAN_TOKEN)
+  }});
+});
+app.get("/api/integrations/test/:provider", async (req, res) => {
+  const provider = req.params.provider;
+  try {
+    let response;
+    if (provider === "github" && process.env.GITHUB_TOKEN) {
+      response = await fetch("https://api.github.com/user", { headers: { authorization: "Bearer " + process.env.GITHUB_TOKEN, accept: "application/vnd.github+json" }, signal: AbortSignal.timeout(8000) });
+    } else if (provider === "supabase" && process.env.NEXUS_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      response = await fetch(process.env.NEXUS_SUPABASE_URL.replace(/\\/$/, "") + "/rest/v1/", { headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY }, signal: AbortSignal.timeout(8000) });
+    } else if (provider === "stripe" && process.env.STRIPE_SECRET_KEY) {
+      response = await fetch("https://api.stripe.com/v1/balance", { headers: { authorization: "Basic " + Buffer.from(process.env.STRIPE_SECRET_KEY + ":").toString("base64") }, signal: AbortSignal.timeout(8000) });
+    } else {
+      return res.status(503).json({ status: "unavailable", provider, reason: "Server-side credentials not configured" });
+    }
+    const payload = await response.json();
+    if (!response.ok) return res.status(502).json({ status: "error", provider, upstreamStatus: response.status, error: payload.message || payload.error || "upstream_error" });
+    return res.json({ status: "connected", provider, checkedAt: new Date().toISOString() });
+  } catch (error) {
+    return res.status(502).json({ status: "unavailable", provider, reason: error.message });
+  }
+});
 app.post("/api/security/scan", async (req, res) => {
   const endpoint = process.env.SECURITY_SCAN_URL;
   const token = process.env.SECURITY_SCAN_TOKEN;
