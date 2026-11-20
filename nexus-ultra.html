@@ -601,14 +601,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;justify-content
     <button class="scan-btn" onclick="setScan(this,'social')">🎭 Sosyal Müh.</button>
     <button class="scan-btn" onclick="setScan(this,'mobile')">📱 Mobil Güvenlik</button>
   </div>
-  <button class="run-btn" onclick="runScan()">⚡ TARAMAYI BAŞLAT</button>
+  <input id="scan-target" type="url" placeholder="https://authorized-domain.example" style="width:100%;padding:12px;margin:12px 0;background:#020210;color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:8px"><label style="display:block;margin:8px 0;color:var(--muted)"><input id="scan-authorized" type="checkbox"> Bu hedef üzerinde yazılı tarama yetkim var</label><button class="run-btn" onclick="runScan()">⚡ TARAMAYI BAŞLAT</button>
 
   <div class="terminal" id="scan-term">
     <div class="t-bar"><div class="td" style="background:#FF3D6B"></div><div class="td" style="background:#FFD700"></div><div class="td" style="background:#39FF14"></div></div>
     <div id="tc">
       <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-info">Red Team Engine başlatıldı</span></div>
-      <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ OWASP Top-10 modülü yüklendi</span></div>
-      <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">✓ CVE-2025 veritabanı güncellendi (47,382 kayıt)</span></div>
+      <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">OWASP scanner provider configuration required</span></div>
+      <div class="t-line"><span class="t-time">[HAZIR]</span><span class="t-ok">CVE feed not connected; no vulnerability count asserted</span></div>
     </div>
   </div>
 
@@ -759,14 +759,7 @@ renderRoleRegistry();
 // ── SCAN ──
 let scanType='web';
 function setScan(btn,type){document.querySelectorAll('.scan-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');scanType=type;}
-const scanSeqs={
-  web:[{t:'info',m:'Web uygulama taraması başlıyor...'},{t:'warn',m:'⚠ X-Frame-Options eksik — Clickjacking'},{t:'err',m:'✗ SQL Injection: /api/search?q= parametresi'},{t:'err',m:'✗ XSS Reflected: /login?redirect='},{t:'ok',m:'✓ HTTPS TLS 1.3 aktif'},{t:'warn',m:'⚠ Eski jQuery 3.3.1 — CVE-2019-11358'},{t:'err',m:'✗ Admin bypass: /admin/dashboard'},{t:'ok',m:'✓ CSRF token mevcut'},{t:'ok',m:'✓ Tamamlandı: 3 kritik, 2 yüksek, 2 orta'}],
-  api:[{t:'info',m:'API güvenlik taraması...'},{t:'err',m:'✗ JWT alg:none — bypass mümkün'},{t:'warn',m:'⚠ Rate limiting yok'},{t:'err',m:'✗ BOLA/IDOR: /api/user/{id}'},{t:'ok',m:'✓ HTTPS aktif'},{t:'ok',m:'✓ Tamamlandı: 2 kritik, 1 orta'}],
-  contract:[{t:'info',m:'Slither analizi başlıyor...'},{t:'err',m:'✗ Reentrancy: withdraw()'},{t:'err',m:'✗ Integer overflow: SafeMath eksik'},{t:'warn',m:'⚠ tx.origin kullanımı'},{t:'ok',m:'✓ Access control var'},{t:'ok',m:'✓ Tamamlandı: 2 kritik, 1 orta'}],
-  network:[{t:'info',m:'Ağ taraması...'},{t:'warn',m:'⚠ Port 22 SSH açık'},{t:'warn',m:'⚠ MySQL 3306 dışarıya açık'},{t:'err',m:'✗ UDP flood açığı'},{t:'ok',m:'✓ HTTPS/TLS doğru'},{t:'ok',m:'✓ Tamamlandı'}],
-  social:[{t:'info',m:'Sosyal mühendislik tespiti...'},{t:'warn',m:'⚠ Email spoofing açık'},{t:'err',m:'✗ Phishing domain benzer tespit edildi'},{t:'ok',m:'✓ 2FA aktif'},{t:'ok',m:'✓ Tamamlandı: 1 kritik, 1 orta'}],
-  mobile:[{t:'info',m:'Mobil güvenlik analizi...'},{t:'warn',m:'⚠ SSL pinning uygulanmamış'},{t:'err',m:'✗ API key hardcoded: kaynak kodda'},{t:'ok',m:'✓ Root detection aktif'},{t:'ok',m:'✓ Tamamlandı: 1 kritik, 1 orta'}],
-};
+const scanSeqs={};
 let scanning=false;
 function addLine(text,type){
   const tc=document.getElementById('tc');if(!tc)return;
@@ -774,11 +767,21 @@ function addLine(text,type){
   const div=document.createElement('div');div.className='t-line';div.innerHTML=`<span class="t-time">[${t}]</span><span class="t-${type}">${text}</span>`;
   tc.appendChild(div);document.getElementById('scan-term').scrollTop=9999;
 }
-function runScan(){
-  if(scanning)return;scanning=true;
-  document.getElementById('tc').innerHTML='';addLine('Hedef taranıyor...','info');
-  const seq=scanSeqs[scanType]||scanSeqs.web;let i=0;
-  const iv=setInterval(()=>{if(i>=seq.length){clearInterval(iv);scanning=false;return;}addLine(seq[i].m,seq[i].t);i++;},700);
+async function runScan(){
+  const target=document.getElementById("scan-target").value.trim();
+  const authorized=document.getElementById("scan-authorized").checked;
+  if(!authorized){addLine("Written authorization confirmation required.","warn");return;}
+  if(!target){addLine("An explicit authorized HTTPS target is required.","warn");return;}
+  const container=document.getElementById("tc");
+  container.replaceChildren();
+  addLine("Submitting target to configured security scanner…","info");
+  try{
+    const response=await fetch("/api/security/scan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({target,type:scanType})});
+    const data=await response.json();
+    if(!response.ok)throw new Error(data.reason||data.error||"scanner_unavailable");
+    addLine("Scanner accepted job "+data.scanId+" · "+data.scannerStatus,"ok");
+    for(const event of data.events||[])addLine(String(event.message||event),event.severity==="high"?"warn":"info");
+  }catch(error){addLine("No scan was performed: "+error.message,"warn");}
 }
 
 // ── API KEY MANAGER ──
