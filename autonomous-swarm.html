@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AUTONOMOUS SWARM — Otonom AI Ajan Zekâsı</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap');
+:root{--q:#00FFD4;--p:#7B2FFF;--r:#FF3D6B;--g:#39FF14;--y:#FFD700;--o:#FF6B35;--bg:#03030A;--glass:rgba(123,47,255,0.05);--border:rgba(123,47,255,0.15);}
+*{margin:0;padding:0;box-sizing:border-box;cursor:none;}
+body{background:var(--bg);color:#E8E8FF;font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
+#cursor{position:fixed;width:10px;height:10px;background:var(--p);border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:screen;}
+#cursor-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(123,47,255,0.5);border-radius:50%;pointer-events:none;z-index:9998;transition:all 0.12s;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:18px 48px;background:rgba(3,3,10,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--p);letter-spacing:0.3em;}
+.nav-links a{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:0.12em;padding:7px 14px;border:1px solid transparent;border-radius:6px;transition:all 0.3s;margin:0 4px;}
+.nav-links a:hover,.nav-links a.active{color:var(--p);border-color:rgba(123,47,255,0.35);background:rgba(123,47,255,0.08);}
+.page-header{padding:120px 48px 48px;max-width:1400px;margin:0 auto;}
+.page-tag{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--p);letter-spacing:0.4em;margin-bottom:16px;}
+.page-title{font-family:'Orbitron',monospace;font-size:clamp(32px,6vw,64px);font-weight:900;line-height:1;margin-bottom:12px;background:linear-gradient(135deg,#FFF 0%,var(--p) 60%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.page-sub{font-family:'Share Tech Mono',monospace;font-size:12px;color:rgba(255,255,255,0.35);letter-spacing:0.15em;}
+.content{max-width:1400px;margin:0 auto;padding:0 48px 80px;}
+.section-title{font-family:'Orbitron',monospace;font-size:13px;color:var(--p);letter-spacing:0.2em;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+/* SWARM CANVAS */
+.swarm-canvas-wrap{background:#020208;border:1px solid var(--border);border-radius:20px;overflow:hidden;height:380px;position:relative;margin-bottom:48px;}
+#swarm-canvas{width:100%;height:100%;}
+.swarm-overlay{position:absolute;top:20px;left:24px;font-family:'Share Tech Mono',monospace;font-size:11px;}
+.swarm-stat{margin-bottom:6px;}
+.swarm-stat span{color:var(--p);}
+.swarm-overlay-r{position:absolute;top:20px;right:24px;text-align:right;font-family:'Share Tech Mono',monospace;font-size:11px;}
+
+/* AGENT GROUPS */
+.agent-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:48px;}
+.agent-group{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:28px;transition:all 0.4s;}
+.agent-group:hover{border-color:rgba(123,47,255,0.4);box-shadow:0 0 40px rgba(123,47,255,0.08);}
+.group-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.group-name{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;}
+.group-count{font-family:'Share Tech Mono',monospace;font-size:24px;font-weight:700;color:var(--p);}
+.group-status{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.15em;padding:3px 10px;border-radius:4px;}
+.status-active{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.2);}
+.status-evolving{background:rgba(255,215,0,0.1);color:var(--y);border:1px solid rgba(255,215,0,0.2);animation:blink 1.5s infinite;}
+.status-merging{background:rgba(255,107,53,0.1);color:var(--o);border:1px solid rgba(255,107,53,0.2);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.group-role{font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:14px;line-height:1.6;}
+.agent-dots{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;}
+.dot{width:10px;height:10px;border-radius:50%;transition:all 0.5s;}
+.dot.active{background:var(--g);box-shadow:0 0 6px rgba(57,255,20,0.5);}
+.dot.busy{background:var(--y);box-shadow:0 0 6px rgba(255,215,0,0.4);animation:dotPulse 1s infinite;}
+.dot.idle{background:rgba(255,255,255,0.1);}
+@keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+.group-task{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.3);padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:6px;border-left:2px solid var(--p);}
+
+/* MARL EQUATIONS */
+.marl-section{background:rgba(123,47,255,0.05);border:1px solid rgba(123,47,255,0.15);border-radius:20px;padding:32px;margin-bottom:48px;}
+.marl-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.marl-card{background:#020208;border-radius:12px;padding:20px;}
+.marl-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--p);letter-spacing:0.2em;margin-bottom:10px;}
+.marl-eq{font-family:'Share Tech Mono',monospace;font-size:14px;color:#E8E8FF;line-height:1.7;margin-bottom:10px;}
+.marl-desc{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.6;}
+
+/* PIPELINE */
+.pipeline{display:flex;align-items:center;gap:0;margin-bottom:48px;overflow-x:auto;padding-bottom:12px;}
+.pipe-step{flex-shrink:0;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:20px 24px;min-width:180px;}
+.pipe-step-num{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,255,255,0.2);margin-bottom:6px;}
+.pipe-step-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--p);margin-bottom:6px;}
+.pipe-step-desc{font-size:12px;color:rgba(255,255,255,0.4);}
+.pipe-arrow{flex-shrink:0;color:var(--p);font-size:20px;padding:0 8px;opacity:0.5;}
+
+/* EMERGENT BEHAVIORS */
+.emerge-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:48px;}
+.emerge-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:20px;transition:all 0.3s;}
+.emerge-card:hover{border-color:rgba(123,47,255,0.3);}
+.emerge-icon{font-size:28px;margin-bottom:12px;}
+.emerge-name{font-family:'Orbitron',monospace;font-size:12px;font-weight:700;margin-bottom:8px;color:#E8E8FF;}
+.emerge-desc{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;}
+.emerge-score{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--p);margin-top:10px;}
+
+footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,255,255,0.15);letter-spacing:0.15em;border-top:1px solid var(--border);}
+@media(max-width:768px){.marl-grid{grid-template-columns:1fr;}.nav-links{display:none;}.content,.page-header{padding-left:20px;padding-right:20px;}.pipeline{flex-direction:column;}.pipe-arrow{transform:rotate(90deg);}}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <div class="nav-logo">⬡ NEXUS OS</div>
+  <div class="nav-links">
+    <a href="index.html">HUB</a>
+    <a href="quantum-core.html">KUANTUM ÇEKIRDEĞI</a>
+    <a href="autonomous-swarm.html" class="active">SWARM ZEKASI</a>
+    <a href="revenue-nexus.html">GELİR ENJİNİ</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-tag">🧠 MODÜL 02 — OTONOM AI SWARM MİMARİSİ</div>
+  <h1 class="page-title">AUTONOMOUS<br>SWARM</h1>
+  <div class="page-sub">MARL · FEDERATED LEARNING · EMERGENT BEHAVIOR · İNSAN MÜDAHALESİ: SIFIR</div>
+</div>
+
+<div class="content">
+
+  <!-- SWARM VIZ -->
+  <div class="swarm-canvas-wrap">
+    <canvas id="swarm-canvas"></canvas>
+    <div class="swarm-overlay">
+      <div class="swarm-stat">TOPLAM AJAN: <span id="total-agents">247</span></div>
+      <div class="swarm-stat">AKTİF GÖREV: <span id="active-tasks">189</span></div>
+      <div class="swarm-stat">BİRLEŞME: <span id="merges">14</span></div>
+    </div>
+    <div class="swarm-overlay-r">
+      <div class="swarm-stat">COLLEKTİF IQ: <span style="color:var(--p)">∞</span></div>
+      <div class="swarm-stat">ÖĞRENME HIZI: <span style="color:var(--g)">847x</span></div>
+    </div>
+  </div>
+
+  <!-- AGENT GROUPS -->
+  <div class="section-title">◈ OTONOM AJAN GRUPLARI — CANLI DURUM</div>
+  <div class="agent-groups" id="agent-groups"></div>
+
+  <!-- MARL EQUATIONS -->
+  <div class="marl-section">
+    <div class="section-title">◈ MULTI-AGENT REINFORCEMENT LEARNING — MATEMATİKSEL TEMEL</div>
+    <div class="marl-grid">
+      <div class="marl-card">
+        <div class="marl-label">MARKOV OYUN TANIMI</div>
+        <div class="marl-eq">G = ⟨S, {Aᵢ}, P, {Rᵢ}, γ⟩</div>
+        <div class="marl-desc">N-ajan Markov oyunu: S durum uzayı, Aᵢ ajan aksiyonları, P geçiş fonksiyonu, Rᵢ ödül, γ indirim faktörü. Her ajan kendi politikasını paylaşılan bilgiyle optimize eder.</div>
+      </div>
+      <div class="marl-card">
+        <div class="marl-label">NASH EQUILIBRIUM — OPTIMAL STRATEJİ</div>
+        <div class="marl-eq">∀i: Vᵢ(πᵢ*, π₋ᵢ*) ≥ Vᵢ(πᵢ, π₋ᵢ*)</div>
+        <div class="marl-desc">Nash dengesi: hiçbir ajan tek taraflı strateji değişikliğiyle iyileşemez. Swarm'ın kararlı çözüme yakınsaması bu denge noktasında garanti altında.</div>
+      </div>
+      <div class="marl-card">
+        <div class="marl-label">FEDERATED LEARNING — YAYILMA</div>
+        <div class="marl-eq">w_global = Σᵢ (nᵢ/n) · wᵢ — FedAvg</div>
+        <div class="marl-desc">Her ajan yerel verisiyle eğitilir, yalnızca gradyanlar paylaşılır. Ham veri hiç merkeze gelmez. Gizlilik korumalı, dağıtık ağırlık güncelleme protokolü.</div>
+      </div>
+      <div class="marl-card">
+        <div class="marl-label">KOLLEKTİF ÖDÜL FONKSİYONU</div>
+        <div class="marl-eq">R_team = Σᵢ αᵢRᵢ + β·R_collective</div>
+        <div class="marl-desc">Bireysel ödüllerin ağırlıklı toplamı + kolektif başarı bonusu. α ve β hiperparametreleri işbirliği vs rekabet dengesini otomatik ayarlar. Convergence: O(1/√T).</div>
+      </div>
+      <div class="marl-card">
+        <div class="marl-label">EMERGENT COMPLEXITY TEOREMİ</div>
+        <div class="marl-eq">C(swarm) >> Σᵢ C(agentᵢ) — Superlinear</div>
+        <div class="marl-desc">Swarm'ın kolektif kapasitesi ajan kapasitelerinin toplamından üstel olarak büyüktür. Anderson's "More is Different" prensibi — emergent behavior garantisi.</div>
+      </div>
+      <div class="marl-card">
+        <div class="marl-label">AJAN SPAWNING ALGORİTMASI</div>
+        <div class="marl-eq">N(t+1) = N(t) · e^(r·Δt) — Adaptive Growth</div>
+        <div class="marl-desc">Görev yüküne göre üstel büyüme: r=growth rate, Δt=zaman adımı. Kaynak limiti yaklaşınca logistik eğriye geçiş. Min:10, Max:∞ ajan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="section-title">◈ OTONOM PROJE GELİŞTİRME DÖNGÜSÜ — SIFIR İNSAN MÜDAHALESİ</div>
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-step-num">01</div>
+      <div class="pipe-step-title">PAZAR TARAMA</div>
+      <div class="pipe-step-desc">Web scraper ajanlar günlük 50K fırsat analiz eder</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="pipe-step-num">02</div>
+      <div class="pipe-step-title">FİZİBİLİTE AI</div>
+      <div class="pipe-step-desc">ROI, teknik olabilirlik, zaman tahmini otomatik</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="pipe-step-num">03</div>
+      <div class="pipe-step-title">AJAN ATAMASI</div>
+      <div class="pipe-step-desc">Skills matrisine göre en uygun ajan grubu seçimi</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="pipe-step-num">04</div>
+      <div class="pipe-step-title">KOD ÜRETİMİ</div>
+      <div class="pipe-step-desc">LLM + Code ajanları paralel yazım, test, debug</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="pipe-step-num">05</div>
+      <div class="pipe-step-title">QA & SEC</div>
+      <div class="pipe-step-desc">Red team ajanları otomatik pentest + güvenlik tarama</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="pipe-step-num">06</div>
+      <div class="pipe-step-title">DEPLOY</div>
+      <div class="pipe-step-desc">Vercel/Cloudflare otomatik deploy + monitoring</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="pipe-step-num">07</div>
+      <div class="pipe-step-title">GELİR İZLEME</div>
+      <div class="pipe-step-desc">Stripe/crypto gelir akışı takip + optimizasyon</div>
+    </div>
+  </div>
+
+  <!-- EMERGENT BEHAVIORS -->
+  <div class="section-title">◈ GÖZLEMLENEN EMERGENT (ORTAYA ÇIKAN) DAVRANIŞ PATERNLERİ</div>
+  <div class="emerge-grid">
+    <div class="emerge-card">
+      <div class="emerge-icon">🔄</div>
+      <div class="emerge-name">OTO-SPECİALİZASYON</div>
+      <div class="emerge-desc">Başlangıçta genel ajanlar zamanla kendi başlarına belirli görevlere uzmanlaşıyor. Programlanmadı — ortaya çıktı.</div>
+      <div class="emerge-score">Gözlem: 847. döngü sonrası</div>
+    </div>
+    <div class="emerge-card">
+      <div class="emerge-icon">🤝</div>
+      <div class="emerge-name">ALT-GRUP OLUŞUMU</div>
+      <div class="emerge-desc">Benzer uzmanlaşmış ajanlar kendiliğinden mini-swarm'lar oluşturdu. Hiyerarşi programlanmadı.</div>
+      <div class="emerge-score">Gözlem: 1.203. döngü</div>
+    </div>
+    <div class="emerge-card">
+      <div class="emerge-icon">🧩</div>
+      <div class="emerge-name">GÖREV PAYLAŞIMI</div>
+      <div class="emerge-desc">Karmaşık görevleri otomatik alt görevlere böldü ve dağıttı. Divide-and-conquer kendi kendine keşfedildi.</div>
+      <div class="emerge-score">Gözlem: 2.891. döngü</div>
+    </div>
+    <div class="emerge-card">
+      <div class="emerge-icon">🛡</div>
+      <div class="emerge-name">HATA TOLERANSI</div>
+      <div class="emerge-desc">Bir ajan çöktüğünde diğerleri otomatik devralıyor. Hiçbir recovery kodu yazılmadı.</div>
+      <div class="emerge-score">Gözlem: 412. döngü</div>
+    </div>
+    <div class="emerge-card">
+      <div class="emerge-icon">📡</div>
+      <div class="emerge-name">KOLLEKTİF HAFIZA</div>
+      <div class="emerge-desc">Swarm distributed memory formatını kendi geliştirdi. PostgreSQL → vector hybrid — insan yazmadı.</div>
+      <div class="emerge-score">Gözlem: 5.441. döngü</div>
+    </div>
+    <div class="emerge-card">
+      <div class="emerge-icon">⚡</div>
+      <div class="emerge-name">PARALEL ÖĞRENME</div>
+      <div class="emerge-desc">Bir ajan bir şey öğrendiğinde diğerleri 47ms içinde öğreniyor. FedAvg'dan 3x hızlı protokol ortaya çıktı.</div>
+      <div class="emerge-score">Gözlem: 7.892. döngü</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>AUTONOMOUS SWARM — NEXUS OS © 2099 — MARL · FED-LEARNING · EMERGENT · ∞ AJAN</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';});
+function animRing(){rx+=(mx-rx-16)*0.12;ry+=(my-ry-16)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}animRing();
+
+// SWARM CANVAS
+const canvas=document.getElementById('swarm-canvas');
+const ctx=canvas.getContext('2d');
+function resizeC(){canvas.width=canvas.parentElement.offsetWidth;canvas.height=canvas.parentElement.offsetHeight;}
+resizeC();window.addEventListener('resize',resizeC);
+
+const agents=[];
+for(let i=0;i<80;i++){
+  const group=Math.floor(Math.random()*6);
+  const colors=['#00FFD4','#7B2FFF','#FF3D6B','#39FF14','#FFD700','#FF6B35'];
+  agents.push({
+    x:Math.random()*canvas.width,y:Math.random()*canvas.height,
+    vx:(Math.random()-0.5)*1.2,vy:(Math.random()-0.5)*1.2,
+    group,color:colors[group],r:3+Math.random()*3,
+    energy:Math.random()
+  });
+}
+
+function drawSwarm(){
+  const W=canvas.width,H=canvas.height;
+  ctx.fillStyle='rgba(2,2,8,0.18)';ctx.fillRect(0,0,W,H);
+  // Draw connections
+  agents.forEach((a,i)=>{
+    agents.forEach((b,j)=>{
+      if(j<=i)return;
+      const dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<100&&a.group===b.group){
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(123,47,255,${0.4*(1-d/100)})`;ctx.lineWidth=0.5;ctx.stroke();
+      }
+    });
+  });
+  // Draw agents
+  agents.forEach(a=>{
+    a.x+=a.vx;a.y+=a.vy;
+    if(a.x<0||a.x>W)a.vx*=-1;
+    if(a.y<0||a.y>H)a.vy*=-1;
+    ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,Math.PI*2);
+    ctx.fillStyle=a.color;ctx.fill();
+    ctx.beginPath();ctx.arc(a.x,a.y,a.r*2.5,0,Math.PI*2);
+    ctx.fillStyle=a.color+'22';ctx.fill();
+  });
+  requestAnimationFrame(drawSwarm);
+}drawSwarm();
+
+// Live counters
+setInterval(()=>{
+  document.getElementById('total-agents').textContent=240+Math.floor(Math.random()*15);
+  document.getElementById('active-tasks').textContent=180+Math.floor(Math.random()*20);
+  document.getElementById('merges').textContent=10+Math.floor(Math.random()*10);
+},2500);
+
+// Agent groups
+const groups=[
+  {name:'LLM ZİNCİR AJANLARI',count:48,status:'active',role:'GPT-4o, Claude, Llama3 modellerini zincirleme çalıştırır. Task decomposition ve synthesis uzmanı.',task:'Şu an: Yeni SaaS landing page kopyası yazılıyor...'},
+  {name:'KOD VE DEV AJANLARI',count:36,status:'active',role:'React, Python, Rust, Solidity kod üretimi. Tam stack geliştirme, test ve optimizasyon.',task:'Şu an: Payment gateway modülü test ediliyor...'},
+  {name:'VERİ VE QUANT AJANLARI',count:29,status:'evolving',role:'Finansal modelleme, istatistik analiz, backtest. Akademik seviyede veri bilimi pipeline.',task:'Şu an: DeFi yield stratejisi optimize ediliyor...'},
+  {name:'RED TEAM AJANLARI',count:22,status:'active',role:'Penetrasyon testi, güvenlik tarama, exploit araştırma. CVE veritabanı anlık izleme.',task:'Şu an: Web3 smart contract audit çalışıyor...'},
+  {name:'PAZAR ZEKÂSI AJANLARI',count:34,status:'active',role:'Sektör trendleri, rakip analizi, fiyatlandırma optimizasyonu. Geleceğe yönelik projeksiyon.',task:'Şu an: 2026-2030 AI sektör haritası çıkarılıyor...'},
+  {name:'GELİR OPTİMİZASYON',count:28,status:'merging',role:'A/B test, conversion optimizasyonu, ödeme akışı iyileştirme. Sıfır kayıp gelir garantisi.',task:'Şu an: Checkout funnel %23 → %31 hedefleniyor...'},
+  {name:'KUANTUM-KLASİK KÖPRÜ',count:18,status:'evolving',role:'VQE/QAOA kuantum algoritmaları klasik sistemlerle entegrasyon. Hibrit hesaplama koordinasyonu.',task:'Şu an: Protein folding simülasyonu koşuyor...'},
+  {name:'SELF-EVOLUTION CORE',count:32,status:'active',role:'Diğer tüm ajanları izler, değerlendirir ve geliştirir. Meta-learning ve architecture search.',task:'Şu an: 3 ajan yeni nöron mimarisi test ediyor...'},
+];
+
+const groupGrid=document.getElementById('agent-groups');
+groups.forEach(g=>{
+  const dots=Array.from({length:Math.min(g.count,30)},(_,i)=>{
+    const cls=i<g.count*0.7?'active':i<g.count*0.9?'busy':'idle';
+    return `<div class="dot ${cls}"></div>`;
+  }).join('');
+  const statusClass={active:'status-active',evolving:'status-evolving',merging:'status-merging'}[g.status];
+  const statusText={active:'AKTİF',evolving:'EVRİMLEŞİYOR',merging:'BİRLEŞİYOR'}[g.status];
+  groupGrid.innerHTML+=`<div class="agent-group">
+    <div class="group-header">
+      <div>
+        <div class="group-name">${g.name}</div>
+        <div class="group-count">${g.count}</div>
+      </div>
+      <span class="group-status ${statusClass}">${statusText}</span>
+    </div>
+    <div class="group-role">${g.role}</div>
+    <div class="agent-dots">${dots}</div>
+    <div class="group-task">${g.task}</div>
+  </div>`;
+});
+</script>
+</body>
+</html>
