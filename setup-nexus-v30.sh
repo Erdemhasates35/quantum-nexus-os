@@ -50,8 +50,32 @@ write_once "$APP_DIR/server.mjs" <<'SERVER'
 import express from "express";
 import { createServer } from "node:http";
 import { WebSocketServer } from "ws";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
+const ROOT = process.env.QUANTUM_NEXUS_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const app = express();
+app.use(express.json({ limit: "1mb" }));
+const MODULES = new Map([
+  ["admin.html", "admin.html"],
+  ["autonomous-swarm.html", "autonomous-swarm.html"],
+  ["index-1.html", "index-1.html"],
+  ["nexus-ultra.html", "nexus-ultra.html"],
+  ["quantum-api-panel.html", "quantum-api-panel.html"],
+  ["quantum-core.html", "quantum-core.html"],
+  ["red-team-1.html", "red-team-1.html"],
+  ["revenue-nexus.html", "revenue-nexus.html"],
+  ["public.html", "public/index.html"],
+  ["frontend.html", "frontend/public/index.html"],
+  ["todo.html", "archive/todo-app-original.html"],
+  ["nexus-live-telemetry.js", "nexus-live-telemetry.js"]
+]);
+app.get("/modules/:file", async (req, res) => {
+  const relative = MODULES.get(req.params.file);
+  if (!relative) return res.status(404).json({ error: "module_not_registered" });
+  return res.sendFile(path.join(ROOT, relative));
+});
 const server = createServer(app);
 const sockets = new WebSocketServer({ server, path: "/stream" });
 const PORT = Number(process.env.PORT || 3080);
@@ -97,6 +121,81 @@ app.get("/api/market", async (_req, res) => {
     res.status(latest.status === "unavailable" ? 503 : 200).json(latest);
   } catch (error) {
     res.status(502).json({ status: "unavailable", error: error.message, timestamp: new Date().toISOString() });
+  }
+});
+app.get("/api/registry", async (_req, res) => {
+  try {
+    const registry = JSON.parse(await readFile(path.join(ROOT, "config/agent-registry.v16.json"), "utf8"));
+    const core = (registry.core || []).flatMap((cluster) => (cluster.slice(2) || []).map((role) => ({ id: cluster[0], cluster: cluster[1], role })));
+    const academic = (registry.academic || []).map((role) => ({ role }));
+    const frontier = (registry.frontier || []).map((role) => ({ role }));
+    return res.json({
+      version: registry.version,
+      counts: { core: core.length, academic: academic.length, frontier: frontier.length, total: core.length + academic.length + frontier.length },
+      states: registry.states || [],
+      execution: "role_definitions_only",
+      roles: { core, academic, frontier }
+    });
+  } catch (error) {
+    return res.status(503).json({ status: "unavailable", error: error.message });
+  }
+});
+app.get("/api/agents/status", async (_req, res) => {
+  const endpoint = process.env.AGENT_STATUS_URL;
+  if (!endpoint) return res.status(503).json({ status: "unavailable", activeCount: 0, reason: "No worker heartbeat endpoint configured" });
+  try {
+    const headers = process.env.AGENT_STATUS_TOKEN ? { authorization: "Bearer " + process.env.AGENT_STATUS_TOKEN } : {};
+    const response = await fetch(endpoint, { headers, signal: AbortSignal.timeout(8000) });
+    const data = await response.json();
+    if (!response.ok || !Number.isInteger(data.activeCount) || typeof data.observedAt !== "string") throw new Error("Worker heartbeat schema or HTTP status invalid");
+    return res.json({ status: "connected", activeCount: data.activeCount, observedAt: data.observedAt, workers: data.workers || [] });
+  } catch (error) {
+    return res.status(503).json({ status: "unavailable", activeCount: 0, reason: error.message });
+  }
+});
+app.get("/api/revenue/summary", async (_req, res) => {
+  const endpoint = process.env.REVENUE_LEDGER_URL;
+  if (!endpoint) return res.status(503).json({ status: "unavailable", verified: false, reason: "No settled-revenue ledger endpoint configured" });
+  try {
+    const headers = process.env.REVENUE_LEDGER_TOKEN ? { authorization: "Bearer " + process.env.REVENUE_LEDGER_TOKEN } : {};
+    const response = await fetch(endpoint, { headers, signal: AbortSignal.timeout(8000) });
+    const data = await response.json();
+    if (!response.ok || data.verified !== true || typeof data.currency !== "string" || !Number.isFinite(data.totalSettled)) {
+      throw new Error("Revenue ledger must return verified=true, currency and numeric totalSettled");
+    }
+    return res.json({ status: "connected", verified: true, currency: data.currency, totalSettled: data.totalSettled, period: data.period || null, observedAt: data.observedAt || new Date().toISOString() });
+  } catch (error) {
+    return res.status(503).json({ status: "unavailable", verified: false, reason: error.message });
+  }
+});
+app.get("/api/telemetry", (_req, res) => {
+  const memory = process.memoryUsage();
+  return res.json({
+    status: "connected",
+    service: "quantum-nexus-v30-runtime",
+    uptimeSeconds: Math.floor(process.uptime()),
+    memoryBytes: { rss: memory.rss, heapUsed: memory.heapUsed, heapTotal: memory.heapTotal },
+    timestamp: new Date().toISOString()
+  });
+});
+app.post("/api/ai/:provider", async (req, res) => {
+  const providers = {
+    anthropic: { key: process.env.ANTHROPIC_API_KEY, url: "https://api.anthropic.com/v1/messages", headers: { "anthropic-version": "2023-06-01" } },
+    openai: { key: process.env.OPENAI_API_KEY, url: "https://api.openai.com/v1/chat/completions", headers: {} },
+    groq: { key: process.env.GROQ_API_KEY, url: "https://api.groq.com/openai/v1/chat/completions", headers: {} }
+  };
+  const provider = providers[req.params.provider];
+  if (!provider) return res.status(404).json({ error: "provider_not_supported" });
+  if (!provider.key) return res.status(503).json({ error: "provider_server_key_not_configured" });
+  try {
+    const headers = { "content-type": "application/json", ...provider.headers };
+    if (req.params.provider === "anthropic") headers["x-api-key"] = provider.key;
+    else headers.authorization = "Bearer " + provider.key;
+    const response = await fetch(provider.url, { method: "POST", headers, body: JSON.stringify(req.body || {}), signal: AbortSignal.timeout(30000) });
+    const payload = await response.json();
+    return res.status(response.status).json(payload);
+  } catch (error) {
+    return res.status(502).json({ error: "provider_request_failed", detail: error.message });
   }
 });
 app.get("/", (_req, res) => res.sendFile(new URL("./index.html", import.meta.url).pathname));
