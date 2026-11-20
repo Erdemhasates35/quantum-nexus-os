@@ -154,6 +154,42 @@ app.get("/api/agents/status", async (_req, res) => {
     return res.status(503).json({ status: "unavailable", activeCount: 0, reason: error.message });
   }
 });
+app.post("/api/agents/control", async (req, res) => {
+  const endpoint = process.env.AGENT_CONTROL_URL;
+  const token = process.env.AGENT_CONTROL_TOKEN;
+  if (!endpoint || !token) return res.status(503).json({ status: "unavailable", reason: "Worker control endpoint is not configured" });
+  const action = String(req.body?.action || "");
+  const roleId = String(req.body?.roleId || "");
+  if (!["start", "stop"].includes(action) || !roleId) return res.status(400).json({ error: "invalid_worker_control_request" });
+  try {
+    const registry = JSON.parse(await readFile(path.join(ROOT, "config/agent-registry.v16.json"), "utf8"));
+    const allowed = new Set([
+      ...(registry.core || []).map((cluster) => cluster[0]),
+      ...(registry.academic || []),
+      ...(registry.frontier || [])
+    ]);
+    if (!allowed.has(roleId)) return res.status(404).json({ error: "role_not_registered" });
+    const response = await fetch(endpoint, { method: "POST", headers: { authorization: "Bearer " + token, "content-type": "application/json" }, body: JSON.stringify({ action, roleId, requestedAt: new Date().toISOString() }), signal: AbortSignal.timeout(10000) });
+    const data = await response.json();
+    if (!response.ok || typeof data.status !== "string" || typeof data.observedAt !== "string") throw new Error("Worker control response schema or HTTP status invalid");
+    return res.json({ status: data.status, roleId, action, observedAt: data.observedAt, workerId: data.workerId || null });
+  } catch (error) {
+    return res.status(502).json({ status: "unavailable", reason: error.message });
+  }
+});
+app.post("/api/evolution/run", async (_req, res) => {
+  const endpoint = process.env.EVOLUTION_ENDPOINT;
+  const token = process.env.EVOLUTION_TOKEN;
+  if (!endpoint || !token) return res.status(503).json({ status: "unavailable", reason: "Evolution worker endpoint is not configured" });
+  try {
+    const response = await fetch(endpoint, { method: "POST", headers: { authorization: "Bearer " + token, "content-type": "application/json" }, body: JSON.stringify({ requestedAt: new Date().toISOString(), mode: "evaluate" }), signal: AbortSignal.timeout(15000) });
+    const data = await response.json();
+    if (!response.ok || typeof data.runId !== "string" || typeof data.status !== "string") throw new Error("Evolution worker response schema or HTTP status invalid");
+    return res.status(202).json({ status: data.status, runId: data.runId, observedAt: data.observedAt || null });
+  } catch (error) {
+    return res.status(502).json({ status: "unavailable", reason: error.message });
+  }
+});
 app.get("/api/revenue/summary", async (_req, res) => {
   const endpoint = process.env.REVENUE_LEDGER_URL;
   if (!endpoint) return res.status(503).json({ status: "unavailable", verified: false, reason: "No settled-revenue ledger endpoint configured" });
