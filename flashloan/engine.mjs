@@ -68,11 +68,6 @@ async function buildTransaction({ connection, signer, flashloan, first, second, 
   const tables = await loadLookupTables(connection, [first, second]);
   const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
   const firstComputePrice = instructions(first.computeBudgetInstructions || []);
-  const setup = [
-    ...(flashloan.setupIxs || []),
-    ...instructions(first.setupInstructions || []),
-    ...instructions(second.setupInstructions || []),
-  ];
   const routeInstructions = [
     ...(flashloan.setupIxs || []),
     ...instructions(first.setupInstructions || []),
@@ -86,8 +81,6 @@ async function buildTransaction({ connection, signer, flashloan, first, second, 
     ...(second.cleanupInstruction ? [decodeInstruction(second.cleanupInstruction)] : []),
     ...instructions(flashloan.cleanupIxs || []),
   ];
-  const uniqueSetup = setup.length ? [] : [];
-  void uniqueSetup;
   const message = new TransactionMessage({
     payerKey: signer.publicKey,
     recentBlockhash: blockhash,
@@ -180,6 +173,19 @@ export async function runFlashloan({ entrypoint = "flashloan-engine" } = {}) {
   if (consumed >= 1_400_000) throw new Error("Transaction reached the maximum compute budget; refusing submission");
   const tunedLimit = Math.min(1_400_000, Math.ceil(consumed * 1.2));
   const tuned = await buildTransaction({ connection, signer, flashloan, first, second, computeUnits: tunedLimit });
+  const feeResult = await connection.getFeeForMessage(tuned.transaction.message, "confirmed");
+  if (feeResult.value === null) throw new Error("RPC did not return a fee estimate for the compiled transaction");
+  const feeLamports = BigInt(feeResult.value);
+  const conservativeSolOut = asBigInt(first.otherAmountThreshold, "first.otherAmountThreshold");
+  const networkFeeBaseUnits = (feeLamports * amount + conservativeSolOut - 1n) / conservativeSolOut;
+  const netProfit = grossProfit - networkFeeBaseUnits;
+  report.networkFeeLamports = feeLamports.toString();
+  report.estimatedNetworkFeeBaseUnits = networkFeeBaseUnits.toString();
+  report.conservativeNetProfitBaseUnits = netProfit.toString();
+  if (netProfit <= requiredProfit) {
+    console.log(JSON.stringify({ ...report, decision: "NO_TRADE", reason: "net_profit_below_network_fee_and_margin" }, null, 2));
+    return { decision: "NO_TRADE", reason: "net_profit_below_network_fee_and_margin" };
+  }
   const finalSimulation = await connection.simulateTransaction(tuned.transaction, { sigVerify: true, commitment: "confirmed" });
   if (finalSimulation.value.err) {
     console.log(JSON.stringify({ ...report, decision: "NO_TRADE", reason: "final_simulation_failed", simulationError: finalSimulation.value.err, logs: finalSimulation.value.logs }, null, 2));
