@@ -1,6 +1,6 @@
 import unittest
 
-from contracts.swarm_sae_contract import (
+from src.contracts.swarm_sae_contract import (
     SAEFeature,
     SwarmAgentSpec,
     ProductionSwarmCoordinator,
@@ -20,13 +20,11 @@ class FakeExecutor:
 
 class SwarmSAEContractTests(unittest.TestCase):
     def test_default_swarm_is_disabled(self):
-        swarm = create_default_swarm()
-        self.assertFalse(swarm.production_ready)
+        self.assertFalse(create_default_swarm().production_ready)
 
     def test_route_fails_closed_without_executor(self):
-        swarm = create_default_swarm()
         with self.assertRaisesRegex(RuntimeError, "No inference executor"):
-            swarm.route("Judge", {"input": "real context"})
+            create_default_swarm().route("Judge", {"input": "real context"})
 
     def test_sae_required_role_fails_without_trained_sae(self):
         swarm = ProductionSwarmCoordinator(
@@ -37,9 +35,8 @@ class SwarmSAEContractTests(unittest.TestCase):
             swarm.route("Scout", {"input": "real context"}, residual=object())
 
     def test_sae_feature_extraction_requires_real_sae(self):
-        swarm = create_default_swarm()
         with self.assertRaisesRegex(RuntimeError, "No trained SAE"):
-            swarm.extract_features(object())
+            create_default_swarm().extract_features(object())
 
     def test_route_uses_injected_executor_and_validated_sae_features(self):
         swarm = ProductionSwarmCoordinator(
