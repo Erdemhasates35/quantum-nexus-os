@@ -1,30 +1,28 @@
-# Quantum Nexus OS — Swarm + SAE Production Status
+# Quantum Nexus OS — Swarm + SAE integration contract
 
-Updated: 2026-11-15
+Updated: 2026-11-20
 
-## Added artifacts
+**Status: DEFERRED — NOT PRODUCTION**
 
-- `src/production/swarm_sae_contract.py`  
-  Real Protocol definitions for ActivationSource and SparseAutoencoder.  
-  ProductionSwarmCoordinator refuses to invent features when SAE is absent.
+The Swarm / Pythia Sparse Autoencoder (SAE) integration is a contract only. It
+is not imported by the deployed Next.js application and does not perform model
+inference, generate activations, route agent work, or authorize trades.
 
-## Integration points
+The contract lives at `src/contracts/swarm_sae_contract.py`. It intentionally
+fails closed unless a real inference executor is injected. Scout and
+Cartographer also require a real trained SAE and real residual-stream input.
+No synthetic activations or feature identifiers are permitted.
 
-1. Load real Pythia residual activations (EleutherAI/pythia suite).
-2. Attach trained TopK / BatchTopK SAE (EleutherAI/sparsify or equivalent).
-3. Feed monosemantic features into Scout / Cartographer agents only.
-4. Guard and Executor remain free of SAE dependency for latency reasons.
+## Outstanding integration prerequisites
 
-## Non-negotiable rules
+1. Implement and verify a real Pythia model forward pass and residual stream.
+2. Load a pinned, checksum-verified TopK / BatchTopK SAE checkpoint.
+3. Provide an inference executor with bounded timeouts, audit correlation IDs,
+   and explicit model/version provenance.
+4. Add independent policy and risk authorization; this contract is not an
+   execution or trading authorization layer.
+5. Run hardware, latency, numerical, and model-quality validation before any
+   production promotion.
 
-- No synthetic residual streams.
-- No random feature IDs.
-- Feature explanations must come from offline labeling or verified auto-interp, never invented at runtime.
-
-## Next operator steps
-
-- Wire real model forward pass to residual_stream.
-- Load SAE checkpoint from Hugging Face collection (sae-pythia-*).
-- Connect Guard decision to honeycomb-execution-core Guard endpoint.
-
-This document is the canonical production contract for the Swarm layer.
+Until these prerequisites are completed, the module remains disabled and must
+not be described as production-ready.
