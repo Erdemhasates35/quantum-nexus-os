@@ -1,0 +1,19 @@
+{
+  "name": "quantum-nexus-flashloan-engine",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": { "node": ">=20.9.0" },
+  "scripts": {
+    "check": "node --check engine.mjs && node --check ../nexus_flashloan.js && node --check ../nexuss_flashloan.js && node --check ../nexusss_flashloan.js && node --check ../nexussss_flashloan.js",
+    "run": "node engine.mjs",
+    "audit": "npm audit --audit-level=high"
+  },
+  "dependencies": {
+    "@jup-ag/lend": "0.4.0",
+    "@solana/web3.js": "1.98.4",
+    "bn.js": "5.2.5",
+    "bs58": "6.0.0",
+    "dotenv": "17.4.2"
+  }
+}
