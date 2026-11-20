@@ -2,9 +2,7 @@
 
 Updated: 2026-11-20
 
-## Production status
-
-<badge>DEFERRED — NOT PRODUCTION</badge>
+**Status: DEFERRED — NOT PRODUCTION**
 
 The Swarm / Pythia Sparse Autoencoder (SAE) integration is a contract only. It
 is not imported by the deployed Next.js application and does not perform model
