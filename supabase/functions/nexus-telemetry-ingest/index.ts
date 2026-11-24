@@ -336,7 +336,7 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
         const status = optionalText(r,"exchange_status",32)?.toUpperCase();
         const nextState = status === "NEW" ? "accepted" : status === "PARTIALLY_FILLED" ? "partially_filled" : status === "FILLED" ? "filled" : status === "CANCELED" ? "canceled" : status === "REJECTED" ? "rejected" : status === "EXPIRED" ? "expired" : status ? "unknown" : null;
         if (nextState) await client.queryObject(
-          "update nexus_private.order_intents set state=$1,updated_at=pg_catalog.now() where id=$2::uuid and state not in ('filled','canceled','rejected','expired','reconciled')",
+          "update nexus_private.order_intents set state=case when $1='accepted' and state='partially_filled' then state else $1 end,updated_at=pg_catalog.now() where id=$2::uuid and state not in ('risk_rejected','filled','canceled','rejected','expired','reconciled')",
           [nextState,uuid(r,"intent_id")],
         );
         return q.rows[0].id;
