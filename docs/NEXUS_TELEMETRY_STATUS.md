@@ -25,7 +25,7 @@ All trading tables have RLS enabled and are restricted to the `service_role`. Th
 
 ## Runtime controls
 
-Nine distinct database migrations were applied:
+Ten distinct database migrations were applied:
 - `institutional_trading_execution_core`
 - `market_data_and_agent_orchestration`
 - `agent_queue_and_operational_views`
@@ -35,6 +35,7 @@ Nine distinct database migrations were applied:
 - `agent_event_dedupe_index`
 - `signed_guard_live_authorization`
 - `guard_foreign_key_indexes`
+- `admin_bootstrap_owner_policy`
 
 The schema includes atomic task claiming using `FOR UPDATE SKIP LOCKED`, lease expiry, worker heartbeats, lease-owner fencing on task completion, order lifecycle views, strategy PnL views, open reconciliation discrepancy views, signed Guard approval records, one-time live authorization consumption, and executor-bound submission result recording.
 
@@ -50,6 +51,6 @@ At the time of verification, `strategy_runs`, `agents`, `order_intents`, `fills`
 
 The deployed `nexus-telemetry-ingest` Edge Function remains version 3. A version 4 implementation is under review in PR #71; it preserves the original six telemetry kinds and adds allowlisted order, risk, fill, position, balance, PnL, funding, market-data, agent-task and reconciliation ingestion. Deno typecheck and six contract tests passed on the latest tested revision; final repository CI and deployment verification remain in progress. The signed Guard authorization tables and one-time consume functions are deployed, but no signer key, active live policy, Guard service, or Executor integration has been provisioned. Worker processes are not deployed or running. The Vercel Honeycomb Omega X environment references a different Supabase project ref (`qxfvpcjvoiantjrkorsa`) than the connected active database; that project was not accessible through the current Supabase connection and has not been silently substituted.
 
-Supabase advisor verification reports no health lints and no remaining unindexed foreign keys in `nexus_private`, including the new Guard authorization tables. The global anonymous-sign-in advisor notice remains because the Auth setting is enabled; the 25 restrictive policies now reject anonymous-auth JWTs. The unused-index advisor still reports indexes without observed workload usage; no indexes were dropped because the new tables have no production workload and removal would be premature.
+Supabase advisor verification reports no health lints and no remaining unindexed foreign keys in `nexus_private`, including the new Guard authorization tables. The only remaining security-advisor warning is the project-wide anonymous-sign-in setting; the 25 restrictive policies reject anonymous-auth JWTs. The private admin bootstrap allowlist now has an explicit owner-only policy. The unused-index advisor still reports indexes without observed workload usage; no indexes were dropped because the new tables have no production workload and removal would be premature.
 
 The database foundation is additive and does not by itself certify the trading application or any strategy as production-ready.
