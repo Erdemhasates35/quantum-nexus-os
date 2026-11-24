@@ -97,3 +97,15 @@ begin
   if not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='nexus_private' and p.proname='claim_agent_task') then raise exception 'agent_task_claim_function_missing'; end if;
 end
 $$;
+
+do $$
+begin
+  if not exists(select 1 from information_schema.columns where table_schema='nexus_private' and table_name='order_intents' and column_name='request_digest' and data_type='text') then raise exception 'order_intent_request_digest_missing'; end if;
+  if not exists(select 1 from pg_indexes where schemaname='nexus_private' and indexname='order_book_snapshots_sequence_uidx') then raise exception 'order_book_sequence_idempotency_index_missing'; end if;
+  if not exists(select 1 from pg_indexes where schemaname='nexus_private' and indexname='order_flow_events_sequence_uidx') then raise exception 'order_flow_sequence_idempotency_index_missing'; end if;
+  if not exists(select 1 from pg_indexes where schemaname='nexus_private' and indexname='order_flow_events_trade_uidx') then raise exception 'order_flow_trade_idempotency_index_missing'; end if;
+  if not exists(select 1 from pg_indexes where schemaname='nexus_private' and indexname='agent_events_dedupe_uidx') then raise exception 'agent_event_dedupe_index_missing'; end if;
+  if has_function_privilege('anon','nexus_private.heartbeat_agent(text,text,text,jsonb)','EXECUTE') then raise exception 'anon_can_heartbeat_agents'; end if;
+  if has_function_privilege('authenticated','nexus_private.finish_agent_task(uuid,text,text,jsonb)','EXECUTE') then raise exception 'authenticated_can_finish_agent_tasks'; end if;
+end
+$$;
