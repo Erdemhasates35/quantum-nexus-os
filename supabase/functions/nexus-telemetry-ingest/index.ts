@@ -54,7 +54,7 @@ const fields: Record<TelemetryKind, Set<string>> = {
 const forbiddenField = /(private[_-]?key|secret[_-]?key|api[_-]?key|api[_-]?secret|mnemonic|seed[_-]?phrase|service[_-]?role[_-]?key|authorization|access[_-]?token|password|credential)/i;
 const forbiddenValue = /(-----BEGIN [A-Z ]*PRIVATE KEY-----|Bearer\\s+[A-Za-z0-9._-]+|sb_secret_[A-Za-z0-9_-]{8,})/i;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const decimalPattern = /^-?\\d{1,38}(?:\\.\\d{1,18})?$/;
+const decimalPattern = /^-?\\d{1,20}(?:\\.\\d{1,18})?$/;
 
 function getPool(): Pool {
   if (pool) return pool;
@@ -177,11 +177,30 @@ function jsonObject(record: JsonObject, key: string): string {
   return JSON.stringify(value);
 }
 
-function jsonArray(record: JsonObject, key: string): string {
+function bookLevels(record: JsonObject, key: string): string {
   const value = record[key];
-  if (!Array.isArray(value) || value.length > 100) throw new Error("invalid_" + key);
+  if (!Array.isArray(value) || value.length < 1 || value.length > 100) throw new Error("invalid_" + key);
+  for (const level of value) {
+    if (!Array.isArray(level) || level.length !== 2 || typeof level[0] !== "string" || typeof level[1] !== "string") throw new Error("invalid_" + key);
+    if (!decimalPattern.test(level[0]) || !decimalPattern.test(level[1]) || Number(level[0]) <= 0 || Number(level[1]) <= 0) throw new Error("invalid_" + key);
+  }
   assertJsonSafe(value);
   return JSON.stringify(value);
+}
+
+function canonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as JsonObject).sort(([a],[b]) => a.localeCompare(b));
+    return Object.fromEntries(entries.map(([key,child]) => [key,canonical(child)]));
+  }
+  return value;
+}
+
+async function requestDigest(record: JsonObject): Promise<string> {
+  const bytes = new TextEncoder().encode(JSON.stringify(canonical(record)));
+  const hash = await crypto.subtle.digest("SHA-256",bytes);
+  return Array.from(new Uint8Array(hash)).map(value => value.toString(16).padStart(2,"0")).join("");
 }
 
 function timestamp(record: JsonObject, key: string, required = false): string | null {
@@ -237,13 +256,15 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
       return q.rows[0].id;
     }
     if (kind === "order_intent") {
+      const digest = await requestDigest(r);
       const q = await client.queryObject<{ id: string }>(
-        "insert into nexus_private.order_intents (run_id,strategy_code,strategy_version_id,account_id,instrument_id,client_order_id,idempotency_key,side,position_side,order_type,time_in_force,quantity,limit_price,stop_price,reduce_only,post_only,risk_profile_code,requested_mode,metadata) values ($1::uuid,$2,$3::uuid,$4::uuid,$5::uuid,$6,$7,$8,$9,$10,$11,$12::numeric,$13::numeric,$14::numeric,$15,$16,$17,$18,$19::jsonb) on conflict(account_id,idempotency_key) do nothing returning id::text as id",
-        [uuid(r,"run_id",false),requiredText(r,"strategy_code",64),uuid(r,"strategy_version_id",false),uuid(r,"account_id"),uuid(r,"instrument_id"),requiredText(r,"client_order_id",128),requiredText(r,"idempotency_key",128),requiredText(r,"side",8),optionalText(r,"position_side",8),requiredText(r,"order_type",32),optionalText(r,"time_in_force",16),decimal(r,"quantity"),decimal(r,"limit_price",false,false),decimal(r,"stop_price",false,false),bool(r,"reduce_only"),bool(r,"post_only"),optionalText(r,"risk_profile_code",64),requiredText(r,"requested_mode",16),jsonObject(r,"metadata")],
+        "insert into nexus_private.order_intents (run_id,strategy_code,strategy_version_id,account_id,instrument_id,client_order_id,idempotency_key,request_digest,side,position_side,order_type,time_in_force,quantity,limit_price,stop_price,reduce_only,post_only,risk_profile_code,requested_mode,metadata) values ($1::uuid,$2,$3::uuid,$4::uuid,$5::uuid,$6,$7,$8,$9,$10,$11,$12,$13::numeric,$14::numeric,$15::numeric,$16,$17,$18,$19,$20::jsonb) on conflict(account_id,idempotency_key) do nothing returning id::text as id",
+        [uuid(r,"run_id",false),requiredText(r,"strategy_code",64),uuid(r,"strategy_version_id",false),uuid(r,"account_id"),uuid(r,"instrument_id"),requiredText(r,"client_order_id",128),requiredText(r,"idempotency_key",128),digest,requiredText(r,"side",8),optionalText(r,"position_side",8),requiredText(r,"order_type",32),optionalText(r,"time_in_force",16),decimal(r,"quantity"),decimal(r,"limit_price",false,false),decimal(r,"stop_price",false,false),bool(r,"reduce_only"),bool(r,"post_only"),optionalText(r,"risk_profile_code",64),requiredText(r,"requested_mode",16),jsonObject(r,"metadata")],
       );
       if (q.rows[0]?.id) return q.rows[0].id;
-      const existing = await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_intents where account_id=$1::uuid and idempotency_key=$2", [uuid(r,"account_id"),requiredText(r,"idempotency_key",128)]);
+      const existing = await client.queryObject<{ id: string; request_digest: string | null }>("select id::text as id,request_digest from nexus_private.order_intents where account_id=$1::uuid and idempotency_key=$2", [uuid(r,"account_id"),requiredText(r,"idempotency_key",128)]);
       if (!existing.rows[0]) throw new Error("idempotency_record_unavailable");
+      if (existing.rows[0].request_digest !== digest) throw new Error("idempotency_key_reused_with_different_payload");
       return existing.rows[0].id;
     }
     if (kind === "risk_decision") {
@@ -277,7 +298,7 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
     if (kind === "fill") {
       const q = await client.queryObject<{ id: string }>(
         "insert into nexus_private.fills (intent_id,order_event_id,account_id,instrument_id,venue_trade_id,side,quantity,price,fee_amount,fee_asset,liquidity_role,executed_at,source,raw_digest) values ($1::uuid,$2::uuid,$3::uuid,$4::uuid,$5,$6,$7::numeric,$8::numeric,$9::numeric,$10,$11,$12::timestamptz,$13,$14) on conflict(account_id,venue_trade_id) do nothing returning id::text as id",
-        [uuid(r,"intent_id"),uuid(r,"order_event_id",false),uuid(r,"account_id"),uuid(r,"instrument_id"),requiredText(r,"venue_trade_id",128),requiredText(r,"side",8),decimal(r,"quantity"),decimal(r,"price"),decimal(r,"fee_amount") ?? "0",requiredText(r,"fee_asset",32),optionalText(r,"liquidity_role",16),timestamp(r,"executed_at",true),requiredText(r,"source",64),optionalText(r,"raw_digest",128)],
+        [uuid(r,"intent_id"),uuid(r,"order_event_id",false),uuid(r,"account_id"),uuid(r,"instrument_id"),requiredText(r,"venue_trade_id",128),requiredText(r,"side",8),decimal(r,"quantity"),decimal(r,"price"),decimal(r,"fee_amount",false,false) ?? "0",requiredText(r,"fee_asset",32),optionalText(r,"liquidity_role",16),timestamp(r,"executed_at",true),requiredText(r,"source",64),optionalText(r,"raw_digest",128)],
       );
       if (q.rows[0]?.id) return q.rows[0].id;
       const existing = await client.queryObject<{ id: string }>("select id::text as id from nexus_private.fills where account_id=$1::uuid and venue_trade_id=$2", [uuid(r,"account_id"),requiredText(r,"venue_trade_id",128)]);
@@ -376,7 +397,7 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
     if (kind === "order_book") {
       const q = await client.queryObject<{ id: string }>(
         "insert into nexus_private.order_book_snapshots (instrument_id,venue,sequence_number,bids,asks,checksum,depth_levels,source,observed_at) values ($1::uuid,$2,$3,$4::jsonb,$5::jsonb,$6,$7,$8,$9::timestamptz) returning id::text as id",
-        [uuid(r,"instrument_id"),requiredText(r,"venue",64),optionalText(r,"sequence_number",128),jsonArray(r,"bids"),jsonArray(r,"asks"),optionalText(r,"checksum",128),integer(r,"depth_levels",1,100),requiredText(r,"source",64),timestamp(r,"observed_at",true)],
+        [uuid(r,"instrument_id"),requiredText(r,"venue",64),optionalText(r,"sequence_number",128),bookLevels(r,"bids"),bookLevels(r,"asks"),optionalText(r,"checksum",128),integer(r,"depth_levels",1,100),requiredText(r,"source",64),timestamp(r,"observed_at",true)],
       );
       return q.rows[0].id;
     }
