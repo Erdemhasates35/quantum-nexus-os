@@ -110,6 +110,11 @@ declare
   intent_row nexus_private.order_intents%rowtype;
   approval_row nexus_private.guard_approvals%rowtype;
   policy_state text;
+  account_state text;
+  account_environment text;
+  strategy_enabled boolean;
+  strategy_modes text[];
+  risk_enabled boolean;
   authorization_id uuid;
 begin
   if p_executor_id is null or length(p_executor_id) < 1 or length(p_executor_id) > 128 then
@@ -127,6 +132,20 @@ begin
   if intent_row.requested_mode <> 'live' then raise exception 'live_mode_required'; end if;
   if intent_row.state <> 'approved' or intent_row.risk_decision_id is null then raise exception 'risk_verdict_required'; end if;
   if intent_row.request_digest is null then raise exception 'intent_digest_required'; end if;
+  if intent_row.risk_profile_code is null then raise exception 'risk_profile_required'; end if;
+  if not exists(select 1 from nexus_private.risk_decisions where id=intent_row.risk_decision_id and intent_id=p_intent_id and decision='allow') then raise exception 'explicit_risk_allow_required'; end if;
+
+  select status,environment into account_state,account_environment
+  from nexus_private.venue_accounts where id=intent_row.account_id;
+  if account_state <> 'armed' or account_environment <> 'production' then raise exception 'production_account_not_armed'; end if;
+
+  select enabled,supported_modes into strategy_enabled,strategy_modes
+  from nexus_private.strategy_catalog where strategy_code=intent_row.strategy_code;
+  if strategy_enabled is distinct from true or not ('live'=any(strategy_modes)) then raise exception 'strategy_not_live_enabled'; end if;
+
+  select enabled into risk_enabled
+  from nexus_private.risk_profiles where profile_code=intent_row.risk_profile_code;
+  if risk_enabled is distinct from true then raise exception 'risk_profile_not_enabled'; end if;
 
   select * into approval_row
   from nexus_private.guard_approvals
