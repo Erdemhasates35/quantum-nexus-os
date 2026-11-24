@@ -53,7 +53,7 @@ const fields: Record<TelemetryKind, Set<string>> = {
   authorize_live: new Set(["intent_id","executor_id","approval_digest"]),
   submission_result: new Set(["authorization_id","executor_id","outcome","venue_order_id","error_code"]),
   guard_approval: new Set(["intent_id","intent_digest","policy_version","decision","reason_code","approval_digest","signer_key_id","signature_algorithm","signature","nonce","issued_at","expires_at","evidence"]),
-  execution_config: new Set(["risk_profile_code","strategy_code","mode"]),
+  execution_config: new Set(["risk_profile_code","strategy_code","mode","account_id","instrument_id","symbol"]),
 };
 
 const forbiddenField = /(private[_-]?key|secret[_-]?key|api[_-]?key|api[_-]?secret|mnemonic|seed[_-]?phrase|service[_-]?role[_-]?key|authorization|access[_-]?token|password|credential)/i;
@@ -257,6 +257,9 @@ async function readExecutionConfig(r: JsonObject): Promise<JsonObject> {
   const profileCode = requiredText(r,"risk_profile_code",128);
   const strategyCode = requiredText(r,"strategy_code",128);
   const mode = requiredText(r,"mode",16);
+  const accountId = typeof r.account_id === "string" ? uuid(r,"account_id",true) ?? "" : "";
+  const instrumentId = typeof r.instrument_id === "string" ? uuid(r,"instrument_id",true) ?? "" : "";
+  const symbol = typeof r.symbol === "string" ? r.symbol : "";
   if (!["paper","testnet","live"].includes(mode)) throw new Error("invalid_execution_mode");
   const client = await getPool().connect();
   try {
@@ -300,8 +303,8 @@ async function readExecutionConfig(r: JsonObject): Promise<JsonObject> {
     if (!Array.isArray(row.strategy_modes) || !row.strategy_modes.includes(mode)) throw new Error("execution_strategy_mode_not_supported");
     if (!row.strategy_version_id || !["validated","approved"].includes(row.validation_status ?? "")) throw new Error("execution_strategy_version_not_validated");
     const breakerResult = await client.queryObject<{ scope: string; scope_key: string; state: string; trigger_code: string | null; reset_after: string | null }>(
-      "select scope,scope_key,state,trigger_code,reset_after from nexus_private.circuit_breakers where state <> 'closed' and (scope='global' or (scope='venue' and scope_key='binance') or (scope='strategy' and scope_key=$1)) order by scope,scope_key",
-      [strategyCode],
+      "select scope,scope_key,state,trigger_code,reset_after from nexus_private.circuit_breakers where state <> 'closed' and (scope='global' or (scope='venue' and scope_key='binance') or (scope='strategy' and scope_key=$1) or (scope='account' and scope_key=$2) or (scope='instrument' and scope_key in (nullif($3,''),nullif($4,'')))) order by scope,scope_key",
+      [strategyCode,accountId,instrumentId,symbol],
     );
     if (breakerResult.rows.length > 0) throw new Error("execution_circuit_breaker_open");
     if (mode === "live" && !row.policy_version) throw new Error("execution_active_guard_policy_missing");
