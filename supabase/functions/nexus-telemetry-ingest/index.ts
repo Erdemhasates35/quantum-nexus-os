@@ -418,9 +418,7 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
       const sequence = optionalText(r,"event_sequence",128);
       const tradeId = optionalText(r,"exchange_trade_id",128);
       if (!sequence && !tradeId) throw new Error("event_sequence_or_trade_id_required");
-      const existing = sequence
-        ? await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_flow_events where instrument_id=$1::uuid and venue=$2 and event_sequence=$3", [uuid(r,"instrument_id"),requiredText(r,"venue",64),sequence])
-        : await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_flow_events where instrument_id=$1::uuid and venue=$2 and exchange_trade_id=$3", [uuid(r,"instrument_id"),requiredText(r,"venue",64),tradeId]);
+      const existing = await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_flow_events where instrument_id=$1::uuid and venue=$2 and (($3::text is not null and event_sequence=$3) or ($4::text is not null and exchange_trade_id=$4)) limit 1", [uuid(r,"instrument_id"),requiredText(r,"venue",64),sequence,tradeId]);
       if (!existing.rows[0]) throw new Error("idempotency_record_unavailable");
       return existing.rows[0].id;
     }
