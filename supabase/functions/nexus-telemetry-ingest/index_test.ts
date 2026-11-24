@@ -1,4 +1,4 @@
-import { bookLevels, decimal, recordFor, requestDigest } from "./index.ts";
+import { bookLevels, decimal, recordFor, requestDigest, verifyGuardApprovalSignature } from "./index.ts";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -68,4 +68,88 @@ Deno.test("live authorization messages are strictly allowlisted", () => {
   const approval = recordFor("authorize_live", { intent_id: "123e4567-e89b-42d3-a456-426614174000", executor_id: "executor-a", approval_digest: "a".repeat(64) });
   assert(approval.executor_id === "executor-a", "authorization payload was not preserved");
   expectThrow(() => recordFor("authorize_live", { intent_id: "123e4567-e89b-42d3-a456-426614174000", executor_id: "executor-a", approval_digest: "a".repeat(64), signature: "not-accepted-here" }), "unknown_record_fields");
+});
+
+Deno.test("signed Guard approvals require a valid Ed25519 signature and immutable policy digest", async () => {
+  const pair = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]) as CryptoKeyPair;
+  const publicBytes = new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey));
+  const publicKeyBase64 = btoa(Array.from(publicBytes, value => String.fromCharCode(value)).join(""));
+  const policyDocument = {
+    signer: {
+      key_id: "guard-test-ed25519",
+      algorithm: "ed25519",
+      public_key_base64: publicKeyBase64,
+    },
+    policy: {
+      max_order_notional: "100",
+      max_leverage: "2",
+      max_daily_loss: "5",
+    },
+  };
+  const policySha256 = await requestDigest(policyDocument);
+  const approvalDigest = "a".repeat(64);
+  const signed = new Uint8Array(await crypto.subtle.sign({ name: "Ed25519" }, pair.privateKey, new TextEncoder().encode(approvalDigest)));
+  const signature = btoa(Array.from(signed, value => String.fromCharCode(value)).join(""));
+  const valid = await verifyGuardApprovalSignature({
+    policyDocument,
+    policySha256,
+    signerKeyId: "guard-test-ed25519",
+    signatureAlgorithm: "ed25519",
+    approvalDigest,
+    signature,
+  });
+  assert(valid, "valid Guard signature was rejected");
+  const alteredDigest = await verifyGuardApprovalSignature({
+    policyDocument,
+    policySha256,
+    signerKeyId: "guard-test-ed25519",
+    signatureAlgorithm: "ed25519",
+    approvalDigest: "b".repeat(64),
+    signature,
+  });
+  assert(!alteredDigest, "signature for a different approval digest was accepted");
+  const alteredPolicy = await verifyGuardApprovalSignature({
+    policyDocument,
+    policySha256: "0".repeat(64),
+    signerKeyId: "guard-test-ed25519",
+    signatureAlgorithm: "ed25519",
+    approvalDigest,
+    signature,
+  });
+  assert(!alteredPolicy, "signature under a mismatched policy digest was accepted");
+});
+
+Deno.test("Guard approval payloads accept only the signed intent-bound contract", () => {
+  const approval = recordFor("guard_approval", {
+    intent_id: "123e4567-e89b-42d3-a456-426614174000",
+    intent_digest: "a".repeat(64),
+    policy_version: "guard-policy-v1",
+    decision: "allow",
+    reason_code: "all_limits_passed",
+    approval_digest: "b".repeat(64),
+    signer_key_id: "guard-ed25519-01",
+    signature_algorithm: "ed25519",
+    signature: "A".repeat(88),
+    nonce: "nonce-0123456789abcdef",
+    issued_at: "2026-11-24T07:00:00.000Z",
+    expires_at: "2026-11-24T07:01:00.000Z",
+    evidence: { risk_verdict: "allow" },
+  });
+  assert(approval.policy_version === "guard-policy-v1", "Guard approval contract was not preserved");
+  expectThrow(() => recordFor("guard_approval", {
+    intent_id: "123e4567-e89b-42d3-a456-426614174000",
+    intent_digest: "a".repeat(64),
+    policy_version: "guard-policy-v1",
+    decision: "allow",
+    reason_code: "all_limits_passed",
+    approval_digest: "b".repeat(64),
+    signer_key_id: "guard-ed25519-01",
+    signature_algorithm: "ed25519",
+    signature: "A".repeat(88),
+    nonce: "nonce-0123456789abcdef",
+    issued_at: "2026-11-24T07:00:00.000Z",
+    expires_at: "2026-11-24T07:01:00.000Z",
+    evidence: {},
+    private_key: "blocked",
+  }), "unknown_record_fields");
 });

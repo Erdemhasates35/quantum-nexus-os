@@ -6,7 +6,7 @@ type TelemetryKind =
   | "order_intent" | "risk_decision" | "order_event" | "fill"
   | "position" | "balance" | "pnl" | "funding" | "heartbeat"
   | "alpha" | "venue_health" | "reconciliation" | "discrepancy"
-  | "task" | "market_bar" | "order_book" | "order_flow" | "venue_account" | "instrument" | "authorize_live" | "submission_result";
+  | "task" | "market_bar" | "order_book" | "order_flow" | "venue_account" | "instrument" | "authorize_live" | "submission_result" | "guard_approval";
 
 let pool: Pool | null = null;
 const maxBodyBytes = 64 * 1024;
@@ -52,6 +52,7 @@ const fields: Record<TelemetryKind, Set<string>> = {
   instrument: new Set(["venue","market_type","symbol","base_asset","quote_asset","settlement_asset","price_tick","quantity_step","min_quantity","min_notional","contract_multiplier","maker_fee_bps","taker_fee_bps","active","metadata"]),
   authorize_live: new Set(["intent_id","executor_id","approval_digest"]),
   submission_result: new Set(["authorization_id","executor_id","outcome","venue_order_id","error_code"]),
+  guard_approval: new Set(["intent_id","intent_digest","policy_version","decision","reason_code","approval_digest","signer_key_id","signature_algorithm","signature","nonce","issued_at","expires_at","evidence"]),
 };
 
 const forbiddenField = /(private[_-]?key|secret[_-]?key|api[_-]?key|api[_-]?secret|mnemonic|seed[_-]?phrase|service[_-]?role[_-]?key|authorization|access[_-]?token|password|credential)/i;
@@ -206,6 +207,44 @@ export async function requestDigest(record: JsonObject): Promise<string> {
   return Array.from(new Uint8Array(hash)).map(value => value.toString(16).padStart(2,"0")).join("");
 }
 
+function toArrayBuffer(value: Uint8Array): ArrayBuffer {
+  const buffer = new ArrayBuffer(value.byteLength);
+  new Uint8Array(buffer).set(value);
+  return buffer;
+}
+
+function decodeBase64(value: string): Uint8Array {
+  if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) throw new Error("invalid_signature_encoding");
+  const decoded = atob(value);
+  return Uint8Array.from(decoded, character => character.charCodeAt(0));
+}
+
+export async function verifyGuardApprovalSignature(input: {
+  policyDocument: JsonObject;
+  policySha256: string;
+  signerKeyId: string;
+  signatureAlgorithm: string;
+  approvalDigest: string;
+  signature: string;
+}): Promise<boolean> {
+  if (input.signatureAlgorithm !== "ed25519") return false;
+  if (!/^[0-9a-f]{64}$/.test(input.policySha256) || !/^[0-9a-f]{64}$/.test(input.approvalDigest)) return false;
+  if (!constantTimeEqual(await requestDigest(input.policyDocument), input.policySha256)) return false;
+  const signer = input.policyDocument.signer;
+  if (!signer || typeof signer !== "object" || Array.isArray(signer)) return false;
+  const signerRecord = signer as JsonObject;
+  if (signerRecord.key_id !== input.signerKeyId || signerRecord.algorithm !== "ed25519" || typeof signerRecord.public_key_base64 !== "string") return false;
+  try {
+    const publicKeyBytes = decodeBase64(signerRecord.public_key_base64);
+    const signatureBytes = decodeBase64(input.signature);
+    if (publicKeyBytes.length !== 32 || signatureBytes.length !== 64) return false;
+    const publicKey = await crypto.subtle.importKey("raw", toArrayBuffer(publicKeyBytes), { name: "Ed25519" }, false, ["verify"]);
+    return await crypto.subtle.verify({ name: "Ed25519" }, publicKey, toArrayBuffer(signatureBytes), toArrayBuffer(new TextEncoder().encode(input.approvalDigest)));
+  } catch {
+    return false;
+  }
+}
+
 function timestamp(record: JsonObject, key: string, required = false): string | null {
   const value = record[key];
   if ((value === undefined || value === null || value === "") && !required) return null;
@@ -216,6 +255,90 @@ function timestamp(record: JsonObject, key: string, required = false): string | 
 async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string> {
   const client = await getPool().connect();
   try {
+
+    if (kind === "guard_approval") {
+      const intentId = uuid(r,"intent_id")!;
+      const intentDigest = requiredText(r,"intent_digest",64);
+      const policyVersion = requiredText(r,"policy_version",128);
+      const decision = requiredText(r,"decision",16);
+      const reasonCode = requiredText(r,"reason_code",128);
+      const approvalDigest = requiredText(r,"approval_digest",64);
+      const signerKeyId = requiredText(r,"signer_key_id",128);
+      const signatureAlgorithm = requiredText(r,"signature_algorithm",32);
+      const signature = requiredText(r,"signature",2048);
+      const nonce = requiredText(r,"nonce",128);
+      const issuedAt = timestamp(r,"issued_at",true)!;
+      const expiresAt = timestamp(r,"expires_at",true)!;
+      if (decision !== "allow") throw new Error("guard_approval_must_be_allow");
+      if (!/^[0-9a-f]{64}$/.test(intentDigest) || !/^[0-9a-f]{64}$/.test(approvalDigest)) throw new Error("invalid_guard_digest");
+      if (nonce.length < 16) throw new Error("invalid_guard_nonce");
+      const issuedMs = Date.parse(issuedAt);
+      const expiresMs = Date.parse(expiresAt);
+      const now = Date.now();
+      if (issuedMs > now + 30000 || expiresMs <= now || expiresMs <= issuedMs || expiresMs > issuedMs + 300000 || expiresMs > now + 300000) throw new Error("guard_approval_time_window_invalid");
+      const q = await client.queryObject<{
+        request_digest: string | null;
+        intent_state: string;
+        requested_mode: string;
+        risk_decision: string | null;
+        account_status: string;
+        account_environment: string;
+        strategy_enabled: boolean;
+        strategy_modes: string[];
+        risk_enabled: boolean;
+        policy_sha256: string;
+        policy_document: JsonObject | string;
+        policy_signer_key_id: string;
+        policy_status: string;
+        effective_at: string | null;
+        retired_at: string | null;
+      }>(
+        "select oi.request_digest,oi.state as intent_state,oi.requested_mode,rd.decision as risk_decision,va.status as account_status,va.environment as account_environment,sc.enabled as strategy_enabled,sc.supported_modes as strategy_modes,rp.enabled as risk_enabled,gp.policy_sha256,gp.policy_document,gp.signer_key_id as policy_signer_key_id,gp.status as policy_status,gp.effective_at,gp.retired_at from nexus_private.order_intents oi join nexus_private.risk_decisions rd on rd.id=oi.risk_decision_id and rd.intent_id=oi.id join nexus_private.venue_accounts va on va.id=oi.account_id join nexus_private.strategy_catalog sc on sc.strategy_code=oi.strategy_code join nexus_private.risk_profiles rp on rp.profile_code=oi.risk_profile_code join nexus_private.guard_policy_versions gp on gp.policy_version=$2 where oi.id=$1::uuid",
+        [intentId,policyVersion],
+      );
+      const row = q.rows[0];
+      if (!row) throw new Error("guard_approval_context_unavailable");
+      if (row.request_digest !== intentDigest) throw new Error("guard_intent_digest_mismatch");
+      if (row.intent_state !== "approved" || row.requested_mode !== "live" || row.risk_decision !== "allow") throw new Error("guard_intent_not_approved");
+      if (row.account_status !== "armed" || row.account_environment !== "production") throw new Error("guard_production_account_not_armed");
+      if (!row.strategy_enabled || !row.strategy_modes?.includes("live")) throw new Error("guard_strategy_not_live_enabled");
+      if (!row.risk_enabled) throw new Error("guard_risk_profile_not_enabled");
+      if (row.policy_status !== "active" || !row.effective_at || Date.parse(row.effective_at) > now || (row.retired_at && Date.parse(row.retired_at) <= now)) throw new Error("guard_policy_not_active");
+      if (row.policy_signer_key_id !== signerKeyId) throw new Error("guard_signer_key_mismatch");
+      const policyDocument = typeof row.policy_document === "string" ? JSON.parse(row.policy_document) as JsonObject : row.policy_document;
+      const approvalPayload: JsonObject = {
+        intent_id: intentId,
+        intent_digest: intentDigest,
+        policy_version: policyVersion,
+        decision,
+        reason_code: reasonCode,
+        signer_key_id: signerKeyId,
+        nonce,
+        issued_at: issuedAt,
+        expires_at: expiresAt,
+      };
+      if (!constantTimeEqual(await requestDigest(approvalPayload),approvalDigest)) throw new Error("guard_approval_digest_mismatch");
+      const signatureValid = await verifyGuardApprovalSignature({
+        policyDocument,
+        policySha256: row.policy_sha256,
+        signerKeyId,
+        signatureAlgorithm,
+        approvalDigest,
+        signature,
+      });
+      if (!signatureValid) throw new Error("guard_signature_invalid");
+      const inserted = await client.queryObject<{ id: string }>(
+        "insert into nexus_private.guard_approvals (intent_id,policy_version,decision,reason_code,intent_digest,approval_digest,signer_key_id,signature_algorithm,signature,nonce,issued_at,expires_at,evidence) values ($1::uuid,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::timestamptz,$12::timestamptz,$13::jsonb) on conflict(intent_id) do nothing returning id::text as id",
+        [intentId,policyVersion,decision,reasonCode,intentDigest,approvalDigest,signerKeyId,signatureAlgorithm,signature,nonce,issuedAt,expiresAt,jsonObject(r,"evidence")],
+      );
+      if (inserted.rows[0]?.id) return inserted.rows[0].id;
+      const existing = await client.queryObject<{ id: string; approval_digest: string }>(
+        "select id::text as id,approval_digest from nexus_private.guard_approvals where intent_id=$1::uuid",
+        [intentId],
+      );
+      if (!existing.rows[0] || existing.rows[0].approval_digest !== approvalDigest) throw new Error("guard_approval_conflict");
+      return existing.rows[0].id;
+    }
     if (kind === "authorize_live") {
       const q = await client.queryObject<{ id: string }>(
         "select nexus_private.consume_live_authorization($1::uuid,$2,$3)::text as id",
