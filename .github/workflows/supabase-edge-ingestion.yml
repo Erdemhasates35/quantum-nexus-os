@@ -16,5 +16,5 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno check supabase/functions/nexus-telemetry-ingest/index.ts supabase/functions/nexus-telemetry-ingest/index_test.ts
+      - run: deno check supabase/functions/nexus-telemetry-ingest/serve.ts supabase/functions/nexus-telemetry-ingest/index.ts supabase/functions/nexus-telemetry-ingest/index_test.ts
       - run: deno test --allow-env=SUPABASE_SECRET_KEYS,SUPABASE_SERVICE_ROLE_KEY supabase/functions/nexus-telemetry-ingest/index_test.ts
