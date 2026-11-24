@@ -58,3 +58,42 @@ select
   (select count(*) from nexus_private.strategy_catalog) as registered_disabled_strategies,
   (select count(*) from nexus_private.agent_profiles) as registered_disabled_agent_profiles,
   (select count(*) from nexus_private.discovery_hypotheses) as proposed_discovery_hypotheses;
+
+do $$
+declare
+  missing_count integer;
+begin
+  select count(*) into missing_count
+  from (
+    select distinct p.tablename
+    from pg_policies p
+    where p.schemaname='public'
+      and p.roles @> array['authenticated']::name[]
+  ) protected
+  where not exists (
+    select 1 from pg_policies p
+    where p.schemaname='public'
+      and p.tablename=protected.tablename
+      and p.policyname='permanent_users_only'
+      and p.permissive='RESTRICTIVE'
+  );
+  if missing_count <> 0 then raise exception 'anonymous_auth_policy_guard_missing:%',missing_count; end if;
+
+  select count(*) into missing_count
+  from pg_constraint con
+  join pg_class rel on rel.oid=con.conrelid
+  join pg_namespace ns on ns.oid=rel.relnamespace
+  where con.contype='f' and ns.nspname='nexus_private'
+    and not exists (
+      select 1 from pg_index i
+      where i.indrelid=con.conrelid and i.indisvalid
+        and (select array_agg(k.attnum order by k.n) from unnest(i.indkey) with ordinality k(attnum,n) where k.n<=cardinality(con.conkey))=con.conkey
+    );
+  if missing_count <> 0 then raise exception 'unindexed_nexus_foreign_keys:%',missing_count; end if;
+
+  if not exists(select 1 from pg_views where schemaname='nexus_private' and viewname='v_order_lifecycle') then raise exception 'order_lifecycle_view_missing'; end if;
+  if not exists(select 1 from pg_views where schemaname='nexus_private' and viewname='v_strategy_net_pnl') then raise exception 'strategy_pnl_view_missing'; end if;
+  if not exists(select 1 from pg_views where schemaname='nexus_private' and viewname='v_agent_fleet') then raise exception 'agent_fleet_view_missing'; end if;
+  if not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='nexus_private' and p.proname='claim_agent_task') then raise exception 'agent_task_claim_function_missing'; end if;
+end
+$$;
