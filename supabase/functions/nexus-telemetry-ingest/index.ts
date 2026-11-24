@@ -229,10 +229,15 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
     }
     if (kind === "event") {
       const q = await client.queryObject<{ id: string }>(
-        "insert into nexus_private.agent_events (run_id,agent_id,severity,event_type,message,payload,source_commit_sha,dedupe_key) values ($1::uuid,$2::uuid,$3,$4,$5,$6::jsonb,$7,$8) returning event_uid::text as id",
+        "insert into nexus_private.agent_events (run_id,agent_id,severity,event_type,message,payload,source_commit_sha,dedupe_key) values ($1::uuid,$2::uuid,$3,$4,$5,$6::jsonb,$7,$8) on conflict do nothing returning event_uid::text as id",
         [uuid(r,"run_id"),uuid(r,"agent_id",false),requiredText(r,"severity",16),requiredText(r,"event_type",128),requiredText(r,"message",4000),jsonObject(r,"payload"),optionalText(r,"source_commit_sha",40),optionalText(r,"dedupe_key",256)],
       );
-      return q.rows[0].id;
+      if (q.rows[0]?.id) return q.rows[0].id;
+      const dedupeKey = optionalText(r,"dedupe_key",256);
+      if (!dedupeKey) throw new Error("idempotency_record_unavailable");
+      const existing = await client.queryObject<{ id: string }>("select event_uid::text as id from nexus_private.agent_events where run_id=$1::uuid and dedupe_key=$2", [uuid(r,"run_id"),dedupeKey]);
+      if (!existing.rows[0]) throw new Error("idempotency_record_unavailable");
+      return existing.rows[0].id;
     }
     if (kind === "quote") {
       const q = await client.queryObject<{ id: string }>(
@@ -396,17 +401,28 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
     }
     if (kind === "order_book") {
       const q = await client.queryObject<{ id: string }>(
-        "insert into nexus_private.order_book_snapshots (instrument_id,venue,sequence_number,bids,asks,checksum,depth_levels,source,observed_at) values ($1::uuid,$2,$3,$4::jsonb,$5::jsonb,$6,$7,$8,$9::timestamptz) returning id::text as id",
-        [uuid(r,"instrument_id"),requiredText(r,"venue",64),optionalText(r,"sequence_number",128),bookLevels(r,"bids"),bookLevels(r,"asks"),optionalText(r,"checksum",128),integer(r,"depth_levels",1,100),requiredText(r,"source",64),timestamp(r,"observed_at",true)],
+        "insert into nexus_private.order_book_snapshots (instrument_id,venue,sequence_number,bids,asks,checksum,depth_levels,source,observed_at) values ($1::uuid,$2,$3,$4::jsonb,$5::jsonb,$6,$7,$8,$9::timestamptz) on conflict do nothing returning id::text as id",
+        [uuid(r,"instrument_id"),requiredText(r,"venue",64),requiredText(r,"sequence_number",128),bookLevels(r,"bids"),bookLevels(r,"asks"),optionalText(r,"checksum",128),integer(r,"depth_levels",1,100),requiredText(r,"source",64),timestamp(r,"observed_at",true)],
       );
-      return q.rows[0].id;
+      if (q.rows[0]?.id) return q.rows[0].id;
+      const existing = await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_book_snapshots where instrument_id=$1::uuid and venue=$2 and sequence_number=$3", [uuid(r,"instrument_id"),requiredText(r,"venue",64),requiredText(r,"sequence_number",128)]);
+      if (!existing.rows[0]) throw new Error("idempotency_record_unavailable");
+      return existing.rows[0].id;
     }
     if (kind === "order_flow") {
       const q = await client.queryObject<{ id: string }>(
-        "insert into nexus_private.order_flow_events (instrument_id,venue,event_type,side,price,quantity,event_sequence,exchange_trade_id,maker,occurred_at,received_at,payload_digest) values ($1::uuid,$2,$3,$4,$5::numeric,$6::numeric,$7,$8,$9,$10::timestamptz,$11::timestamptz,$12) returning id::text as id",
+        "insert into nexus_private.order_flow_events (instrument_id,venue,event_type,side,price,quantity,event_sequence,exchange_trade_id,maker,occurred_at,received_at,payload_digest) values ($1::uuid,$2,$3,$4,$5::numeric,$6::numeric,$7,$8,$9,$10::timestamptz,$11::timestamptz,$12) on conflict do nothing returning id::text as id",
         [uuid(r,"instrument_id"),requiredText(r,"venue",64),requiredText(r,"event_type",16),requiredText(r,"side",8),decimal(r,"price"),decimal(r,"quantity"),optionalText(r,"event_sequence",128),optionalText(r,"exchange_trade_id",128),r.maker === undefined || r.maker === null ? null : bool(r,"maker"),timestamp(r,"occurred_at",true),timestamp(r,"received_at") ?? new Date().toISOString(),optionalText(r,"payload_digest",128)],
       );
-      return q.rows[0].id;
+      if (q.rows[0]?.id) return q.rows[0].id;
+      const sequence = optionalText(r,"event_sequence",128);
+      const tradeId = optionalText(r,"exchange_trade_id",128);
+      if (!sequence && !tradeId) throw new Error("event_sequence_or_trade_id_required");
+      const existing = sequence
+        ? await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_flow_events where instrument_id=$1::uuid and venue=$2 and event_sequence=$3", [uuid(r,"instrument_id"),requiredText(r,"venue",64),sequence])
+        : await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_flow_events where instrument_id=$1::uuid and venue=$2 and exchange_trade_id=$3", [uuid(r,"instrument_id"),requiredText(r,"venue",64),tradeId]);
+      if (!existing.rows[0]) throw new Error("idempotency_record_unavailable");
+      return existing.rows[0].id;
     }
     throw new Error("unsupported_kind");
   } finally {
