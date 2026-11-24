@@ -3,6 +3,7 @@ declare
   missing_count integer;
   actual_count integer;
 begin
+  if (select count(*) from pg_tables where schemaname='nexus_private') <> 43 then raise exception 'nexus_private_table_count_mismatch'; end if;
   select count(*) into missing_count
   from pg_tables t
   join pg_namespace n on n.nspname=t.schemaname
@@ -95,5 +96,29 @@ begin
   if not exists(select 1 from pg_views where schemaname='nexus_private' and viewname='v_strategy_net_pnl') then raise exception 'strategy_pnl_view_missing'; end if;
   if not exists(select 1 from pg_views where schemaname='nexus_private' and viewname='v_agent_fleet') then raise exception 'agent_fleet_view_missing'; end if;
   if not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='nexus_private' and p.proname='claim_agent_task') then raise exception 'agent_task_claim_function_missing'; end if;
+end
+$$;
+
+do $$
+begin
+  if not exists(select 1 from information_schema.columns where table_schema='nexus_private' and table_name='order_intents' and column_name='request_digest' and data_type='text') then raise exception 'order_intent_request_digest_missing'; end if;
+  if not exists(select 1 from pg_indexes where schemaname='nexus_private' and indexname='order_book_snapshots_sequence_uidx') then raise exception 'order_book_sequence_idempotency_index_missing'; end if;
+  if not exists(select 1 from pg_indexes where schemaname='nexus_private' and indexname='order_flow_events_sequence_uidx') then raise exception 'order_flow_sequence_idempotency_index_missing'; end if;
+  if not exists(select 1 from pg_indexes where schemaname='nexus_private' and indexname='order_flow_events_trade_uidx') then raise exception 'order_flow_trade_idempotency_index_missing'; end if;
+  if not exists(select 1 from pg_indexes where schemaname='nexus_private' and indexname='agent_events_dedupe_uidx') then raise exception 'agent_event_dedupe_index_missing'; end if;
+  if has_function_privilege('anon','nexus_private.heartbeat_agent(text,text,text,jsonb)','EXECUTE') then raise exception 'anon_can_heartbeat_agents'; end if;
+  if has_function_privilege('authenticated','nexus_private.finish_agent_task(uuid,text,text,jsonb)','EXECUTE') then raise exception 'authenticated_can_finish_agent_tasks'; end if;
+end
+$$;
+
+do $$
+begin
+  if not exists(select 1 from pg_tables where schemaname='nexus_private' and tablename='guard_policy_versions') then raise exception 'guard_policy_versions_missing'; end if;
+  if not exists(select 1 from pg_tables where schemaname='nexus_private' and tablename='guard_approvals') then raise exception 'guard_approvals_missing'; end if;
+  if not exists(select 1 from pg_tables where schemaname='nexus_private' and tablename='execution_authorizations') then raise exception 'execution_authorizations_missing'; end if;
+  if not exists(select 1 from pg_tables where schemaname='nexus_private' and tablename='guard_audit_events') then raise exception 'guard_audit_events_missing'; end if;
+  if has_function_privilege('anon','nexus_private.consume_live_authorization(uuid,text,text)','EXECUTE') then raise exception 'anon_can_consume_live_authorization'; end if;
+  if has_function_privilege('authenticated','nexus_private.record_execution_submission(uuid,text,text,text,text)','EXECUTE') then raise exception 'authenticated_can_record_execution_submission'; end if;
+  if not has_function_privilege('service_role','nexus_private.consume_live_authorization(uuid,text,text)','EXECUTE') then raise exception 'service_role_cannot_consume_live_authorization'; end if;
 end
 $$;
