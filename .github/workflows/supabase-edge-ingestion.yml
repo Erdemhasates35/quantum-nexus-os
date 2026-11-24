@@ -1,0 +1,20 @@
+name: Supabase Edge Ingestion Contract
+on:
+  push:
+    branches:
+      - feat/trading-event-ingestion-v4
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  edge-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno check supabase/functions/nexus-telemetry-ingest/index.ts supabase/functions/nexus-telemetry-ingest/index_test.ts
+      - run: deno test supabase/functions/nexus-telemetry-ingest/index_test.ts
