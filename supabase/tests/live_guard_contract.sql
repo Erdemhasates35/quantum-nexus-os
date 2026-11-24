@@ -7,7 +7,7 @@ insert into nexus_private.instruments(venue,market_type,symbol,base_asset,quote_
 values('contract-venue','perpetual','CONTRACTUSDT','CONTRACT','USDT','USDT', '0.01','0.001','0.001','5')
 returning id;
 
-do $$
+do $
 declare
   account_id uuid;
   instrument_id uuid;
@@ -25,7 +25,6 @@ begin
   )
   returning id into intent_id;
 
-  execute 'set local role service_role';
   begin
     perform nexus_private.consume_live_authorization(intent_id,'contract-executor',repeat('b',64));
     raise exception 'live_authorization_without_risk_verdict_was_accepted';
@@ -33,5 +32,6 @@ begin
     if sqlerrm <> 'risk_verdict_required' then raise; end if;
   end;
 end
-$$;
+$;
+reset role;
 rollback;
