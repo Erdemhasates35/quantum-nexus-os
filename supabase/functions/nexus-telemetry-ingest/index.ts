@@ -52,9 +52,9 @@ const fields: Record<TelemetryKind, Set<string>> = {
 };
 
 const forbiddenField = /(private[_-]?key|secret[_-]?key|api[_-]?key|api[_-]?secret|mnemonic|seed[_-]?phrase|service[_-]?role[_-]?key|authorization|access[_-]?token|password|credential)/i;
-const forbiddenValue = /(-----BEGIN [A-Z ]*PRIVATE KEY-----|Bearer\\s+[A-Za-z0-9._-]+|sb_secret_[A-Za-z0-9_-]{8,})/i;
+const forbiddenValue = /(-----BEGIN [A-Z ]*PRIVATE KEY-----|Bearer\s+[A-Za-z0-9._-]+|sb_secret_[A-Za-z0-9_-]{8,})/i;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const decimalPattern = /^-?\\d{1,20}(?:\\.\\d{1,18})?$/;
+const decimalPattern = /^-?\d{1,20}(?:\\.\d{1,18})?$/;
 
 function getPool(): Pool {
   if (pool) return pool;
@@ -165,7 +165,7 @@ function atomic(record: JsonObject, key: string, allowNegative = false, required
   const value = record[key];
   if ((value === undefined || value === null || value === "") && !required) return null;
   if (typeof value !== "string") throw new Error("atomic_amount_must_be_string_" + key);
-  const pattern = allowNegative ? /^-?\\d{1,78}$/ : /^\\d{1,78}$/;
+  const pattern = allowNegative ? /^-?\d{1,78}$/ : /^\d{1,78}$/;
   if (!pattern.test(value)) throw new Error("invalid_" + key);
   return value;
 }
