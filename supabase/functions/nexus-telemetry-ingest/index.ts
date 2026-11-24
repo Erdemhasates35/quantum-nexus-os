@@ -191,7 +191,7 @@ export function bookLevels(record: JsonObject, key: string): string {
 function canonical(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonical);
   if (value && typeof value === "object") {
-    const entries = Object.entries(value as JsonObject).sort(([a],[b]) => a.localeCompare(b));
+    const entries = Object.entries(value as JsonObject).sort(([a],[b]) => a < b ? -1 : a > b ? 1 : 0);
     return Object.fromEntries(entries.map(([key,child]) => [key,canonical(child)]));
   }
   return value;
@@ -279,10 +279,11 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
           "insert into nexus_private.risk_decisions (intent_id,profile_code,decision,reason_code,explanation,metrics) values ($1::uuid,$2,$3,$4,$5,$6::jsonb) returning id::text as id",
           [uuid(r,"intent_id"),optionalText(r,"profile_code",64),requiredText(r,"decision",16),requiredText(r,"reason_code",128),optionalText(r,"explanation",2000) ?? "",jsonObject(r,"metrics")],
         );
-        await client.queryObject(
-          "update nexus_private.order_intents set risk_decision_id=$1::uuid,state=case when $2='allow' then 'approved' when $2='deny' then 'risk_rejected' else state end,updated_at=pg_catalog.now() where id=$3::uuid and risk_decision_id is null and state='created'",
+        const applied = await client.queryObject<{ id: string }>(
+          "update nexus_private.order_intents set risk_decision_id=$1::uuid,state=case when $2='allow' then 'approved' when $2='deny' then 'risk_rejected' else state end,updated_at=pg_catalog.now() where id=$3::uuid and risk_decision_id is null and state='created' returning id::text as id",
           [q.rows[0].id,requiredText(r,"decision",16),uuid(r,"intent_id")],
         );
+        if (!applied.rows[0]) throw new Error("risk_decision_not_applied");
         await client.queryObject("commit");
         return q.rows[0].id;
       } catch (error) {
@@ -410,14 +411,14 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
       return existing.rows[0].id;
     }
     if (kind === "order_flow") {
+      const sequence = optionalText(r,"event_sequence",128);
+      const tradeId = optionalText(r,"exchange_trade_id",128);
+      if (!sequence && !tradeId) throw new Error("event_sequence_or_trade_id_required");
       const q = await client.queryObject<{ id: string }>(
         "insert into nexus_private.order_flow_events (instrument_id,venue,event_type,side,price,quantity,event_sequence,exchange_trade_id,maker,occurred_at,received_at,payload_digest) values ($1::uuid,$2,$3,$4,$5::numeric,$6::numeric,$7,$8,$9,$10::timestamptz,$11::timestamptz,$12) on conflict do nothing returning id::text as id",
         [uuid(r,"instrument_id"),requiredText(r,"venue",64),requiredText(r,"event_type",16),requiredText(r,"side",8),decimal(r,"price"),decimal(r,"quantity"),optionalText(r,"event_sequence",128),optionalText(r,"exchange_trade_id",128),r.maker === undefined || r.maker === null ? null : bool(r,"maker"),timestamp(r,"occurred_at",true),timestamp(r,"received_at") ?? new Date().toISOString(),optionalText(r,"payload_digest",128)],
       );
       if (q.rows[0]?.id) return q.rows[0].id;
-      const sequence = optionalText(r,"event_sequence",128);
-      const tradeId = optionalText(r,"exchange_trade_id",128);
-      if (!sequence && !tradeId) throw new Error("event_sequence_or_trade_id_required");
       const existing = await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_flow_events where instrument_id=$1::uuid and venue=$2 and (($3::text is not null and event_sequence=$3) or ($4::text is not null and exchange_trade_id=$4)) limit 1", [uuid(r,"instrument_id"),requiredText(r,"venue",64),sequence,tradeId]);
       if (!existing.rows[0]) throw new Error("idempotency_record_unavailable");
       return existing.rows[0].id;
