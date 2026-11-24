@@ -106,7 +106,7 @@ function assertJsonSafe(value: unknown, depth = 0): void {
   if (typeof value === "number" && !Number.isFinite(value)) throw new Error("non_finite_number_rejected");
 }
 
-function recordFor(kind: TelemetryKind, value: unknown): JsonObject {
+export function recordFor(kind: TelemetryKind, value: unknown): JsonObject {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("record_must_be_object");
   const record = value as JsonObject;
   const unknownFields = Object.keys(record).filter((key) => !fields[kind].has(key));
@@ -153,7 +153,7 @@ function uuid(record: JsonObject, key: string, required = true): string | null {
   return value;
 }
 
-function decimal(record: JsonObject, key: string, allowNegative = false, required = true): string | null {
+export function decimal(record: JsonObject, key: string, allowNegative = false, required = true): string | null {
   const value = record[key];
   if ((value === undefined || value === null || value === "") && !required) return null;
   if (typeof value !== "string" || !decimalPattern.test(value)) throw new Error("invalid_decimal_" + key);
@@ -177,7 +177,7 @@ function jsonObject(record: JsonObject, key: string): string {
   return JSON.stringify(value);
 }
 
-function bookLevels(record: JsonObject, key: string): string {
+export function bookLevels(record: JsonObject, key: string): string {
   const value = record[key];
   if (!Array.isArray(value) || value.length < 1 || value.length > 100) throw new Error("invalid_" + key);
   for (const level of value) {
@@ -197,7 +197,7 @@ function canonical(value: unknown): unknown {
   return value;
 }
 
-async function requestDigest(record: JsonObject): Promise<string> {
+export async function requestDigest(record: JsonObject): Promise<string> {
   const bytes = new TextEncoder().encode(JSON.stringify(canonical(record)));
   const hash = await crypto.subtle.digest("SHA-256",bytes);
   return Array.from(new Uint8Array(hash)).map(value => value.toString(16).padStart(2,"0")).join("");
