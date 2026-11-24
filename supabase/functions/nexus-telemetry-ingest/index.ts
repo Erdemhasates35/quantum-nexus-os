@@ -6,7 +6,7 @@ type TelemetryKind =
   | "order_intent" | "risk_decision" | "order_event" | "fill"
   | "position" | "balance" | "pnl" | "funding" | "heartbeat"
   | "alpha" | "venue_health" | "reconciliation" | "discrepancy"
-  | "task" | "market_bar" | "order_book" | "order_flow" | "venue_account" | "instrument" | "authorize_live" | "submission_result" | "guard_approval";
+  | "task" | "market_bar" | "order_book" | "order_flow" | "venue_account" | "instrument" | "authorize_live" | "submission_result" | "guard_approval" | "execution_config";
 
 let pool: Pool | null = null;
 const maxBodyBytes = 64 * 1024;
@@ -53,6 +53,7 @@ const fields: Record<TelemetryKind, Set<string>> = {
   authorize_live: new Set(["intent_id","executor_id","approval_digest"]),
   submission_result: new Set(["authorization_id","executor_id","outcome","venue_order_id","error_code"]),
   guard_approval: new Set(["intent_id","intent_digest","policy_version","decision","reason_code","approval_digest","signer_key_id","signature_algorithm","signature","nonce","issued_at","expires_at","evidence"]),
+  execution_config: new Set(["risk_profile_code","strategy_code","mode","account_id","instrument_id","symbol"]),
 };
 
 const forbiddenField = /(private[_-]?key|secret[_-]?key|api[_-]?key|api[_-]?secret|mnemonic|seed[_-]?phrase|service[_-]?role[_-]?key|authorization|access[_-]?token|password|credential)/i;
@@ -250,6 +251,117 @@ function timestamp(record: JsonObject, key: string, required = false): string | 
   if ((value === undefined || value === null || value === "") && !required) return null;
   if (typeof value !== "string" || Number.isNaN(Date.parse(value))) throw new Error("invalid_" + key);
   return value;
+}
+
+async function readExecutionConfig(r: JsonObject): Promise<JsonObject> {
+  const profileCode = requiredText(r,"risk_profile_code",128);
+  const strategyCode = requiredText(r,"strategy_code",128);
+  const mode = requiredText(r,"mode",16);
+  const accountId = typeof r.account_id === "string" ? uuid(r,"account_id",true) ?? "" : "";
+  const instrumentId = typeof r.instrument_id === "string" ? uuid(r,"instrument_id",true) ?? "" : "";
+  const symbol = typeof r.symbol === "string" ? r.symbol : "";
+  if (!["paper","testnet","live"].includes(mode)) throw new Error("invalid_execution_mode");
+  const client = await getPool().connect();
+  try {
+    const result = await client.queryObject<{
+      profile_code: string;
+      max_risk_per_trade: string;
+      max_daily_loss: string;
+      max_drawdown: string;
+      max_leverage: string;
+      max_open_orders: number;
+      max_position_notional: string;
+      max_slippage_bps: string;
+      max_fee_bps: string;
+      max_funding_bps: string;
+      max_concentration: string;
+      risk_profile_enabled: boolean;
+      risk_profile_config: JsonObject | string;
+      strategy_code: string;
+      strategy_enabled: boolean;
+      strategy_modes: string[];
+      strategy_config: JsonObject | string;
+      strategy_version_id: string | null;
+      strategy_version: string | null;
+      source_commit_sha: string | null;
+      config_sha256: string | null;
+      parameter_schema: JsonObject | string | null;
+      parameters: JsonObject | string | null;
+      validation_status: string | null;
+      policy_version: string | null;
+      policy_sha256: string | null;
+      signer_key_id: string | null;
+      policy_document: JsonObject | string | null;
+    }>(
+      "select rp.profile_code,rp.max_risk_per_trade::text,rp.max_daily_loss::text,rp.max_drawdown::text,rp.max_leverage::text,rp.max_open_orders,rp.max_position_notional::text,rp.max_slippage_bps::text,rp.max_fee_bps::text,rp.max_funding_bps::text,rp.max_concentration::text,rp.enabled as risk_profile_enabled,rp.config as risk_profile_config,sc.strategy_code,sc.enabled as strategy_enabled,sc.supported_modes as strategy_modes,sc.config as strategy_config,sv.id::text as strategy_version_id,sv.version as strategy_version,sv.source_commit_sha,sv.config_sha256,sv.parameter_schema,sv.parameters,sv.validation_status,gp.policy_version,gp.policy_sha256,gp.signer_key_id,gp.policy_document from nexus_private.risk_profiles rp join nexus_private.strategy_catalog sc on sc.strategy_code=$2 left join lateral (select id,version,source_commit_sha,config_sha256,parameter_schema,parameters,validation_status from nexus_private.strategy_versions where strategy_code=sc.strategy_code order by created_at desc limit 1) sv on true left join lateral (select policy_version,policy_sha256,signer_key_id,policy_document from nexus_private.guard_policy_versions where status='active' and effective_at<=now() and (retired_at is null or retired_at>now()) order by created_at desc limit 1) gp on true where rp.profile_code=$1",
+      [profileCode,strategyCode],
+    );
+    const row = result.rows[0];
+    if (!row) throw new Error("execution_profile_or_strategy_not_found");
+    if (!row.risk_profile_enabled) throw new Error("execution_risk_profile_disabled");
+    if (!row.strategy_enabled) throw new Error("execution_strategy_disabled");
+    if (!Array.isArray(row.strategy_modes) || !row.strategy_modes.includes(mode)) throw new Error("execution_strategy_mode_not_supported");
+    if (!row.strategy_version_id || !["validated","approved"].includes(row.validation_status ?? "")) throw new Error("execution_strategy_version_not_validated");
+    const breakerResult = await client.queryObject<{ scope: string; scope_key: string; state: string; trigger_code: string | null; reset_after: string | null }>(
+      "select scope,scope_key,state,trigger_code,reset_after from nexus_private.circuit_breakers where state <> 'closed' and (scope='global' or (scope='venue' and scope_key='binance') or (scope='strategy' and scope_key=$1) or (scope='account' and scope_key=$2) or (scope='instrument' and scope_key in (nullif($3,''),nullif($4,'')))) order by scope,scope_key",
+      [strategyCode,accountId,instrumentId,symbol],
+    );
+    if (breakerResult.rows.length > 0) throw new Error("execution_circuit_breaker_open");
+    if (mode === "live" && !row.policy_version) throw new Error("execution_active_guard_policy_missing");
+    const riskConfig = typeof row.risk_profile_config === "string" ? JSON.parse(row.risk_profile_config) as JsonObject : row.risk_profile_config;
+    const strategyConfig = typeof row.strategy_config === "string" ? JSON.parse(row.strategy_config) as JsonObject : row.strategy_config;
+    const parameterSchema = typeof row.parameter_schema === "string" ? JSON.parse(row.parameter_schema) as JsonObject : row.parameter_schema;
+    const parameters = typeof row.parameters === "string" ? JSON.parse(row.parameters) as JsonObject : row.parameters;
+    const policyDocument = typeof row.policy_document === "string" ? JSON.parse(row.policy_document) as JsonObject : row.policy_document;
+    assertJsonSafe(riskConfig);
+    assertJsonSafe(strategyConfig);
+    if (parameterSchema) assertJsonSafe(parameterSchema);
+    if (parameters) assertJsonSafe(parameters);
+    if (policyDocument) assertJsonSafe(policyDocument);
+    return {
+      mode,
+      riskProfile: {
+        profileCode: row.profile_code,
+        enabled: row.risk_profile_enabled,
+        maxRiskPerTrade: Number(row.max_risk_per_trade),
+        maxDailyLoss: Number(row.max_daily_loss),
+        maxDrawdown: Number(row.max_drawdown),
+        maxLeverage: Number(row.max_leverage),
+        maxOpenOrders: row.max_open_orders,
+        maxPositionNotional: Number(row.max_position_notional),
+        maxSlippageBps: Number(row.max_slippage_bps),
+        maxFeeBps: Number(row.max_fee_bps),
+        maxFundingBps: Number(row.max_funding_bps),
+        maxConcentration: Number(row.max_concentration),
+        minRewardRisk: Number(riskConfig.minRewardRisk ?? riskConfig.min_reward_risk ?? 1.5),
+        config: riskConfig,
+      },
+      strategy: {
+        strategyCode: row.strategy_code,
+        enabled: row.strategy_enabled,
+        supportedModes: row.strategy_modes,
+        config: strategyConfig,
+        version: {
+          id: row.strategy_version_id,
+          version: row.strategy_version,
+          sourceCommitSha: row.source_commit_sha,
+          configSha256: row.config_sha256,
+          validationStatus: row.validation_status,
+          parameterSchema,
+          parameters,
+        },
+      },
+      activeGuardPolicy: row.policy_version ? {
+        policyVersion: row.policy_version,
+        policySha256: row.policy_sha256,
+        signerKeyId: row.signer_key_id,
+        policyDocument,
+      } : null,
+      circuitBreakers: breakerResult.rows,
+    };
+  } finally {
+    client.release();
+  }
 }
 
 async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string> {
@@ -623,12 +735,16 @@ export async function handleRequest(req: Request): Promise<Response> {
     const kind = input.kind;
     if (typeof kind !== "string" || !Object.hasOwn(fields,kind)) return response({ error: "unsupported_kind" },400);
     const record = recordFor(kind as TelemetryKind,input.record);
+    if (kind === "execution_config") {
+      const data = await readExecutionConfig(record);
+      return response({ ok: true,kind,data },200);
+    }
     const id = await insertRecord(kind as TelemetryKind,record);
     const broadcasted = await broadcastTelemetry(kind as TelemetryKind,id);
     return response({ ok: true,kind,id,broadcast: broadcasted ? "sent" : "unavailable" },201);
   } catch (error) {
     const message = error instanceof Error ? error.message : "request_rejected";
-    if (/^(record_|unknown_|sensitive_|payload_|non_finite_|atomic_|invalid_|negative_|unsupported_|idempotency_)/.test(message)) return response({ error: message },400);
+    if (/^(record_|unknown_|sensitive_|payload_|non_finite_|atomic_|invalid_|negative_|unsupported_|idempotency_|execution_)/.test(message)) return response({ error: message },400);
     console.error("nexus_telemetry_ingest_failed");
     return response({ error: "telemetry_write_failed" },422);
   }
