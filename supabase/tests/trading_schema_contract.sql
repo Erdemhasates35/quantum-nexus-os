@@ -109,3 +109,15 @@ begin
   if has_function_privilege('authenticated','nexus_private.finish_agent_task(uuid,text,text,jsonb)','EXECUTE') then raise exception 'authenticated_can_finish_agent_tasks'; end if;
 end
 $$;
+
+do $$
+begin
+  if not exists(select 1 from pg_tables where schemaname='nexus_private' and tablename='guard_policy_versions') then raise exception 'guard_policy_versions_missing'; end if;
+  if not exists(select 1 from pg_tables where schemaname='nexus_private' and tablename='guard_approvals') then raise exception 'guard_approvals_missing'; end if;
+  if not exists(select 1 from pg_tables where schemaname='nexus_private' and tablename='execution_authorizations') then raise exception 'execution_authorizations_missing'; end if;
+  if not exists(select 1 from pg_tables where schemaname='nexus_private' and tablename='guard_audit_events') then raise exception 'guard_audit_events_missing'; end if;
+  if has_function_privilege('anon','nexus_private.consume_live_authorization(uuid,text,text)','EXECUTE') then raise exception 'anon_can_consume_live_authorization'; end if;
+  if has_function_privilege('authenticated','nexus_private.record_execution_submission(uuid,text,text,text,text)','EXECUTE') then raise exception 'authenticated_can_record_execution_submission'; end if;
+  if not has_function_privilege('service_role','nexus_private.consume_live_authorization(uuid,text,text)','EXECUTE') then raise exception 'service_role_cannot_consume_live_authorization'; end if;
+end
+$$;
