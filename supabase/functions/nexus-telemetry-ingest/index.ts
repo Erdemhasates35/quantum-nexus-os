@@ -6,7 +6,7 @@ type TelemetryKind =
   | "order_intent" | "risk_decision" | "order_event" | "fill"
   | "position" | "balance" | "pnl" | "funding" | "heartbeat"
   | "alpha" | "venue_health" | "reconciliation" | "discrepancy"
-  | "task" | "market_bar" | "order_book" | "order_flow" | "venue_account" | "instrument";
+  | "task" | "market_bar" | "order_book" | "order_flow" | "venue_account" | "instrument" | "authorize_live" | "submission_result";
 
 let pool: Pool | null = null;
 const maxBodyBytes = 64 * 1024;
@@ -50,6 +50,8 @@ const fields: Record<TelemetryKind, Set<string>> = {
   order_flow: new Set(["instrument_id","venue","event_type","side","price","quantity","event_sequence","exchange_trade_id","maker","occurred_at","received_at","payload_digest"]),
   venue_account: new Set(["venue","account_label","environment","account_type","capabilities"]),
   instrument: new Set(["venue","market_type","symbol","base_asset","quote_asset","settlement_asset","price_tick","quantity_step","min_quantity","min_notional","contract_multiplier","maker_fee_bps","taker_fee_bps","active","metadata"]),
+  authorize_live: new Set(["intent_id","executor_id","approval_digest"]),
+  submission_result: new Set(["authorization_id","executor_id","outcome","venue_order_id","error_code"]),
 };
 
 const forbiddenField = /(private[_-]?key|secret[_-]?key|api[_-]?key|api[_-]?secret|mnemonic|seed[_-]?phrase|service[_-]?role[_-]?key|authorization|access[_-]?token|password|credential)/i;
@@ -214,6 +216,22 @@ function timestamp(record: JsonObject, key: string, required = false): string | 
 async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string> {
   const client = await getPool().connect();
   try {
+    if (kind === "authorize_live") {
+      const q = await client.queryObject<{ id: string }>(
+        "select nexus_private.consume_live_authorization($1::uuid,$2,$3)::text as id",
+        [uuid(r,"intent_id"),requiredText(r,"executor_id",128),requiredText(r,"approval_digest",64)],
+      );
+      if (!q.rows[0]?.id) throw new Error("live_authorization_denied");
+      return q.rows[0].id;
+    }
+    if (kind === "submission_result") {
+      const q = await client.queryObject<{ accepted: boolean }>(
+        "select nexus_private.record_execution_submission($1::uuid,$2,$3,$4,$5) as accepted",
+        [uuid(r,"authorization_id"),requiredText(r,"executor_id",128),requiredText(r,"outcome",16),optionalText(r,"venue_order_id",128),optionalText(r,"error_code",128)],
+      );
+      if (q.rows[0]?.accepted !== true) throw new Error("execution_submission_transition_rejected");
+      return uuid(r,"authorization_id")!;
+    }
     if (kind === "venue_account") {
       const q = await client.queryObject<{ id: string }>(
         "insert into nexus_private.venue_accounts (venue,account_label,environment,account_type,status,capabilities) values ($1,$2,$3,$4,'disabled',$5::jsonb) on conflict(venue,account_label,environment) do nothing returning id::text as id",
@@ -314,7 +332,15 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
         "insert into nexus_private.order_events (intent_id,venue_order_id,event_uid,event_type,exchange_status,cumulative_quantity,last_fill_quantity,average_fill_price,exchange_timestamp,payload) values ($1::uuid,$2,$3,$4,$5,$6::numeric,$7::numeric,$8::numeric,$9::timestamptz,$10::jsonb) on conflict(event_uid) do nothing returning id::text as id",
         [uuid(r,"intent_id"),optionalText(r,"venue_order_id",128),requiredText(r,"event_uid",256),requiredText(r,"event_type",64),optionalText(r,"exchange_status",32),decimal(r,"cumulative_quantity",false,false),decimal(r,"last_fill_quantity",false,false),decimal(r,"average_fill_price",false,false),timestamp(r,"exchange_timestamp"),jsonObject(r,"payload")],
       );
-      if (q.rows[0]?.id) return q.rows[0].id;
+      if (q.rows[0]?.id) {
+        const status = optionalText(r,"exchange_status",32)?.toUpperCase();
+        const nextState = status === "NEW" ? "accepted" : status === "PARTIALLY_FILLED" ? "partially_filled" : status === "FILLED" ? "filled" : status === "CANCELED" ? "canceled" : status === "REJECTED" ? "rejected" : status === "EXPIRED" ? "expired" : status ? "unknown" : null;
+        if (nextState) await client.queryObject(
+          "update nexus_private.order_intents set state=$1,updated_at=pg_catalog.now() where id=$2::uuid and state not in ('filled','canceled','rejected','expired','reconciled')",
+          [nextState,uuid(r,"intent_id")],
+        );
+        return q.rows[0].id;
+      }
       const existing = await client.queryObject<{ id: string }>("select id::text as id from nexus_private.order_events where event_uid=$1", [requiredText(r,"event_uid",256)]);
       if (!existing.rows[0]) throw new Error("idempotency_record_unavailable");
       return existing.rows[0].id;
