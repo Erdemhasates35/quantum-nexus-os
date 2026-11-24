@@ -37,3 +37,21 @@ Deno.test("canonical request digest ignores object key order", async () => {
   assert(first === second, "canonical digest depends on key order");
   assert(first !== third, "different order payloads produced the same digest");
 });
+
+Deno.test("HTTP method and content-type guards fail closed", async () => {
+  const { handleRequest } = await import("./index.ts");
+  const method = await handleRequest(new Request("https://edge.test/ingest", { method: "GET" }));
+  assert(method.status === 405, "non-POST method was not rejected");
+  const contentType = await handleRequest(new Request("https://edge.test/ingest", { method: "POST", body: "{}" }));
+  assert(contentType.status === 415, "non-JSON content type was not rejected");
+});
+
+Deno.test("unauthenticated writes are rejected before database access", async () => {
+  const { handleRequest } = await import("./index.ts");
+  const result = await handleRequest(new Request("https://edge.test/ingest", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ kind: "order_intent", record: {} }),
+  }));
+  assert(result.status === 401, "unauthenticated write was not rejected");
+});
