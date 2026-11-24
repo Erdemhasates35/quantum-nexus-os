@@ -313,6 +313,11 @@ async function readExecutionConfig(r: JsonObject): Promise<JsonObject> {
     const parameterSchema = typeof row.parameter_schema === "string" ? JSON.parse(row.parameter_schema) as JsonObject : row.parameter_schema;
     const parameters = typeof row.parameters === "string" ? JSON.parse(row.parameters) as JsonObject : row.parameters;
     const policyDocument = typeof row.policy_document === "string" ? JSON.parse(row.policy_document) as JsonObject : row.policy_document;
+    assertJsonSafe(riskConfig);
+    assertJsonSafe(strategyConfig);
+    if (parameterSchema) assertJsonSafe(parameterSchema);
+    if (parameters) assertJsonSafe(parameters);
+    if (policyDocument) assertJsonSafe(policyDocument);
     return {
       mode,
       riskProfile: {
