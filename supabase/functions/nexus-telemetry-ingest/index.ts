@@ -300,7 +300,8 @@ async function readExecutionConfig(r: JsonObject): Promise<JsonObject> {
     if (!Array.isArray(row.strategy_modes) || !row.strategy_modes.includes(mode)) throw new Error("execution_strategy_mode_not_supported");
     if (!row.strategy_version_id || !["validated","approved"].includes(row.validation_status ?? "")) throw new Error("execution_strategy_version_not_validated");
     const breakerResult = await client.queryObject<{ scope: string; scope_key: string; state: string; trigger_code: string | null; reset_after: string | null }>(
-      "select scope,scope_key,state,trigger_code,reset_after from nexus_private.circuit_breakers where state <> 'closed' order by scope,scope_key",
+      "select scope,scope_key,state,trigger_code,reset_after from nexus_private.circuit_breakers where state <> 'closed' and (scope='global' or (scope='venue' and scope_key='binance') or (scope='strategy' and scope_key=$1)) order by scope,scope_key",
+      [strategyCode],
     );
     if (breakerResult.rows.length > 0) throw new Error("execution_circuit_breaker_open");
     if (mode === "live" && !row.policy_version) throw new Error("execution_active_guard_policy_missing");
@@ -728,7 +729,7 @@ export async function handleRequest(req: Request): Promise<Response> {
     const record = recordFor(kind as TelemetryKind,input.record);
     if (kind === "execution_config") {
       const data = await readExecutionConfig(record);
-      return response({ ok: true,kind,data },200,{"Cache-Control":"no-store"});
+      return response({ ok: true,kind,data },200);
     }
     const id = await insertRecord(kind as TelemetryKind,record);
     const broadcasted = await broadcastTelemetry(kind as TelemetryKind,id);
