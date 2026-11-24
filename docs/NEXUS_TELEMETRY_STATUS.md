@@ -6,7 +6,7 @@ Date: 2026-11-24
 
 Supabase project `tglfvmwhrpelbxfvofca` is active on PostgreSQL 17.11 in ap-northeast-1. The trading system is isolated in the server-only `nexus_private` schema. The existing `public` schema remains the separate application domain; its existing legal/workflow tables were not rewritten.
 
-The `nexus_private` schema now contains 39 tables:
+The `nexus_private` schema now contains 43 tables:
 - 6 original telemetry/execution-foundation tables
 - strategy catalog and immutable strategy versions
 - risk profiles and risk decisions
@@ -19,19 +19,24 @@ The `nexus_private` schema now contains 39 tables:
 - alpha observations and discovery hypotheses
 - strategy allocations, venue health, cost metrics and circuit breakers
 - execution routes, model registry, inference events, backtests and strategy metrics
+- versioned Guard policies, signed intent-bound approvals, one-time execution authorizations and append-only Guard audit events
 
 All trading tables have RLS enabled and are restricted to the `service_role`. The three legacy public telemetry tables were also explicitly restricted to service-role access. Twenty-five authenticated public application tables now have restrictive policies that reject anonymous-auth JWTs; the existing legal application policies remain in place for permanent authenticated users. No API secrets, private keys, seed phrases or exchange credentials are stored in these tables. `venue_accounts.credential_ref` is only a reference to an external secret manager.
 
 ## Runtime controls
 
-Five distinct database migrations were applied:
+Nine distinct database migrations were applied:
 - `institutional_trading_execution_core`
 - `market_data_and_agent_orchestration`
 - `agent_queue_and_operational_views`
 - `restrict_anonymous_auth_users`
 - `optimize_anonymous_rls_predicates`
+- `event_ingestion_idempotency`
+- `agent_event_dedupe_index`
+- `signed_guard_live_authorization`
+- `guard_foreign_key_indexes`
 
-The schema includes atomic task claiming using `FOR UPDATE SKIP LOCKED`, lease expiry, worker heartbeats, lease-owner fencing on task completion, order lifecycle views, strategy PnL views, and open reconciliation discrepancy views.
+The schema includes atomic task claiming using `FOR UPDATE SKIP LOCKED`, lease expiry, worker heartbeats, lease-owner fencing on task completion, order lifecycle views, strategy PnL views, open reconciliation discrepancy views, signed Guard approval records, one-time live authorization consumption, and executor-bound submission result recording.
 
 Ten strategy catalog entries, six agent role profiles, and five discovery hypotheses are registered as disabled/proposed metadata. They are not running engines, validated profitable strategies, or live agents.
 
@@ -43,8 +48,8 @@ At the time of verification, `strategy_runs`, `agents`, `order_intents`, `fills`
 
 ## Remaining integration work
 
-The deployed `nexus-telemetry-ingest` Edge Function remains version 3. A version 4 implementation is under review in PR #71; it preserves the original six telemetry kinds and adds allowlisted order, risk, fill, position, balance, PnL, funding, market-data, agent-task and reconciliation ingestion. Deno typecheck and contract tests have passed on the current implementation branch; deployment is pending final repository CI and endpoint verification. Worker processes are not deployed or running. The Vercel Honeycomb Omega X environment references a different Supabase project ref (`qxfvpcjvoiantjrkorsa`) than the connected active database; that project was not accessible through the current Supabase connection and has not been silently substituted.
+The deployed `nexus-telemetry-ingest` Edge Function remains version 3. A version 4 implementation is under review in PR #71; it preserves the original six telemetry kinds and adds allowlisted order, risk, fill, position, balance, PnL, funding, market-data, agent-task and reconciliation ingestion. Deno typecheck and six contract tests passed on the latest tested revision; final repository CI and deployment verification remain in progress. The signed Guard authorization tables and one-time consume functions are deployed, but no signer key, active live policy, Guard service, or Executor integration has been provisioned. Worker processes are not deployed or running. The Vercel Honeycomb Omega X environment references a different Supabase project ref (`qxfvpcjvoiantjrkorsa`) than the connected active database; that project was not accessible through the current Supabase connection and has not been silently substituted.
 
-Supabase advisor verification reports no health lints and no remaining unindexed foreign keys in `nexus_private`. The global anonymous-sign-in advisor notice remains because the Auth setting is enabled; the 25 restrictive policies now reject anonymous-auth JWTs. The unused-index advisor still reports indexes without observed workload usage; no indexes were dropped because the new tables have no production workload and removal would be premature.
+Supabase advisor verification reports no health lints and no remaining unindexed foreign keys in `nexus_private`, including the new Guard authorization tables. The global anonymous-sign-in advisor notice remains because the Auth setting is enabled; the 25 restrictive policies now reject anonymous-auth JWTs. The unused-index advisor still reports indexes without observed workload usage; no indexes were dropped because the new tables have no production workload and removal would be premature.
 
 The database foundation is additive and does not by itself certify the trading application or any strategy as production-ready.
