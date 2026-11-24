@@ -318,6 +318,14 @@ async function readExecutionConfig(r: JsonObject): Promise<JsonObject> {
     if (parameterSchema) assertJsonSafe(parameterSchema);
     if (parameters) assertJsonSafe(parameters);
     if (policyDocument) assertJsonSafe(policyDocument);
+    if (!/^[0-9a-f]{40}$/i.test(row.source_commit_sha ?? "")) throw new Error("execution_strategy_source_commit_invalid");
+    const calculatedConfigSha256 = await requestDigest({
+      strategy_code: row.strategy_code,
+      version: row.strategy_version ?? "",
+      config: strategyConfig,
+      parameters: parameters ?? {},
+    });
+    if (calculatedConfigSha256 !== row.config_sha256) throw new Error("execution_strategy_config_hash_mismatch");
     return {
       mode,
       riskProfile: {
