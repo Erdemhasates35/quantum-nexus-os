@@ -160,9 +160,9 @@ Deno.test("execution configuration reads accept only profile, strategy and mode 
     strategy_code: "basis_funding_velocity",
     mode: "testnet",
   });
-  assert.equal(request.risk_profile_code, "canary_testnet_v1");
-  assert.equal(request.strategy_code, "basis_funding_velocity");
-  assert.equal(request.mode, "testnet");
+  assert(request.risk_profile_code === "canary_testnet_v1", "risk profile selector was not preserved");
+  assert(request.strategy_code === "basis_funding_velocity", "strategy selector was not preserved");
+  assert(request.mode === "testnet", "execution mode was not preserved");
   expectThrow(() => recordFor("execution_config", {
     risk_profile_code: "canary_testnet_v1",
     strategy_code: "basis_funding_velocity",
