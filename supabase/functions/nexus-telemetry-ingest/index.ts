@@ -207,6 +207,12 @@ export async function requestDigest(record: JsonObject): Promise<string> {
   return Array.from(new Uint8Array(hash)).map(value => value.toString(16).padStart(2,"0")).join("");
 }
 
+function toArrayBuffer(value: Uint8Array): ArrayBuffer {
+  const buffer = new ArrayBuffer(value.byteLength);
+  new Uint8Array(buffer).set(value);
+  return buffer;
+}
+
 function decodeBase64(value: string): Uint8Array {
   if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) throw new Error("invalid_signature_encoding");
   const decoded = atob(value);
@@ -232,8 +238,8 @@ export async function verifyGuardApprovalSignature(input: {
     const publicKeyBytes = decodeBase64(signerRecord.public_key_base64);
     const signatureBytes = decodeBase64(input.signature);
     if (publicKeyBytes.length !== 32 || signatureBytes.length !== 64) return false;
-    const publicKey = await crypto.subtle.importKey("raw", publicKeyBytes, { name: "Ed25519" }, false, ["verify"]);
-    return await crypto.subtle.verify({ name: "Ed25519" }, publicKey, signatureBytes, new TextEncoder().encode(input.approvalDigest));
+    const publicKey = await crypto.subtle.importKey("raw", toArrayBuffer(publicKeyBytes), { name: "Ed25519" }, false, ["verify"]);
+    return await crypto.subtle.verify({ name: "Ed25519" }, publicKey, toArrayBuffer(signatureBytes), toArrayBuffer(new TextEncoder().encode(input.approvalDigest)));
   } catch {
     return false;
   }
