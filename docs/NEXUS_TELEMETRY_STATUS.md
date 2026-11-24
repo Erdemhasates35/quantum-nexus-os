@@ -20,14 +20,16 @@ The `nexus_private` schema now contains 39 tables:
 - strategy allocations, venue health, cost metrics and circuit breakers
 - execution routes, model registry, inference events, backtests and strategy metrics
 
-All trading tables have RLS enabled and are restricted to the `service_role`. No API secrets, private keys, seed phrases or exchange credentials are stored in these tables. `venue_accounts.credential_ref` is only a reference to an external secret manager.
+All trading tables have RLS enabled and are restricted to the `service_role`. The three legacy public telemetry tables were also explicitly restricted to service-role access. Twenty-five authenticated public application tables now have restrictive policies that reject anonymous-auth JWTs; the existing legal application policies remain in place for permanent authenticated users. No API secrets, private keys, seed phrases or exchange credentials are stored in these tables. `venue_accounts.credential_ref` is only a reference to an external secret manager.
 
 ## Runtime controls
 
-Three database migrations were applied:
+Five distinct database migrations were applied:
 - `institutional_trading_execution_core`
 - `market_data_and_agent_orchestration`
 - `agent_queue_and_operational_views`
+- `restrict_anonymous_auth_users`
+- `optimize_anonymous_rls_predicates`
 
 The schema includes atomic task claiming using `FOR UPDATE SKIP LOCKED`, lease expiry, worker heartbeats, lease-owner fencing on task completion, order lifecycle views, strategy PnL views, and open reconciliation discrepancy views.
 
@@ -42,5 +44,7 @@ At the time of verification, `strategy_runs`, `agents`, `order_intents`, `fills`
 ## Remaining integration work
 
 The deployed `nexus-telemetry-ingest` Edge Function is version 3 and still accepts the original six telemetry kinds only. It has not yet been extended to ingest the new order, fill, risk, balance, position, funding, and reconciliation records. Worker processes are not deployed or running. The Vercel Honeycomb Omega X environment references a different Supabase project ref (`qxfvpcjvoiantjrkorsa`) than the connected active database; that project was not accessible through the current Supabase connection and has not been silently substituted.
+
+Supabase advisor verification reports no health lints and no remaining unindexed foreign keys in `nexus_private`. The global anonymous-sign-in advisor notice remains because the Auth setting is enabled; the 25 restrictive policies now reject anonymous-auth JWTs. The unused-index advisor still reports indexes without observed workload usage; no indexes were dropped because the new tables have no production workload and removal would be premature.
 
 The database foundation is additive and does not by itself certify the trading application or any strategy as production-ready.
