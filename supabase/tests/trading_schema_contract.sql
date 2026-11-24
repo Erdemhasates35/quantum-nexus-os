@@ -3,6 +3,7 @@ declare
   missing_count integer;
   actual_count integer;
 begin
+  if (select count(*) from pg_tables where schemaname='nexus_private') <> 43 then raise exception 'nexus_private_table_count_mismatch'; end if;
   select count(*) into missing_count
   from pg_tables t
   join pg_namespace n on n.nspname=t.schemaname
