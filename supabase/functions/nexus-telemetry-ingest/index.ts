@@ -279,7 +279,7 @@ async function insertRecord(kind: TelemetryKind, r: JsonObject): Promise<string>
           [uuid(r,"intent_id"),optionalText(r,"profile_code",64),requiredText(r,"decision",16),requiredText(r,"reason_code",128),optionalText(r,"explanation",2000) ?? "",jsonObject(r,"metrics")],
         );
         const applied = await client.queryObject<{ id: string }>(
-          "update nexus_private.order_intents set risk_decision_id=$1::uuid,state=case when $2='allow' then 'approved' when $2='deny' then 'risk_rejected' else state end,updated_at=pg_catalog.now() where id=$3::uuid and risk_decision_id is null and state='created' returning id::text as id",
+          "update nexus_private.order_intents set risk_decision_id=$1::uuid,state=case when $2='allow' then 'approved' else 'risk_rejected' end,updated_at=pg_catalog.now() where id=$3::uuid and risk_decision_id is null and state='created' returning id::text as id",
           [q.rows[0].id,requiredText(r,"decision",16),uuid(r,"intent_id")],
         );
         if (!applied.rows[0]) throw new Error("risk_decision_not_applied");
