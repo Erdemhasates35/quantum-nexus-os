@@ -1,0 +1,15 @@
+create table if not exists public.telemetry_events (id uuid primary key default gen_random_uuid(), event_id text not null, source text not null, level text not null check (level in ('info','warn','error','system')), message text not null, created_at timestamptz not null default now(), meta jsonb not null default '{}'::jsonb);
+create table if not exists public.positions (id uuid primary key default gen_random_uuid(), symbol text not null, side text not null check (side in ('LONG','SHORT')), size numeric not null check (size > 0), entry_price numeric not null check (entry_price > 0), mark_price numeric check (mark_price is null or mark_price > 0), unrealized_pnl numeric, updated_at timestamptz not null default now(), source text not null);
+create table if not exists public.guard_intents (id uuid primary key default gen_random_uuid(), intent_id text not null unique, symbol text not null, side text not null check (side in ('BUY','SELL')), quantity numeric not null check (quantity > 0), order_type text not null default 'MARKET', meta jsonb not null default '{}'::jsonb, decision text not null check (decision in ('approve','reject')), reason text, created_at timestamptz not null default now());
+create index if not exists telemetry_events_created_at_idx on public.telemetry_events (created_at desc);
+create index if not exists telemetry_events_source_created_at_idx on public.telemetry_events (source, created_at desc);
+create index if not exists positions_updated_at_idx on public.positions (updated_at desc);
+create index if not exists positions_symbol_idx on public.positions (symbol);
+create index if not exists guard_intents_created_at_idx on public.guard_intents (created_at desc);
+create index if not exists guard_intents_symbol_created_at_idx on public.guard_intents (symbol, created_at desc);
+alter table public.telemetry_events enable row level security;
+alter table public.positions enable row level security;
+alter table public.guard_intents enable row level security;
+grant select on public.telemetry_events to anon, authenticated;
+grant select on public.positions to anon, authenticated;
+revoke all on public.guard_intents from anon, authenticated;

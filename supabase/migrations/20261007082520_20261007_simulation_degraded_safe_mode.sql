@@ -1,0 +1,1 @@
+alter table public.simulation_sessions drop constraint if exists simulation_sessions_status_check; alter table public.simulation_sessions add constraint simulation_sessions_status_check check (status = any (array['draft','running','completed','failed','cancelled','degraded']));
