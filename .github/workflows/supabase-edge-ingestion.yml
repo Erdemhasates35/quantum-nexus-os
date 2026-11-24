@@ -2,7 +2,7 @@ name: Supabase Edge Ingestion Contract
 on:
   push:
     branches:
-      - feat/trading-event-ingestion-v4
+      - "feat/**"
   pull_request:
     branches:
       - main

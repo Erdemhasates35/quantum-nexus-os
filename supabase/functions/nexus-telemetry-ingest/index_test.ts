@@ -55,3 +55,17 @@ Deno.test("unauthenticated writes are rejected before database access", async ()
   }));
   assert(result.status === 401, "unauthenticated write was not rejected");
 });
+
+Deno.test("venue and instrument registration accept only non-secret metadata", () => {
+  const account = recordFor("venue_account", { venue: "binance", account_label: "testnet-primary", environment: "testnet", capabilities: { futures: true } });
+  assert(account.environment === "testnet", "venue account metadata was not preserved");
+  expectThrow(() => recordFor("venue_account", { venue: "binance", account_label: "primary", environment: "production", api_key: "blocked" }), "unknown_record_fields");
+  const instrument = recordFor("instrument", { venue: "binance", market_type: "perpetual", symbol: "BTCUSDT", base_asset: "BTC", quote_asset: "USDT", price_tick: "0.01", quantity_step: "0.001", min_quantity: "0.001", min_notional: "5" });
+  assert(instrument.symbol === "BTCUSDT", "instrument metadata was not preserved");
+});
+
+Deno.test("live authorization messages are strictly allowlisted", () => {
+  const approval = recordFor("authorize_live", { intent_id: "123e4567-e89b-42d3-a456-426614174000", executor_id: "executor-a", approval_digest: "a".repeat(64) });
+  assert(approval.executor_id === "executor-a", "authorization payload was not preserved");
+  expectThrow(() => recordFor("authorize_live", { intent_id: "123e4567-e89b-42d3-a456-426614174000", executor_id: "executor-a", approval_digest: "a".repeat(64), signature: "not-accepted-here" }), "unknown_record_fields");
+});
