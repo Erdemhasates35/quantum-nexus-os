@@ -1,0 +1,2 @@
+
+revoke delete on table public.proceedings, public.proceeding_participants, public.case_events, public.statements, public.claims, public.defences, public.requests, public.evidence_items, public.provenance_edges, public.legal_questions, public.legal_rules, public.precedent_refs, public.simulation_sessions, public.simulation_agents, public.simulation_turns, public.simulation_decisions from anon, authenticated;
