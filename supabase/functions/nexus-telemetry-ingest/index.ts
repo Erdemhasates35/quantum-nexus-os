@@ -1,5 +1,4 @@
 import { Pool } from "jsr:@db/postgres@^0";
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 type JsonObject = Record<string, unknown>;
 type TelemetryKind =
