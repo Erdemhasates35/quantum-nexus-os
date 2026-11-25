@@ -86,19 +86,82 @@ def extract_web_symbols(text: str, suffix: str) -> dict:
         re.compile(r"\bfunction\s+([A-Za-z_$][\w$]*)\s*\("),
         re.compile(r"\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>"),
         re.compile(r"\b([A-Za-z_$][\w$]*)\s*:\s*(?:async\s*)?function\s*\("),
+        re.compile(r"\b(?:pub\s+)?(?:async\s+)?fn\s+([A-Za-z_]\w*)\s*\("),
+        re.compile(r"\bfunc\s+(?:\([^)]*\)\s*)?([A-Za-z_]\w*)\s*\("),
+        re.compile(r"(?m)^\s*(?:static\s+)?(?:inline\s+)?(?:[\w:*&<>\[\]]+\s+)+([A-Za-z_]\w*)\s*\([^;{}]*\)\s*(?:const\s*)?\{"),
     ]
+    seen_functions = set()
     for pattern in patterns:
         for match in pattern.finditer(text):
-            functions.append({"name": match.group(1), "line": text.count("\n", 0, match.start()) + 1})
+            line_no = text.count("\n", 0, match.start()) + 1
+            key = (match.group(1), line_no)
+            if key not in seen_functions:
+                functions.append({"name": key[0], "line": line_no})
+                seen_functions.add(key)
+    type_pattern = re.compile(r"\b(?:class|struct|contract|interface|library|enum)\s+([A-Za-z_]\w*)")
+    types = [{"name": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
+             for m in type_pattern.finditer(text)]
     ids = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
            for m in re.finditer(r'\bid\s*=\s*["\']([^"\']+)["\']', text)]
     classes = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
                for m in re.finditer(r'\bclass\s*=\s*["\']([^"\']+)["\']', text)]
     css_classes = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
                    for m in re.finditer(r"(?m)(?:^|[}\s])\.([A-Za-z_-][\w-]*)", text)]
-    return {"functions": functions, "html_ids": ids, "html_classes": classes, "css_class_selectors": css_classes}
+    components = [{"name": name, "line": line}
+                  for name, line in sorted(seen_functions) if name[:1].isupper()]
+    return {
+        "functions": sorted(functions, key=lambda x: (x["line"], x["name"])),
+        "types": types,
+        "react_component_candidates": components,
+        "html_ids": ids,
+        "html_classes": classes,
+        "css_class_selectors": css_classes,
+    }
 
 
+CLAIM_TERMS = re.compile(
+    r"\b(?:live|production|verified|real|atomic|zero[- ]?loss|zero[- ]?downtime|"
+    r"fully|complete|secure|compliant|supports|implements|ensures|guarantees|"
+    r"prevents|autonomous|real[- ]time|reproducible|deterministic)\b",
+    re.IGNORECASE,
+)
+
+
+def extract_claim_candidates(path: str, text: str) -> list[dict]:
+    suffix = Path(path).suffix.lower()
+    claims = []
+    for line_no, line in enumerate(text.splitlines(), 1):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if suffix in {".md", ".rst", ".txt"}:
+            claims.append({
+                "line": line_no,
+                "kind": "prose_statement",
+                "tag": "[UNVERIFIED — source statement; evidence review required]",
+                "context": stripped[:500],
+            })
+            continue
+        if suffix in {".html", ".htm"}:
+            visible = re.sub(r"<[^>]*>", " ", stripped)
+            visible = re.sub(r"\s+", " ", visible).strip()
+            if visible and len(visible) > 8:
+                claims.append({
+                    "line": line_no,
+                    "kind": "html_text_candidate",
+                    "tag": "[UNVERIFIED — rendered text claim; evidence review required]",
+                    "context": visible[:500],
+                })
+                continue
+        is_comment = bool(re.match(r"^\s*(?:#|//|/\*|\*|--|///|//!|<!--)", line))
+        if is_comment or CLAIM_TERMS.search(line):
+            claims.append({
+                "line": line_no,
+                "kind": "comment_or_assertion_candidate",
+                "tag": "[UNVERIFIED — code/comment claim; runtime evidence required]",
+                "context": stripped[:500],
+            })
+    return claims
 def scan_text(path: str, text: str) -> dict:
     numeric, alpha, alpha_identifiers = [], [], []
     for line_no, line in enumerate(text.splitlines(), 1):
@@ -113,7 +176,8 @@ def scan_text(path: str, text: str) -> dict:
             alpha_identifiers.append({"line": line_no, "match": match.group(0), "context": line.strip()[:500]})
     suffix = Path(path).suffix.lower()
     symbols = extract_python_symbols(text) if suffix in PY_EXT else extract_web_symbols(text, suffix)
-    return {"numeric_literals": numeric, "alpha_references": alpha, "alpha_identifiers": alpha_identifiers, "symbols": symbols}
+    claims = extract_claim_candidates(path, text)
+    return {"numeric_literals": numeric, "alpha_references": alpha, "alpha_identifiers": alpha_identifiers, "claim_candidates": claims, "symbols": symbols}
 
 
 def fetch_blob(repo: str, entry: dict, token: str) -> dict:
@@ -179,6 +243,7 @@ def audit_repo(repo: str, label: str, token: str) -> dict:
         "numeric_literal_count": numeric_count,
         "alpha_reference_count": alpha_count,
         "alpha_identifier_count": sum(len(item.get("alpha_identifiers", [])) for item in records),
+        "claim_candidate_count": sum(len(item.get("claim_candidates", [])) for item in records),
         "incomplete_paths": incomplete,
         "fetch_errors": errors,
         "files": records,
@@ -222,6 +287,7 @@ def main() -> int:
             "numeric_literal_count": report["numeric_literal_count"],
             "alpha_reference_count": report["alpha_reference_count"],
             "alpha_identifier_count": report["alpha_identifier_count"],
+            "claim_candidate_count": report["claim_candidate_count"],
             "incomplete_paths": report["incomplete_paths"],
             "fetch_errors": report["fetch_errors"],
         } for report in reports],
