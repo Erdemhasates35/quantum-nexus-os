@@ -3,6 +3,8 @@ name: URO A0 and A1 Verification
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [uro/a0-inventory-a1-kappa]
   workflow_dispatch:
 
 concurrency:
