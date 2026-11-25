@@ -82,43 +82,68 @@ def extract_python_symbols(text: str) -> dict:
 
 def extract_web_symbols(text: str, suffix: str) -> dict:
     functions = []
-    patterns = [
+    types = []
+    ids = []
+    classes = []
+    css_classes = []
+    long_lines_skipped = 0
+    js_patterns = [
         re.compile(r"\bfunction\s+([A-Za-z_$][\w$]*)\s*\("),
         re.compile(r"\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>"),
         re.compile(r"\b([A-Za-z_$][\w$]*)\s*:\s*(?:async\s*)?function\s*\("),
-        re.compile(r"\b(?:pub\s+)?(?:async\s+)?fn\s+([A-Za-z_]\w*)\s*\("),
-        re.compile(r"\bfunc\s+(?:\([^)]*\)\s*)?([A-Za-z_]\w*)\s*\("),
-        re.compile(r"(?m)^\s*(?:static\s+)?(?:inline\s+)?(?:[\w:*&<>\[\]]+\s+)+([A-Za-z_]\w*)\s*\([^;{}]*\)\s*(?:const\s*)?\{"),
     ]
-    seen_functions = set()
-    for pattern in patterns:
-        for match in pattern.finditer(text):
-            line_no = text.count("\n", 0, match.start()) + 1
-            key = (match.group(1), line_no)
-            if key not in seen_functions:
-                functions.append({"name": key[0], "line": line_no})
-                seen_functions.add(key)
+    rust_pattern = re.compile(r"\b(?:pub\s+)?(?:async\s+)?fn\s+([A-Za-z_]\w*)\s*\(")
+    go_pattern = re.compile(r"\bfunc\s+(?:\([^)]*\)\s*)?([A-Za-z_]\w*)\s*\(")
+    c_pattern = re.compile(r"^\s*(?:static\s+)?(?:inline\s+)?(?:[\w:*&<>\[\]]+\s+)+([A-Za-z_]\w*)\s*\([^;{}]{0,2000}\)\s*(?:const\s*)?\{")
     type_pattern = re.compile(r"\b(?:class|struct|contract|interface|library|enum)\s+([A-Za-z_]\w*)")
-    types = [{"name": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
-             for m in type_pattern.finditer(text)]
-    ids = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
-           for m in re.finditer(r'\bid\s*=\s*["\']([^"\']+)["\']', text)]
-    classes = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
-               for m in re.finditer(r'\bclass\s*=\s*["\']([^"\']+)["\']', text)]
-    css_classes = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
-                   for m in re.finditer(r"(?m)(?:^|[}\s])\.([A-Za-z_-][\w-]*)", text)]
-    components = [{"name": name, "line": line}
-                  for name, line in sorted(seen_functions) if name[:1].isupper()]
+    html_id_pattern = re.compile(r'\bid\s*=\s*["\']([^"\']+)["\']')
+    html_class_pattern = re.compile(r'\bclass\s*=\s*["\']([^"\']+)["\']')
+    css_pattern = re.compile(r"(?m)(?:^|[}\s])\.([A-Za-z_-][\w-]*)")
+
+    js_ext = {".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx"}
+    c_ext = {".c", ".h", ".cpp", ".hpp", ".m", ".mm", ".java", ".kt", ".swift", ".sol"}
+    for line_no, line in enumerate(text.splitlines(), 1):
+        if len(line) > 10000:
+            long_lines_skipped += 1
+            continue
+        patterns = []
+        if suffix in js_ext:
+            patterns.extend(js_patterns)
+        if suffix == ".rs":
+            patterns.append(rust_pattern)
+        if suffix == ".go":
+            patterns.append(go_pattern)
+        if suffix in c_ext:
+            patterns.append(c_pattern)
+        for pattern in patterns:
+            for match in pattern.finditer(line):
+                functions.append({"name": match.group(1), "line": line_no})
+        for match in type_pattern.finditer(line):
+            types.append({"name": match.group(1), "line": line_no})
+        if suffix in {".html", ".htm", ".jsx", ".tsx"}:
+            ids.extend({"value": m.group(1), "line": line_no} for m in html_id_pattern.finditer(line))
+            classes.extend({"value": m.group(1), "line": line_no} for m in html_class_pattern.finditer(line))
+        if suffix in {".css", ".scss", ".sass", ".less", ".html", ".htm"}:
+            css_classes.extend({"value": m.group(1), "line": line_no} for m in css_pattern.finditer(line))
+
+    seen = set()
+    unique_functions = []
+    for item in functions:
+        key = (item["name"], item["line"])
+        if key not in seen:
+            unique_functions.append(item)
+            seen.add(key)
+    components = [{"name": item["name"], "line": item["line"]}
+                  for item in unique_functions if item["name"][:1].isupper()]
     return {
-        "functions": sorted(functions, key=lambda x: (x["line"], x["name"])),
+        "functions": sorted(unique_functions, key=lambda x: (x["line"], x["name"])),
         "types": types,
         "react_component_candidates": components,
         "html_ids": ids,
         "html_classes": classes,
         "css_class_selectors": css_classes,
+        "long_lines_skipped": long_lines_skipped,
     }
-
-
 CLAIM_TERMS = re.compile(
     r"\b(?:live|production|verified|real|atomic|zero[- ]?loss|zero[- ]?downtime|"
     r"fully|complete|secure|compliant|supports|implements|ensures|guarantees|"
