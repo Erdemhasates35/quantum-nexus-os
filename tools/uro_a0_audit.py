@@ -102,9 +102,9 @@ def scan_text(path: str, text: str) -> dict:
     numeric, alpha = [], []
     for line_no, line in enumerate(text.splitlines(), 1):
         for match in NUMBER_RE.finditer(line):
-            numeric.append({"line": line_no, "literal": match.group(0), "context": line.strip()[:500]})
+            numeric.append({"line": line_no, "literal": match.group(0), "tag": "[GERÇEK — source literal; live measurement not implied]", "context": line.strip()[:500]})
         for match in ALPHA_RE.finditer(line):
-            alpha.append({"line": line_no, "match": match.group(0), "context": line.strip()[:500]})
+            alpha.append({"line": line_no, "match": match.group(0), "tag": ("[GERÇEK — physical constant reference text]" if "fine-structure" in line.casefold() or "scientific reference" in line.casefold() else "[CONTEXT_REVIEW — not assumed to be the physical constant]"), "context": line.strip()[:500]})
     suffix = Path(path).suffix.lower()
     symbols = extract_python_symbols(text) if suffix in PY_EXT else extract_web_symbols(text, suffix)
     return {"numeric_literals": numeric, "alpha_references": alpha, "symbols": symbols}
@@ -156,6 +156,9 @@ def audit_repo(repo: str, label: str, token: str) -> dict:
     return {
         "repository": repo,
         "label": label,
+        "is_fork": bool(metadata.get("fork", False)),
+        "parent_repository": (metadata.get("parent") or {}).get("full_name"),
+        "license_spdx": (metadata.get("license") or {}).get("spdx_id"),
         "default_branch": branch,
         "commit_sha": tree.get("sha"),
         "tree_truncated": bool(tree.get("truncated", False)),
