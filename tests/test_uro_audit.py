@@ -54,3 +54,7 @@ def test_solidity_contract_and_function_symbols_are_extracted():
 def test_rust_function_symbols_are_extracted():
     report = MODULE.scan_text("engine.rs", "pub async fn execute() {}")
     assert any(item["name"] == "execute" for item in report["symbols"]["functions"])
+
+def test_alpha_coupled_branding_is_legacy_not_physical_constant():
+    report = MODULE.scan_text("index.html", "Engine — α-Coupled")
+    assert report["alpha_references"][0]["tag"].startswith("[KALDIRILACAK")
