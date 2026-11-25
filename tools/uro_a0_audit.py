@@ -114,6 +114,8 @@ def extract_web_symbols(text: str, suffix: str) -> dict:
         if suffix == ".go":
             patterns.append(go_pattern)
         if suffix in c_ext:
+            if suffix == ".sol":
+                patterns.append(re.compile(r"\bfunction\s+([A-Za-z_]\w*)\s*\("))
             patterns.append(c_pattern)
         for pattern in patterns:
             for match in pattern.finditer(line):
