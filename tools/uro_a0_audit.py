@@ -118,6 +118,9 @@ def fetch_blob(repo: str, entry: dict, token: str) -> dict:
         return record
     blob = api_json(f"{API}/repos/{repo}/git/blobs/{sha}", token)
     encoded = blob.get("content", "")
+    if size == 0:
+        record.update({"content_class": "empty_text", "semantic_scan": "complete", **scan_text(path, "")})
+        return record
     if blob.get("encoding") != "base64" or not encoded:
         record.update({"content_class": "unavailable", "semantic_scan": "incomplete", "scan_error": "blob content unavailable"})
         return record
