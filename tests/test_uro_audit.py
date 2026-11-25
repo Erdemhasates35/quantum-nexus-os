@@ -12,6 +12,8 @@ def test_numeric_and_alpha_literals_are_line_attributed():
     report = MODULE.scan_text("index.html", "const x = 0.00729735256;\n// α is legacy")
     assert report["numeric_literals"][0]["literal"] == "0.00729735256"
     assert report["numeric_literals"][0]["line"] == 1
+    underscored = MODULE.scan_text("params.toml", "limit = 10_000")
+    assert underscored["numeric_literals"][0]["literal"] == "10_000"
     assert report["alpha_references"][0]["match"] == "α"
     assert report["alpha_references"][0]["line"] == 2
 
