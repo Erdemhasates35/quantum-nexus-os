@@ -38,3 +38,19 @@ def test_alpha_identifiers_are_separated_from_alpha_references():
     report = MODULE.scan_text("country.c", "char alpha2[2];\nalpha_observations = 1")
     assert report["alpha_references"] == []
     assert [item["match"] for item in report["alpha_identifiers"]] == ["alpha2", "alpha_observations"]
+
+def test_markdown_statements_are_inventory_claim_candidates():
+    report = MODULE.scan_text("claims.md", "# Production claims\nThe system guarantees atomic execution.")
+    assert len(report["claim_candidates"]) == 2
+    assert all(item["tag"].startswith("[UNVERIFIED") for item in report["claim_candidates"])
+
+
+def test_solidity_contract_and_function_symbols_are_extracted():
+    report = MODULE.scan_text("Engine.sol", "contract Engine { function execute() public {} }")
+    assert any(item["name"] == "Engine" for item in report["symbols"]["types"])
+    assert any(item["name"] == "execute" for item in report["symbols"]["functions"])
+
+
+def test_rust_function_symbols_are_extracted():
+    report = MODULE.scan_text("engine.rs", "pub async fn execute() {}")
+    assert any(item["name"] == "execute" for item in report["symbols"]["functions"])
