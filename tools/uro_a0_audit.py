@@ -23,6 +23,7 @@ NUMBER_RE = re.compile(r"(?<![\w.])[-+]?(?:0[xX][0-9a-fA-F_]+|(?:\d[\d_]*(?:\.[\
 ALPHA_RE = re.compile(r"α|\bfine[-_ ]?structure\b|\balpha\b", re.IGNORECASE)
 ALPHA_IDENTIFIER_RE = re.compile(r"\balpha(?:_[A-Za-z0-9_]+|[0-9]+)\b", re.IGNORECASE)
 PY_EXT = {".py", ".pyi"}
+BINARY_EXT = {".gz", ".pcap", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".zip", ".tar", ".pdf", ".pyc", ".wasm", ".so", ".dll", ".exe", ".o", ".a", ".pack"}
 TEXT_EXT = {
     ".py", ".pyi", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".html",
     ".htm", ".css", ".scss", ".sass", ".less", ".sql", ".sh", ".bash",
