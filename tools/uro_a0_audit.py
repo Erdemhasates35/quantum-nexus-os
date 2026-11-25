@@ -160,6 +160,8 @@ def audit_repo(repo: str, label: str, token: str) -> dict:
         "commit_sha": tree.get("sha"),
         "tree_truncated": bool(tree.get("truncated", False)),
         "blob_count": len(blobs),
+        "gitlinks": [{"path": item.get("path"), "sha": item.get("sha")} for item in tree.get("tree", []) if item.get("type") == "commit" or item.get("mode") == "160000"],
+        "gitmodules_present": any(item.get("path") == ".gitmodules" and item.get("type") == "blob" for item in tree.get("tree", [])),
         "text_file_count": text_count,
         "binary_or_nontext_count": len(records) - text_count,
         "numeric_literal_count": numeric_count,
