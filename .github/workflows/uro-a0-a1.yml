@@ -1,0 +1,55 @@
+name: URO A0 and A1 Verification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [uro/a0-inventory-a1-kappa]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reproducible-a0-a1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install repository test dependencies
+        run: python -m pip install -r requirements-flashloan.txt
+      - name: Repeat κ and existing economics tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for iteration in $(seq 1 10); do
+            echo "URO κ/economics verification pass: ${iteration}"
+            python -m pytest -q tests/test_kappa.py tests/test_economics.py
+          done
+      - name: Run complete flashloan quality test set
+        run: >-
+          python -m pytest -q
+          tests/test_economics.py
+          tests/test_orchestrator.py
+          tests/test_controls.py
+          tests/test_optimizer.py
+          tests/test_edge.py
+          tests/test_live_evm.py
+          tests/test_gas_sponsorship.py
+      - name: Compile Python sources
+        run: python -m compileall -q flashloan_engine tests
+      - name: Run read-only A0 inventory and semantic scan
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python tools/uro_a0_audit.py --output uro_a0_inventory.json
+      - name: Preserve A0 evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uro-a0-inventory
+          path: uro_a0_inventory.json
+          if-no-files-found: warn
