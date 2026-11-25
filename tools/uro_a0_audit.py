@@ -19,7 +19,8 @@ from urllib.request import Request, urlopen
 API = "https://api.github.com"
 USER_AGENT = "URO-A0-ReadOnly-Auditor/1.0"
 NUMBER_RE = re.compile(r"(?<![\w.])[-+]?(?:0[xX][0-9a-fA-F_]+|(?:\d[\d_]*(?:\.[\d_]*)?|\.[\d_]+)(?:[eE][-+]?\d[\d_]*)?)(?![\w.])")
-ALPHA_RE = re.compile(r"α|fine[-_ ]?structure|alpha", re.IGNORECASE)
+ALPHA_RE = re.compile(r"α|\bfine[-_ ]?structure\b|\balpha\b", re.IGNORECASE)
+ALPHA_IDENTIFIER_RE = re.compile(r"\balpha(?:_[A-Za-z0-9_]+|[0-9]+)\b", re.IGNORECASE)
 PY_EXT = {".py", ".pyi"}
 TEXT_EXT = {
     ".py", ".pyi", ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".html",
@@ -99,15 +100,20 @@ def extract_web_symbols(text: str, suffix: str) -> dict:
 
 
 def scan_text(path: str, text: str) -> dict:
-    numeric, alpha = [], []
+    numeric, alpha, alpha_identifiers = [], [], []
     for line_no, line in enumerate(text.splitlines(), 1):
         for match in NUMBER_RE.finditer(line):
             numeric.append({"line": line_no, "literal": match.group(0), "tag": "[GERÇEK — source literal; live measurement not implied]", "context": line.strip()[:500]})
         for match in ALPHA_RE.finditer(line):
-            alpha.append({"line": line_no, "match": match.group(0), "tag": ("[GERÇEK — physical constant reference text]" if "fine-structure" in line.casefold() or "scientific reference" in line.casefold() else "[CONTEXT_REVIEW — not assumed to be the physical constant]"), "context": line.strip()[:500]})
+            context = line.strip()[:500]
+            folded = line.casefold()
+            tag = ("[GERÇEK — physical constant reference text]" if "fine-structure" in folded or "scientific reference" in folded else "[KALDIRILACAK — legacy architecture claim]" if "coupling" in folded or "efficiency" in folded else "[SEMBOLIK — parameter, branding, or domain term]")
+            alpha.append({"line": line_no, "match": match.group(0), "tag": tag, "context": context})
+        for match in ALPHA_IDENTIFIER_RE.finditer(line):
+            alpha_identifiers.append({"line": line_no, "match": match.group(0), "context": line.strip()[:500]})
     suffix = Path(path).suffix.lower()
     symbols = extract_python_symbols(text) if suffix in PY_EXT else extract_web_symbols(text, suffix)
-    return {"numeric_literals": numeric, "alpha_references": alpha, "symbols": symbols}
+    return {"numeric_literals": numeric, "alpha_references": alpha, "alpha_identifiers": alpha_identifiers, "symbols": symbols}
 
 
 def fetch_blob(repo: str, entry: dict, token: str) -> dict:
