@@ -90,11 +90,11 @@ def extract_web_symbols(text: str, suffix: str) -> dict:
         for match in pattern.finditer(text):
             functions.append({"name": match.group(1), "line": text.count("\n", 0, match.start()) + 1})
     ids = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
-           for m in re.finditer(r"\bid\\s*=\\s*['\"]([^'\"]+)['\"]", text)]
+           for m in re.finditer(r"\bid\s*=\s*['"]([^'"]+)['"]", text)]
     classes = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
-               for m in re.finditer(r"\bclass\\s*=\\s*['\"]([^'\"]+)['\"]", text)]
+               for m in re.finditer(r"\bclass\s*=\s*['"]([^'"]+)['"]", text)]
     css_classes = [{"value": m.group(1), "line": text.count("\n", 0, m.start()) + 1}
-                   for m in re.finditer(r"(?m)(?:^|[}\\s])\\.([A-Za-z_-][\\w-]*)", text)]
+                   for m in re.finditer(r"(?m)(?:^|[}\s])\.([A-Za-z_-][\w-]*)", text)]
     return {"functions": functions, "html_ids": ids, "html_classes": classes, "css_class_selectors": css_classes}
 
 
