@@ -215,7 +215,7 @@ def scan_text(path: str, text: str) -> dict:
         for match in ALPHA_RE.finditer(line):
             context = line.strip()[:500]
             folded = line.casefold()
-            tag = ("[GERÇEK — physical constant reference text]" if "fine-structure" in folded or "scientific reference" in folded else "[KALDIRILACAK — legacy architecture claim]" if "coupling" in folded or "efficiency" in folded else "[SEMBOLIK — parameter, branding, or domain term]")
+            tag = ("[GERÇEK — physical constant reference text]" if "fine-structure" in folded or "scientific reference" in folded else "[KALDIRILACAK — legacy architecture claim]" if "coupling" in folded or "coupled" in folded or "efficiency" in folded else "[SEMBOLIK — parameter, branding, or domain term]")
             alpha.append({"line": line_no, "match": match.group(0), "tag": tag, "context": context})
         for match in ALPHA_IDENTIFIER_RE.finditer(line):
             alpha_identifiers.append({"line": line_no, "match": match.group(0), "context": line.strip()[:500]})
