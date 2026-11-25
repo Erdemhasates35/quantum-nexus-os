@@ -18,7 +18,7 @@ from urllib.request import Request, urlopen
 
 API = "https://api.github.com"
 USER_AGENT = "URO-A0-ReadOnly-Auditor/1.0"
-NUMBER_RE = re.compile(r"(?<![\w.])[-+]?(?:0[xX][0-9a-fA-F]+|(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)(?![\w.])")
+NUMBER_RE = re.compile(r"(?<![\w.])[-+]?(?:0[xX][0-9a-fA-F_]+|(?:\d[\d_]*(?:\.[\d_]*)?|\.[\d_]+)(?:[eE][-+]?\d[\d_]*)?)(?![\w.])")
 ALPHA_RE = re.compile(r"α|fine[-_ ]?structure|alpha", re.IGNORECASE)
 PY_EXT = {".py", ".pyi"}
 TEXT_EXT = {
