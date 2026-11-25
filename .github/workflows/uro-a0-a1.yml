@@ -57,3 +57,36 @@ jobs:
           name: uro-a0-inventory
           path: uro_a0_inventory.json
           if-no-files-found: warn
+
+  heretic-reference-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out Nexus branch
+        uses: actions/checkout@v4
+      - name: Check out Heretic fork/reference read-only
+        uses: actions/checkout@v4
+        with:
+          repository: Erdemhasates35/heretic
+          ref: master
+          path: heretic
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "heretic/uv.lock"
+      - name: Install Heretic locked dependencies
+        working-directory: heretic
+        run: uv sync --all-extras --dev
+      - name: Repeat Heretic unit tests
+        working-directory: heretic
+        shell: bash
+        run: |
+          set -euo pipefail
+          for iteration in $(seq 1 10); do
+            echo "Heretic unit verification pass: ${iteration}"
+            uv run python -m unittest discover -s tests -p 'test_*.py'
+          done
