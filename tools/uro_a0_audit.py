@@ -238,6 +238,7 @@ def audit_repo(repo: str, label: str, token: str) -> dict:
         "blob_count": len(blobs),
         "gitlinks": [{"path": item.get("path"), "sha": item.get("sha")} for item in tree.get("tree", []) if item.get("type") == "commit" or item.get("mode") == "160000"],
         "gitmodules_present": any(item.get("path") == ".gitmodules" and item.get("type") == "blob" for item in tree.get("tree", [])),
+        "structural_findings": ([{"code": "GITLINKS_WITHOUT_GITMODULES", "severity": "warning", "message": "Tracked gitlinks exist but .gitmodules is absent; submodule URLs cannot be inferred safely.", "paths": [item.get("path") for item in tree.get("tree", []) if item.get("type") == "commit" or item.get("mode") == "160000"]}] if any(item.get("type") == "commit" or item.get("mode") == "160000" for item in tree.get("tree", [])) and not any(item.get("path") == ".gitmodules" and item.get("type") == "blob" for item in tree.get("tree", [])) else []),
         "text_file_count": text_count,
         "binary_or_nontext_count": len(records) - text_count,
         "numeric_literal_count": numeric_count,
@@ -267,7 +268,8 @@ def main() -> int:
     )
     payload = {
         "schema_version": "uro-a0-inventory.v1",
-        "scope": "all tracked blobs on each default branch; text files semantically scanned; binary files inventoried",
+        "execution_context": {"commit_sha": os.environ.get("GITHUB_SHA"), "ref": os.environ.get("GITHUB_REF"), "workflow": os.environ.get("GITHUB_WORKFLOW")},
+        "scope": "all tracked blobs on each default branch; text files semantically scanned; binary files inventoried; the scanner execution ref is recorded separately",
         "complete": complete,
         "repositories": reports,
     }
