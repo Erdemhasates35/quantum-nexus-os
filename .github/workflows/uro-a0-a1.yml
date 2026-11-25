@@ -44,6 +44,8 @@ jobs:
           tests/test_gas_sponsorship.py
       - name: Compile Python sources
         run: python -m compileall -q flashloan_engine tests
+      - name: Run A0 scanner unit tests
+        run: python -m pytest -q tests/test_uro_audit.py
       - name: Run read-only A0 inventory and semantic scan
         env:
           GITHUB_TOKEN: ${{ github.token }}
