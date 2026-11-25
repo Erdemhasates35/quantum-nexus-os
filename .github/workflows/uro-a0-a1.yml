@@ -1,0 +1,98 @@
+name: URO A0 and A1 Verification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [uro/a0-inventory-a1-kappa]
+  workflow_dispatch:
+
+concurrency:
+  group: uro-a0-a1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  reproducible-a0-a1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out Heretic snapshot for A0 inventory
+        uses: actions/checkout@v4
+        with:
+          repository: Erdemhasates35/heretic
+          ref: master
+          path: heretic-reference
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install repository test dependencies
+        run: python -m pip install -r requirements-flashloan.txt
+      - name: Repeat κ and existing economics tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for iteration in $(seq 1 10); do
+            echo "URO κ/economics verification pass: ${iteration}"
+            python -m pytest -q tests/test_kappa.py tests/test_economics.py
+          done
+      - name: Run complete flashloan quality test set
+        run: >-
+          python -m pytest -q
+          tests/test_economics.py
+          tests/test_orchestrator.py
+          tests/test_controls.py
+          tests/test_optimizer.py
+          tests/test_edge.py
+          tests/test_live_evm.py
+          tests/test_gas_sponsorship.py
+      - name: Compile Python sources
+        run: python -m compileall -q flashloan_engine tests
+      - name: Run A0 scanner unit tests
+        run: python -m pytest -q tests/test_uro_audit.py
+      - name: Run read-only A0 inventory and semantic scan
+        run: python tools/uro_a0_audit.py --output uro_a0_inventory.json
+      - name: Preserve A0 evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uro-a0-inventory
+          path: uro_a0_inventory.json
+          if-no-files-found: warn
+
+  heretic-reference-unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out Nexus branch
+        uses: actions/checkout@v4
+      - name: Check out Heretic fork/reference read-only
+        uses: actions/checkout@v4
+        with:
+          repository: Erdemhasates35/heretic
+          ref: master
+          path: heretic
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "heretic/uv.lock"
+      - name: Install Heretic locked dependencies
+        working-directory: heretic
+        run: uv sync --all-extras --dev
+      - name: Repeat Heretic unit tests
+        working-directory: heretic
+        shell: bash
+        run: |
+          set -euo pipefail
+          for iteration in $(seq 1 10); do
+            echo "Heretic unit verification pass: ${iteration}"
+            uv run python -m unittest discover -s tests -p 'test_*.py'
+          done
