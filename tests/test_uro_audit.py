@@ -33,3 +33,8 @@ def test_html_ids_and_classes_are_extracted():
 def test_invalid_python_is_reported_not_silently_accepted():
     report = MODULE.scan_text("broken.py", "def broken(:\n pass")
     assert report["symbols"]["parse_error"].startswith("SyntaxError:")
+
+def test_alpha_identifiers_are_separated_from_alpha_references():
+    report = MODULE.scan_text("country.c", "char alpha2[2];\nalpha_observations = 1")
+    assert report["alpha_references"] == []
+    assert [item["match"] for item in report["alpha_identifiers"]] == ["alpha2", "alpha_observations"]
