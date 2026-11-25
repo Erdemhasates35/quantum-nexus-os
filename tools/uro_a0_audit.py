@@ -113,8 +113,8 @@ def scan_text(path: str, text: str) -> dict:
 def fetch_blob(repo: str, entry: dict, token: str) -> dict:
     path, sha, size = entry["path"], entry["sha"], entry.get("size", 0)
     record = {"path": path, "sha": sha, "size_bytes": size, "mode": entry.get("mode"), "type": entry.get("type")}
-    if Path(path).suffix.lower() not in TEXT_EXT:
-        record.update({"content_class": "binary_or_nontext_extension", "semantic_scan": "not_applicable"})
+    if Path(path).suffix.lower() in {".gz", ".pcap", ".png", ".jpg", ".jpeg", ".gif", ".ico", ".zip", ".tar", ".pdf", ".pyc", ".wasm", ".so", ".dll", ".exe", ".o", ".a", ".pack"}:
+        record.update({"content_class": "binary_by_extension", "semantic_scan": "not_applicable"})
         return record
     blob = api_json(f"{API}/repos/{repo}/git/blobs/{sha}", token)
     encoded = blob.get("content", "")
