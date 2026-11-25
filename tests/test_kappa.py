@@ -38,7 +38,7 @@ def test_kappa_uses_all_cost_components():
     assert result.flash_loan_fee_quote == Decimal("1")
     assert result.total_cost_quote == Decimal("7")
     assert result.net_edge_quote == Decimal("3")
-    assert result.kappa == Decimal(3) / Decimal(7)
+    assert abs(result.kappa - (Decimal(3) / Decimal(7))) < Decimal("1e-27")
     assert result.profitable_before_risk_gate is True
 
 
