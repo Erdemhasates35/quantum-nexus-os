@@ -37,7 +37,7 @@ REPOSITORIES = [
         "repository": "Erdemhasates35/quantum-nexus-os",
         "label": "Quantum Nexus OS",
         "directory": ".",
-        "default_branch": "main",
+        "snapshot_ref": "workflow_checkout",
         "is_fork": False,
         "parent_repository": None,
         "license_spdx": "MIT",
@@ -46,7 +46,7 @@ REPOSITORIES = [
         "repository": "Erdemhasates35/heretic",
         "label": "Heretic fork/reference",
         "directory": "heretic-reference",
-        "default_branch": "master",
+        "snapshot_ref": "refs/heads/master",
         "is_fork": True,
         "parent_repository": "p-e-w/heretic",
         "license_spdx": "AGPL-3.0",
@@ -284,10 +284,15 @@ def audit_repo(config: dict, workspace: Path) -> dict:
     numeric_count = sum(len(item.get("numeric_literals", [])) for item in files)
     alpha_count = sum(len(item.get("alpha_references", [])) for item in files)
     alpha_identifier_count = sum(len(item.get("alpha_identifiers", [])) for item in files)
+    greek_alpha_count = sum(1 for item in files for ref in item.get("alpha_references", []) if "α" in ref.get("match", ""))
+    standalone_alpha_word_count = sum(1 for item in files for ref in item.get("alpha_references", []) if ref.get("match", "").casefold() == "alpha")
+    fine_structure_reference_count = sum(1 for item in files for ref in item.get("alpha_references", []) if "fine-structure" in ref.get("match", "").casefold())
     claim_count = sum(len(item.get("claim_candidates", [])) for item in files)
     symbol_counts = {
-        "functions": sum(len(item.get("symbols", {}).get("functions", [])) for item in files),
-        "types": sum(len(item.get("symbols", {}).get("types", item.get("symbols", {}).get("classes", []))) for item in files),
+        "python_function_definitions": sum(len(item.get("symbols", {}).get("functions", [])) for item in files if Path(item["path"]).suffix.lower() in PY_EXT),
+        "python_class_definitions": sum(len(item.get("symbols", {}).get("classes", [])) for item in files if Path(item["path"]).suffix.lower() in PY_EXT),
+        "cross_language_function_candidates": sum(len(item.get("symbols", {}).get("functions", [])) for item in files if Path(item["path"]).suffix.lower() not in PY_EXT),
+        "cross_language_type_candidates": sum(len(item.get("symbols", {}).get("types", [])) for item in files),
         "react_component_candidates": sum(len(item.get("symbols", {}).get("react_component_candidates", [])) for item in files),
         "html_ids": sum(len(item.get("symbols", {}).get("html_ids", [])) for item in files),
         "html_classes": sum(len(item.get("symbols", {}).get("html_classes", [])) for item in files),
@@ -308,7 +313,7 @@ def audit_repo(config: dict, workspace: Path) -> dict:
         "is_fork": config["is_fork"],
         "parent_repository": config["parent_repository"],
         "license_spdx": config["license_spdx"],
-        "default_branch": config["default_branch"],
+        "snapshot_ref": (os.environ.get("GITHUB_REF", "workflow_checkout") if config["directory"] == "." else config["snapshot_ref"]),
         "commit_sha": commit_sha,
         "tree_truncated": False,
         "blob_count": len(files),
@@ -317,6 +322,9 @@ def audit_repo(config: dict, workspace: Path) -> dict:
         "numeric_literal_count": numeric_count,
         "alpha_reference_count": alpha_count,
         "alpha_identifier_count": alpha_identifier_count,
+        "greek_alpha_count": greek_alpha_count,
+        "standalone_alpha_word_count": standalone_alpha_word_count,
+        "fine_structure_reference_count": fine_structure_reference_count,
         "claim_candidate_count": claim_count,
         "symbol_counts": symbol_counts,
         "gitmodules_present": gitmodules_present,
@@ -360,6 +368,9 @@ def main() -> int:
             "numeric_literal_count": report["numeric_literal_count"],
             "alpha_reference_count": report["alpha_reference_count"],
             "alpha_identifier_count": report["alpha_identifier_count"],
+            "greek_alpha_count": report["greek_alpha_count"],
+            "standalone_alpha_word_count": report["standalone_alpha_word_count"],
+            "fine_structure_reference_count": report["fine_structure_reference_count"],
             "claim_candidate_count": report["claim_candidate_count"],
             "symbol_counts": report["symbol_counts"],
             "gitlinks": report["gitlinks"],
