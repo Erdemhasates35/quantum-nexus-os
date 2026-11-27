@@ -144,3 +144,29 @@ def test_alpha_identifiers_receive_semantic_tags():
     financial = MODULE.scan_text("schema.sql", "alpha_observations")
     assert legacy["alpha_identifiers"][0]["tag"].startswith("[KALDIRILACAK")
     assert financial["alpha_identifiers"][0]["tag"].startswith("[SEMBOLIK")
+
+
+def test_console_summary_uses_current_fine_structure_field_name():
+    report = {
+        "repository": "owner/repository",
+        "commit_sha": "abc123",
+        "blob_count": 1,
+        "text_file_count": 1,
+        "binary_or_nontext_count": 0,
+        "numeric_literal_count": 0,
+        "alpha_reference_count": 0,
+        "alpha_identifier_count": 0,
+        "greek_alpha_count": 0,
+        "standalone_alpha_word_count": 0,
+        "fine_structure_text_mention_count": 1,
+        "claim_candidate_count": 0,
+        "symbol_counts": {},
+        "gitlinks": [],
+        "structural_findings": [],
+        "incomplete_paths": [],
+        "fetch_errors": [],
+    }
+    summary = MODULE.build_console_summary([report], "inventory.json", True)
+    projected = summary["repositories"][0]
+    assert projected["fine_structure_text_mention_count"] == 1
+    assert "fine_structure_reference_count" not in projected
