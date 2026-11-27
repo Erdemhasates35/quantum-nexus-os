@@ -39,10 +39,60 @@ def test_alpha_identifiers_are_separated_from_alpha_references():
     assert report["alpha_references"] == []
     assert [item["match"] for item in report["alpha_identifiers"]] == ["alpha2", "alpha_observations"]
 
-def test_markdown_statements_are_inventory_claim_candidates():
-    report = MODULE.scan_text("claims.md", "# Production claims\nThe system guarantees atomic execution.")
-    assert len(report["claim_candidates"]) == 2
-    assert all(item["tag"].startswith("[UNVERIFIED") for item in report["claim_candidates"])
+def test_markdown_claim_candidates_are_heuristic_not_every_line():
+    report = MODULE.scan_text(
+        "claims.md",
+        "# Production claims\nOrdinary explanatory prose.\nThe system guarantees atomic execution.",
+    )
+    assert len(report["claim_candidates"]) == 1
+    assert report["claim_candidates"][0]["line"] == 3
+    assert report["claim_candidates"][0]["tag"].startswith("[UNVERIFIED")
+
+
+def test_repository_path_scopes_are_separated():
+    assert MODULE.classify_path("docs/design.md") == "documentation_or_legal"
+    assert MODULE.classify_path("tests/test_engine.py") == "test_source_or_fixture"
+    assert MODULE.classify_path("node_modules/pkg/index.js") == "generated_or_dependency"
+    assert MODULE.classify_path("backups/engine.py") == "backup_or_archive"
+    assert MODULE.classify_path("flashloan_engine/economics.py") == "repository_source_or_config"
+    assert MODULE.classify_path("nexmon_csi/src/driver.c") == "reference_or_vendor_candidate"
+
+
+def test_a0_reads_committed_git_blob_not_modified_worktree(tmp_path):
+    import subprocess
+
+    workspace = tmp_path
+    repo_dir = workspace / "repo"
+    repo_dir.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo_dir)], check=True)
+    subprocess.run(["git", "-C", str(repo_dir), "config", "user.email", "uro-test@example.invalid"], check=True)
+    subprocess.run(["git", "-C", str(repo_dir), "config", "user.name", "URO test"], check=True)
+
+    source_path = repo_dir / "engine.py"
+    source_path.write_text("def committed_value():\n    return 17\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(repo_dir), "add", "engine.py"], check=True)
+    subprocess.run(["git", "-C", str(repo_dir), "commit", "-qm", "committed snapshot"], check=True)
+
+    source_path.write_text("def worktree_value():\n    return 999999\n", encoding="utf-8")
+    config = {
+        "repository": "local/test",
+        "label": "local fixture",
+        "directory": "repo",
+        "snapshot_ref": "HEAD",
+        "is_fork": False,
+        "parent_repository": None,
+        "license_spdx": "MIT",
+    }
+    report = MODULE.audit_repo(config, workspace)
+    file_record = next(item for item in report["files"] if item["path"] == "engine.py")
+    assert report["commit_sha"]
+    assert file_record["content_source"] == "git_object_database"
+    assert file_record["symbols"]["functions"][0]["name"] == "committed_value"
+    assert file_record["numeric_literals"][0]["literal"] == "17"
+    assert file_record["sha"] == subprocess.run(
+        ["git", "-C", str(repo_dir), "rev-parse", "HEAD:engine.py"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
 
 
 def test_solidity_contract_and_function_symbols_are_extracted():
