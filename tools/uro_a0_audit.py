@@ -291,7 +291,7 @@ def classify_alpha_reference(path: str, line: str, matched_text: str, match_star
         return "[SEMBOLIK — test fixture for alpha/physical-reference parsing]"
     if match_folded == "fine-structure":
         return "[GERÇEK — physical concept mentioned; no execution use established]"
-    if matched_text == "α" and re.match(r"α\\s*=\\s*0\\.00729735256", local_tail):
+    if matched_text == "α" and re.match(r"α\s*=\s*0\.00729735256", local_tail):
         return "[GERÇEK — physical reference value displayed as text; not a trading input]"
     if re.match(r"(?:α|alpha)[_-](?:coupling|coupled|efficiency|telemetry)", local_tail):
         return "[KALDIRILACAK — legacy architecture namespace; source preserved]"
