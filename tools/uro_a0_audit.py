@@ -271,6 +271,8 @@ def classify_numeric_literal(path: str, line: str) -> str:
         return "[SEMBOLIK — test fixture/assertion literal]"
     if scope == "backup_or_archive":
         return "[KALDIRILACAK — archived literal retained for provenance; not active configuration]"
+    if scope == "documentation_or_legal" and ("0.00729735256" in folded or "scientific reference" in folded):
+        return "[SEMBOLIK — documentation quotation of a physical reference literal; inspect the cited source location]"
     if "0.00729735256" in folded or "scientific reference" in folded:
         return "[GERÇEK — physical reference literal documented/displayed in source; not a trading input]"
     if scope == "generated_or_dependency":
