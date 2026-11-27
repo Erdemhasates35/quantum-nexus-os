@@ -114,6 +114,12 @@ def test_numeric_literal_tags_distinguish_source_test_and_legacy_contexts():
     test_fixture = MODULE.scan_text("tests/test_costs.py", "expected = 0.25")
     assert test_fixture["numeric_literals"][0]["tag"].startswith("[SEMBOLIK")
 
+    test_reference_fixture = MODULE.scan_text(
+        "tests/test_parser.py",
+        "expected_text = 'α = 0.00729735256'",
+    )
+    assert test_reference_fixture["numeric_literals"][0]["tag"].startswith("[SEMBOLIK")
+
     physical_reference = MODULE.scan_text(
         "index.html",
         "Fine-structure reference α = 0.00729735256; display only.",
@@ -132,8 +138,20 @@ def test_alpha_reference_tags_distinguish_physical_legacy_and_domain_terms():
     )
     assert "no execution use established" in physical_mention["alpha_references"][0]["tag"]
 
+    test_fixture = MODULE.scan_text("tests/test_alpha.py", "expected_symbol = 'α'")
+    assert test_fixture["alpha_references"][0]["tag"].startswith("[SEMBOLIK")
+
     legacy = MODULE.scan_text("docs/legacy.md", "The α-telemetry coupling is legacy.")
     assert legacy["alpha_references"][0]["tag"].startswith("[KALDIRILACAK")
+
+    mixed_line = MODULE.scan_text(
+        "docs/financial.md",
+        "alpha_observations tracks signals; fine-structure constant is not used.",
+    )
+    alpha_match = next(item for item in mixed_line["alpha_references"] if item["match"] == "alpha")
+    physics_match = next(item for item in mixed_line["alpha_references"] if item["match"] == "fine-structure")
+    assert alpha_match["tag"].startswith("[SEMBOLIK")
+    assert physics_match["tag"].startswith("[GERÇEK")
 
     domain_term = MODULE.scan_text("supabase/schema.ts", 'kind: "alpha"')
     assert domain_term["alpha_references"][0]["tag"].startswith("[SEMBOLIK")
