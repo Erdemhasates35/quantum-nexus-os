@@ -208,3 +208,16 @@ def test_physical_constant_display_tag_uses_local_alpha_match():
     )
     assert report["alpha_references"][0]["match"] == "α"
     assert report["alpha_references"][0]["tag"].startswith("[GERÇEK")
+
+
+def test_documentation_quote_of_physical_reference_is_not_counted_as_runtime_ui_use():
+    docs = MODULE.scan_text(
+        "docs/URO_A0_INVENTORY.md",
+        "The footer displays α = 0.00729735256 as a scientific reference.",
+    )
+    source = MODULE.scan_text(
+        "index.html",
+        '<footer>α = 0.00729735256 is displayed as a scientific reference only.</footer>',
+    )
+    assert docs["numeric_literals"][0]["tag"].startswith("[SEMBOLIK")
+    assert source["numeric_literals"][0]["tag"].startswith("[GERÇEK")
