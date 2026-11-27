@@ -108,3 +108,39 @@ def test_rust_function_symbols_are_extracted():
 def test_alpha_coupled_branding_is_legacy_not_physical_constant():
     report = MODULE.scan_text("index.html", "Engine — α-Coupled")
     assert report["alpha_references"][0]["tag"].startswith("[KALDIRILACAK")
+
+
+def test_numeric_literal_tags_distinguish_source_test_and_legacy_contexts():
+    test_fixture = MODULE.scan_text("tests/test_costs.py", "expected = 0.25")
+    assert test_fixture["numeric_literals"][0]["tag"].startswith("[SEMBOLIK")
+
+    physical_reference = MODULE.scan_text(
+        "index.html",
+        "Fine-structure reference α = 0.00729735256; display only.",
+    )
+    assert physical_reference["numeric_literals"][0]["tag"].startswith("[GERÇEK")
+    assert "not a trading input" in physical_reference["numeric_literals"][0]["tag"]
+
+    archived = MODULE.scan_text("backups/old_config.py", "threshold = 0.42")
+    assert archived["numeric_literals"][0]["tag"].startswith("[KALDIRILACAK")
+
+
+def test_alpha_reference_tags_distinguish_physical_legacy_and_domain_terms():
+    physical_mention = MODULE.scan_text(
+        "docs/architecture.md",
+        "The fine-structure constant is not an arbitrage threshold.",
+    )
+    assert "no execution use established" in physical_mention["alpha_references"][0]["tag"]
+
+    legacy = MODULE.scan_text("docs/legacy.md", "The α-telemetry coupling is legacy.")
+    assert legacy["alpha_references"][0]["tag"].startswith("[KALDIRILACAK")
+
+    domain_term = MODULE.scan_text("supabase/schema.ts", 'kind: "alpha"')
+    assert domain_term["alpha_references"][0]["tag"].startswith("[SEMBOLIK")
+
+
+def test_alpha_identifiers_receive_semantic_tags():
+    legacy = MODULE.scan_text("legacy.ts", "alpha_telemetry = true")
+    financial = MODULE.scan_text("schema.sql", "alpha_observations")
+    assert legacy["alpha_identifiers"][0]["tag"].startswith("[KALDIRILACAK")
+    assert financial["alpha_identifiers"][0]["tag"].startswith("[SEMBOLIK")
