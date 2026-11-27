@@ -267,12 +267,12 @@ def iter_git_blob_contents(directory: Path, blob_entries: list[dict]):
 def classify_numeric_literal(path: str, line: str) -> str:
     scope = classify_path(path)
     folded = line.casefold()
-    if "0.00729735256" in folded or "scientific reference" in folded:
-        return "[GERÇEK — physical reference literal displayed in source; not a trading input]"
     if scope == "test_source_or_fixture":
         return "[SEMBOLIK — test fixture/assertion literal]"
     if scope == "backup_or_archive":
         return "[KALDIRILACAK — archived literal retained for provenance; not active configuration]"
+    if "0.00729735256" in folded or "scientific reference" in folded:
+        return "[GERÇEK — physical reference literal documented/displayed in source; not a trading input]"
     if scope == "generated_or_dependency":
         return "[GERÇEK — dependency/generated source literal; not a Nexus runtime measurement]"
     if scope == "reference_or_vendor_candidate":
@@ -282,17 +282,23 @@ def classify_numeric_literal(path: str, line: str) -> str:
     return "[GERÇEK — repository source literal; runtime meaning not implied]"
 
 
-def classify_alpha_reference(line: str) -> str:
+def classify_alpha_reference(path: str, line: str, matched_text: str) -> str:
+    scope = classify_path(path)
     folded = line.casefold()
-    if "0.00729735256" in folded or "scientific reference" in folded:
-        return "[GERÇEK — physical reference value displayed as text; not a trading input]"
-    if "fine-structure" in folded:
+    match_folded = matched_text.casefold()
+
+    if scope == "test_source_or_fixture":
+        return "[SEMBOLIK — test fixture for alpha/physical-reference parsing]"
+    if match_folded == "fine-structure":
         return "[GERÇEK — physical concept mentioned; no execution use established]"
+    if matched_text == "α" and ("0.00729735256" in folded or "scientific reference" in folded):
+        return "[GERÇEK — physical reference value displayed as text; not a trading input]"
     if any(term in folded for term in ("α-coupling", "alpha-coupling", "α-coupled", "alpha-coupled", "α-efficiency", "alpha-efficiency", "α-telemetry", "alpha-telemetry")):
         return "[KALDIRILACAK — legacy architecture namespace; source preserved]"
-    if any(term in folded for term in ("coupling", "coupled", "efficiency")):
+    if match_folded == "alpha" and any(term in folded for term in ("coupling", "coupled", "efficiency")):
         return "[KALDIRILACAK — legacy architecture claim; source preserved]"
     return "[SEMBOLIK — parameter, branding, channel, or financial-domain term]"
+
 
 
 def scan_text(path: str, text: str) -> dict:
@@ -309,14 +315,14 @@ def scan_text(path: str, text: str) -> dict:
             alpha.append({
                 "line": line_no,
                 "match": match.group(0),
-                "tag": classify_alpha_reference(line),
+                "tag": classify_alpha_reference(path, line, match.group(0)),
                 "context": line.strip()[:500],
             })
         for match in ALPHA_IDENTIFIER_RE.finditer(line):
-            folded = line.casefold()
+            identifier = match.group(0).casefold()
             identifier_tag = (
                 "[KALDIRILACAK — legacy alpha architecture identifier; source preserved]"
-                if any(term in folded for term in ("alpha_coupl", "alpha_efficiency", "alpha_telemetry"))
+                if identifier.startswith(("alpha_coupl", "alpha_efficiency", "alpha_telemetry"))
                 else "[SEMBOLIK — alpha-prefixed identifier; domain meaning requires schema/code review]"
             )
             alpha_identifiers.append({
