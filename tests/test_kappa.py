@@ -351,3 +351,9 @@ def test_invalid_lamports_values_are_rejected():
             compute_unit_price_micro_lamports=True,
             requested_compute_unit_limit=100000,
         )
+
+
+@pytest.mark.parametrize("quote_price", ["0", "-0.1"])
+def test_lamports_conversion_rejects_non_positive_quote_price(quote_price):
+    with pytest.raises(ValueError, match="greater than zero"):
+        lamports_to_quote(lamports=1_000_000_000, quote_per_sol=quote_price)
