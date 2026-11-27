@@ -264,22 +264,77 @@ def iter_git_blob_contents(directory: Path, blob_entries: list[dict]):
         process.wait()
         raise
 
+def classify_numeric_literal(path: str, line: str) -> str:
+    scope = classify_path(path)
+    folded = line.casefold()
+    if "0.00729735256" in folded or "scientific reference" in folded:
+        return "[GERÇEK — physical reference literal displayed in source; not a trading input]"
+    if scope == "test_source_or_fixture":
+        return "[SEMBOLIK — test fixture/assertion literal]"
+    if scope == "backup_or_archive":
+        return "[KALDIRILACAK — archived literal retained for provenance; not active configuration]"
+    if scope == "generated_or_dependency":
+        return "[GERÇEK — dependency/generated source literal; not a Nexus runtime measurement]"
+    if scope == "reference_or_vendor_candidate":
+        return "[GERÇEK — third-party/reference source literal; not a Nexus runtime measurement]"
+    if scope == "documentation_or_legal":
+        return "[GERÇEK — documentation literal; semantic meaning requires source review]"
+    return "[GERÇEK — repository source literal; runtime meaning not implied]"
+
+
+def classify_alpha_reference(line: str) -> str:
+    folded = line.casefold()
+    if "0.00729735256" in folded or "scientific reference" in folded:
+        return "[GERÇEK — physical reference value displayed as text; not a trading input]"
+    if "fine-structure" in folded:
+        return "[GERÇEK — physical concept mentioned; no execution use established]"
+    if any(term in folded for term in ("α-coupling", "alpha-coupling", "α-coupled", "alpha-coupled", "α-efficiency", "alpha-efficiency", "α-telemetry", "alpha-telemetry")):
+        return "[KALDIRILACAK — legacy architecture namespace; source preserved]"
+    if any(term in folded for term in ("coupling", "coupled", "efficiency")):
+        return "[KALDIRILACAK — legacy architecture claim; source preserved]"
+    return "[SEMBOLIK — parameter, branding, channel, or financial-domain term]"
+
+
 def scan_text(path: str, text: str) -> dict:
     numeric, alpha, alpha_identifiers = [], [], []
     for line_no, line in enumerate(text.splitlines(), 1):
         for match in NUMBER_RE.finditer(line):
-            numeric.append({"line": line_no, "literal": match.group(0), "tag": "[GERÇEK — source literal; live measurement not implied]", "context": line.strip()[:500]})
+            numeric.append({
+                "line": line_no,
+                "literal": match.group(0),
+                "tag": classify_numeric_literal(path, line),
+                "context": line.strip()[:500],
+            })
         for match in ALPHA_RE.finditer(line):
-            context = line.strip()[:500]
-            folded = line.casefold()
-            tag = ("[GERÇEK — physical constant reference text]" if "fine-structure" in folded or "scientific reference" in folded else "[KALDIRILACAK — legacy architecture claim]" if "coupling" in folded or "coupled" in folded or "efficiency" in folded else "[SEMBOLIK — parameter, branding, or domain term]")
-            alpha.append({"line": line_no, "match": match.group(0), "tag": tag, "context": context})
+            alpha.append({
+                "line": line_no,
+                "match": match.group(0),
+                "tag": classify_alpha_reference(line),
+                "context": line.strip()[:500],
+            })
         for match in ALPHA_IDENTIFIER_RE.finditer(line):
-            alpha_identifiers.append({"line": line_no, "match": match.group(0), "context": line.strip()[:500]})
+            folded = line.casefold()
+            identifier_tag = (
+                "[KALDIRILACAK — legacy alpha architecture identifier; source preserved]"
+                if any(term in folded for term in ("alpha_coupl", "alpha_efficiency", "alpha_telemetry"))
+                else "[SEMBOLIK — alpha-prefixed identifier; domain meaning requires schema/code review]"
+            )
+            alpha_identifiers.append({
+                "line": line_no,
+                "match": match.group(0),
+                "tag": identifier_tag,
+                "context": line.strip()[:500],
+            })
     suffix = Path(path).suffix.lower()
     symbols = extract_python_symbols(text) if suffix in PY_EXT else extract_web_symbols(text, suffix)
     claims = extract_claim_candidates(path, text)
-    return {"numeric_literals": numeric, "alpha_references": alpha, "alpha_identifiers": alpha_identifiers, "claim_candidates": claims, "symbols": symbols}
+    return {
+        "numeric_literals": numeric,
+        "alpha_references": alpha,
+        "alpha_identifiers": alpha_identifiers,
+        "claim_candidates": claims,
+        "symbols": symbols,
+    }
 
 
 def audit_repo(config: dict, workspace: Path) -> dict:
@@ -354,7 +409,7 @@ def audit_repo(config: dict, workspace: Path) -> dict:
     alpha_identifier_count = sum(len(item.get("alpha_identifiers", [])) for item in files)
     greek_alpha_count = sum(1 for item in files for ref in item.get("alpha_references", []) if "α" in ref.get("match", ""))
     standalone_alpha_word_count = sum(1 for item in files for ref in item.get("alpha_references", []) if ref.get("match", "").casefold() == "alpha")
-    fine_structure_reference_count = sum(1 for item in files for ref in item.get("alpha_references", []) if "fine-structure" in ref.get("match", "").casefold())
+    fine_structure_text_mention_count = sum(1 for item in files for ref in item.get("alpha_references", []) if "fine-structure" in ref.get("match", "").casefold())
     claim_count = sum(len(item.get("claim_candidates", [])) for item in files)
     symbol_counts = {
         "python_function_definitions": sum(len(item.get("symbols", {}).get("functions", [])) for item in files if Path(item["path"]).suffix.lower() in PY_EXT),
@@ -409,7 +464,7 @@ def audit_repo(config: dict, workspace: Path) -> dict:
         "alpha_identifier_count": alpha_identifier_count,
         "greek_alpha_count": greek_alpha_count,
         "standalone_alpha_word_count": standalone_alpha_word_count,
-        "fine_structure_reference_count": fine_structure_reference_count,
+        "fine_structure_text_mention_count": fine_structure_text_mention_count,
         "claim_candidate_count": claim_count,
         "symbol_counts": symbol_counts,
         "symbol_counts_by_scope": scoped_symbols,
