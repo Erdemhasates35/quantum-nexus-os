@@ -87,8 +87,8 @@ def lamports_to_quote(*, lamports: int, quote_per_sol: object) -> Decimal:
     """Convert lamports into quote-asset units using a timestamp-bound SOL quote."""
     amount = _nonnegative_integer("lamports", lamports)
     price = _decimal("quote_per_sol", quote_per_sol)
-    if price < 0:
-        raise ValueError("quote_per_sol must be non-negative")
+    if price <= 0:
+        raise ValueError("quote_per_sol must be greater than zero")
     with localcontext() as ctx:
         ctx.prec = 50
         return Decimal(amount) * price / Decimal(LAMPORTS_PER_SOL)
