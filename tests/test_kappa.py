@@ -50,7 +50,7 @@ def make_symbolic_evidence(values, refs, extra_costs=None):
         all_units[key] = "quote_asset"
     return {
         key: SourceEvidence(
-            source_ref=refs[key],
+            source_ref=refs.get(key, f"symbolic://missing-reference/{key}"),
             source_kind="symbolic",
             observed_at=OBSERVED_AT,
             raw_value=value,
