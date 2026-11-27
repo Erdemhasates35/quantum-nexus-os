@@ -74,6 +74,29 @@ The Nexus Git tree contains tracked gitlinks while `.gitmodules` is absent. The 
 
 This can produce non-fatal checkout/submodule cleanup warnings. Resolve each remote URL, upstream identity, license and pinned commit from authoritative repository metadata before adding a `.gitmodules` mapping.
 
+### Gitlink remote-origin research
+
+Exact commit-SHA searches found candidate repositories for several gitlinks. These are candidates, not verified remote URLs: the same SHA appears in multiple repositories, and a gitlink stores a commit object ID but not its remote URL.
+
+| Gitlink path | Pinned commit | Exact-SHA candidates found | Origin conclusion |
+|---|---|---|---|
+| `.Own-Script/mac-changer` | `8be0537772096172b03281747ecfc3d66144cb5c` | `SiddhantOffl/mac-changer` | Candidate match; remote not proven |
+| `.tools/ADB-Toolkit` | `9b69686e29b6a2c8dcc68ca80cdf2d0aebc90f60` | `ASHWIN990/ADB-Toolkit`, `Teutades/ADB-Toolkit`, `MSI-Sirajul/ADB-Toolkit`, `CREEKJAMES/Files`, `Chooperkutt9/ADB` | Ambiguous |
+| `.tools/Ghost` | `bf38c7e62e510caa1229e797ca3276e426235b03` | `EntySec/Ghost`, `lazarus-design/Ghost` | Ambiguous |
+| `.tools/SpamWa` | `177fe2ebc79a1010ccd9a1654163b0acef50ab1d` | `krypton-byte/SpamWa`, `edoi777/WaSpm` and additional matches | Ambiguous |
+| `.tools/TBomb` | `162fd6a97977c2f93cffff7b45cba7d186ffa08b` | `TheSpeedX/TBomb`, `shivansh291/TBomb` | Ambiguous; one candidate is archived |
+| `.tools/TheFatRat` | `b0586d08f357bf7bc961aed12b87ffe8849a1674` | `IntelSys-iT/TheFatRat`, `farooq-001/TheFatRat` and additional matches | Ambiguous |
+| `.tools/cupp` | `616a7b0c01b9cec51954df86a2a538dffcba3834` | `Mebus/cupp`, `cashiiyy/hashforge` and additional matches | Candidate upstream found; remote not proven |
+| `.tools/seeker` | `abbbf802cf55852742551df83c104d6bedefd359` | `thewhiteh4t/seeker`, plus fork/mirror matches | Candidate upstream found; remote not proven |
+| `.tools/socialbrute` | `1bdc747ae41744bec863d7d84a5442f44c7f6b7b` | `sh4d0wb0y/socialbrute` | Candidate match; remote not proven |
+| `.tools/zphisher` | `65b99bccaa746ec3edda4291ec7f4048fbd49771` | `iudah/zphisher`, `Tomar-Jii/zphisher` and additional matches | Ambiguous |
+| `nexus-fix` | `4f4d72587c53caab309582266d19532e9c2fbe7f` | No exact-SHA search result | Unresolved |
+| `quantum-nexus-ultimate` | `2f271fb249e88407aad7354a6f8282656c30a9f1` | No exact-SHA search result | Unresolved |
+
+Repository metadata checks confirmed some candidate repositories are non-forks and some are archived; this still does not establish that they are the intended remotes for these gitlinks. A matching SHA establishes that the object is present in a repository, not that the original project selected that repository as its submodule source. Candidate repository identities and licenses therefore remain untrusted until verified against owner history, historical `.gitmodules`, commit lineage or another authoritative origin record.
+
+No candidate was written to `.gitmodules`; no source was cloned or executed. Root-tree blob inventory is complete, but nested gitlink content remains outside the verified scan until canonical remotes are established. A0 aggregate maturity therefore remains L2 with an explicit unresolved nested-repository boundary, not a claim of complete submodule source coverage.
+
 ## Verification protocol
 
 The URO workflow runs:
