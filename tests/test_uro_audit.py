@@ -146,7 +146,7 @@ def test_alpha_reference_tags_distinguish_physical_legacy_and_domain_terms():
 
     mixed_line = MODULE.scan_text(
         "docs/financial.md",
-        "alpha_observations tracks signals; fine-structure constant is not used.",
+        "alpha_observations tracks financial alpha signals; fine-structure constant is not used.",
     )
     alpha_match = next(item for item in mixed_line["alpha_references"] if item["match"] == "alpha")
     physics_match = next(item for item in mixed_line["alpha_references"] if item["match"] == "fine-structure")
