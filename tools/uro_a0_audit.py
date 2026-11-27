@@ -282,21 +282,19 @@ def classify_numeric_literal(path: str, line: str) -> str:
     return "[GERÇEK — repository source literal; runtime meaning not implied]"
 
 
-def classify_alpha_reference(path: str, line: str, matched_text: str) -> str:
+def classify_alpha_reference(path: str, line: str, matched_text: str, match_start: int) -> str:
     scope = classify_path(path)
-    folded = line.casefold()
     match_folded = matched_text.casefold()
+    local_tail = line[match_start:match_start + 48].casefold()
 
     if scope == "test_source_or_fixture":
         return "[SEMBOLIK — test fixture for alpha/physical-reference parsing]"
     if match_folded == "fine-structure":
         return "[GERÇEK — physical concept mentioned; no execution use established]"
-    if matched_text == "α" and ("0.00729735256" in folded or "scientific reference" in folded):
+    if matched_text == "α" and re.match(r"α\\s*=\\s*0\\.00729735256", local_tail):
         return "[GERÇEK — physical reference value displayed as text; not a trading input]"
-    if any(term in folded for term in ("α-coupling", "alpha-coupling", "α-coupled", "alpha-coupled", "α-efficiency", "alpha-efficiency", "α-telemetry", "alpha-telemetry")):
+    if re.match(r"(?:α|alpha)[_-](?:coupling|coupled|efficiency|telemetry)", local_tail):
         return "[KALDIRILACAK — legacy architecture namespace; source preserved]"
-    if match_folded == "alpha" and any(term in folded for term in ("coupling", "coupled", "efficiency")):
-        return "[KALDIRILACAK — legacy architecture claim; source preserved]"
     return "[SEMBOLIK — parameter, branding, channel, or financial-domain term]"
 
 
@@ -315,7 +313,7 @@ def scan_text(path: str, text: str) -> dict:
             alpha.append({
                 "line": line_no,
                 "match": match.group(0),
-                "tag": classify_alpha_reference(path, line, match.group(0)),
+                "tag": classify_alpha_reference(path, line, match.group(0), match.start()),
                 "context": line.strip()[:500],
             })
         for match in ALPHA_IDENTIFIER_RE.finditer(line):
