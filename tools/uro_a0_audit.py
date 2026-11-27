@@ -500,9 +500,10 @@ def main() -> int:
     with output.open("x", encoding="utf-8") as handle:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
         handle.write("\n")
-    summary = {
+def build_console_summary(reports: list[dict], output_path: str, complete: bool) -> dict:
+    return {
         "complete": complete,
-        "output": str(output),
+        "output": output_path,
         "repositories": [{
             "repository": report["repository"],
             "commit_sha": report["commit_sha"],
@@ -514,7 +515,7 @@ def main() -> int:
             "alpha_identifier_count": report["alpha_identifier_count"],
             "greek_alpha_count": report["greek_alpha_count"],
             "standalone_alpha_word_count": report["standalone_alpha_word_count"],
-            "fine_structure_reference_count": report["fine_structure_reference_count"],
+            "fine_structure_text_mention_count": report["fine_structure_text_mention_count"],
             "claim_candidate_count": report["claim_candidate_count"],
             "symbol_counts": report["symbol_counts"],
             "gitlinks": report["gitlinks"],
@@ -523,6 +524,9 @@ def main() -> int:
             "fetch_errors": report["fetch_errors"],
         } for report in reports],
     }
+
+
+    summary = build_console_summary(reports, str(output), complete)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if complete else 1
 if __name__ == "__main__":
