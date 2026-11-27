@@ -84,9 +84,11 @@ Official sources:
 
 Jito bundles contain up to five transactions, execute sequentially and atomically, and compete in an auction. A tip is required for a bundle to be considered. Current tip distribution is exposed through the Jito tip-floor API and websocket; a fixed tip must not be treated as a current competitive bid.
 
-A successful sendBundle response returns a bundle identifier; that receipt is not proof of landing. The adapter must query getBundleStatuses, retain the returned transaction signatures and slot, verify on-chain transaction statuses, require the configured finality level, and reconcile balances/fees from finalized transaction metadata. A missing bundle status is not a successful transaction.
+A successful sendBundle response returns a bundle identifier; that receipt is not proof of landing. The adapter must query getBundleStatuses, retain the returned transaction signatures and slot, verify each signature through Solana RPC, require the configured finality level, and reconcile balances/fees from finalized transaction metadata. A null bundle status is not a successful transaction.
 
-Jito documents tip bidding for sendBundle separately from sendTransaction routing. A bundle's Jito tip is a distinct cost; do not silently combine it with the Solana priority fee or count the same transfer twice.
+Jito's own documentation qualifies bundle atomicity in the presence of uncled blocks: transactions from an uncled block can be rebroadcast through the normal banking stage, which does not preserve Jito bundle atomicity/revert-protection semantics. Consequently, protocol-level bundle atomicity is not an unconditional end-to-end application invariant. Every strategy transaction must include on-chain preconditions and postconditions that prevent partial/unbundled execution from causing unintended state transitions or paying a tip without a valid outcome. The preferred design keeps the tip instruction inside the strategy transaction where possible; if a separate tip transaction is unavoidable, it requires state assertions (for example, account-state/slot conditions) and a dedicated failure/reconciliation path.
+
+Jito documents tip bidding for sendBundle separately from sendTransaction routing: for bundle-auction selection, the tip is the bid input, while Solana base/priority fees remain transaction costs. A bundle's Jito tip is a distinct cost; do not silently combine it with the Solana priority fee or count the same transfer twice. Jito publishes landed-tip percentiles through its tip-floor REST API and websocket. The documented minimum tip is not evidence that a bid is competitive in the current auction.
 
 Sources:
 - https://docs.jito.wtf/lowlatencytxnsend/
