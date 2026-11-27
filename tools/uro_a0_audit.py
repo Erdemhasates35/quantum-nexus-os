@@ -478,28 +478,6 @@ def audit_repo(config: dict, workspace: Path) -> dict:
         "files": files,
     }
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", default="uro_a0_inventory.json")
-    args = parser.parse_args()
-    workspace = Path(os.environ.get("GITHUB_WORKSPACE", ".")).resolve()
-    reports = [audit_repo(config, workspace) for config in REPOSITORIES]
-    complete = all(not report["incomplete_paths"] and not report["fetch_errors"] for report in reports)
-    payload = {
-        "schema_version": "uro-a0-inventory.v1",
-        "execution_context": {
-            "commit_sha": os.environ.get("GITHUB_SHA"),
-            "ref": os.environ.get("GITHUB_REF"),
-            "workflow": os.environ.get("GITHUB_WORKFLOW"),
-        },
-        "scope": "all tracked Git blobs from the checked-out Nexus and Heretic snapshots; all UTF-8 text scanned; binary blobs inventoried",
-        "complete": complete,
-        "repositories": reports,
-    }
-    output = Path(args.output)
-    with output.open("x", encoding="utf-8") as handle:
-        json.dump(payload, handle, ensure_ascii=False, indent=2)
-        handle.write("\n")
 def build_console_summary(reports: list[dict], output_path: str, complete: bool) -> dict:
     return {
         "complete": complete,
@@ -526,6 +504,28 @@ def build_console_summary(reports: list[dict], output_path: str, complete: bool)
     }
 
 
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", default="uro_a0_inventory.json")
+    args = parser.parse_args()
+    workspace = Path(os.environ.get("GITHUB_WORKSPACE", ".")).resolve()
+    reports = [audit_repo(config, workspace) for config in REPOSITORIES]
+    complete = all(not report["incomplete_paths"] and not report["fetch_errors"] for report in reports)
+    payload = {
+        "schema_version": "uro-a0-inventory.v1",
+        "execution_context": {
+            "commit_sha": os.environ.get("GITHUB_SHA"),
+            "ref": os.environ.get("GITHUB_REF"),
+            "workflow": os.environ.get("GITHUB_WORKFLOW"),
+        },
+        "scope": "all tracked Git blobs from the checked-out Nexus and Heretic snapshots; all UTF-8 text scanned; binary blobs inventoried",
+        "complete": complete,
+        "repositories": reports,
+    }
+    output = Path(args.output)
+    with output.open("x", encoding="utf-8") as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
     summary = build_console_summary(reports, str(output), complete)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0 if complete else 1
