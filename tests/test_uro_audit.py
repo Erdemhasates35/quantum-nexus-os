@@ -188,3 +188,23 @@ def test_console_summary_uses_current_fine_structure_field_name():
     projected = summary["repositories"][0]
     assert projected["fine_structure_text_mention_count"] == 1
     assert "fine_structure_reference_count" not in projected
+
+
+def test_alpha_glyph_and_coupling_on_same_line_have_distinct_tags():
+    report = MODULE.scan_text(
+        "docs/legacy.md",
+        "The v16 α glyph/footer, old α-Coupling documents remain.",
+    )
+    alpha = [item for item in report["alpha_references"] if item["match"] == "α"]
+    assert len(alpha) == 2
+    assert alpha[0]["tag"].startswith("[SEMBOLIK")
+    assert alpha[1]["tag"].startswith("[KALDIRILACAK")
+
+
+def test_physical_constant_display_tag_uses_local_alpha_match():
+    report = MODULE.scan_text(
+        "index.html",
+        "α = 0.00729735256 is displayed as a scientific reference only.",
+    )
+    assert report["alpha_references"][0]["match"] == "α"
+    assert report["alpha_references"][0]["tag"].startswith("[GERÇEK")
