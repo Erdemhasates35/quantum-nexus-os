@@ -301,7 +301,7 @@ footer{text-align:center;padding:16px 0;font-family:'Share Tech Mono',monospace;
 <!-- ═══ AJANLAR ═══ -->
 <div id="tab-agents" class="panel">
   <div class="kpi-row">
-    <div class="kpi"><div class="kv" style="color:var(--q)" id="k-active">0</div><div class="kl">AKTİF AJAN</div></div>
+    <div class="kpi"><div class="kv" style="color:var(--q)" id="k-active" data-nexus-role-count>60</div><div class="kl">KAYITLI ROL TANIMI</div></div>
     <div class="kpi"><div class="kv" style="color:var(--p)" id="k-tasks">0</div><div class="kl">TAMAMLANAN GÖREV</div></div>
     <div class="kpi"><div class="kv" style="color:var(--g)" id="k-health">%94</div><div class="kl">SİSTEM SAĞLIĞI</div></div>
     <div class="kpi"><div class="kv" style="color:var(--y)" id="k-iter">0</div><div class="kl">EVRİM İTERASYONU</div></div>
@@ -355,7 +355,7 @@ footer{text-align:center;padding:16px 0;font-family:'Share Tech Mono',monospace;
 const cv=document.getElementById('bg'),cx=cv.getContext('2d');
 function resizeCv(){cv.width=innerWidth;cv.height=innerHeight;}
 resizeCv();window.addEventListener('resize',resizeCv);
-const pts=Array.from({length:60},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3}));
+const pts=Array.from({length:60},(_,i)=>({x:((i%10)+0.5)*innerWidth/10,y:(Math.floor(i/10)+0.5)*innerHeight/6,vx:0,vy:0}));
 function drawBg(){
   cx.clearRect(0,0,cv.width,cv.height);
   pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1;cx.beginPath();cx.arc(p.x,p.y,1.2,0,Math.PI*2);cx.fillStyle='rgba(0,255,212,0.4)';cx.fill();});
@@ -364,86 +364,64 @@ function drawBg(){
 }
 drawBg();
 
-// ── KEY STORAGE ──
-const KS='nxk_';
+// API secrets remain server-side; browser storage is intentionally disabled.
 function saveKey(id){
-  const v=document.getElementById('inp-'+id).value.trim();
-  if(!v||v.includes('•')){toast('Key boş olamaz!','w');return;}
-  localStorage.setItem(KS+id,btoa(v));
-  setDot(id,'ok');setBadge(id,'ok');
-  toast('✓ '+id.toUpperCase()+' kaydedildi');
-  updateCmdLine(id,v);
-  updateSysStatus();
+  const input=document.getElementById('inp-'+id);if(input)input.value='';
+  showTR(id,'load','Configure this provider secret in the runtime server environment.');
+  toast('Browser key storage disabled; server environment configuration required.','w');
 }
-function getKey(id){const s=localStorage.getItem(KS+id);return s?atob(s):null;}
+function getKey(id){return id;}
 function delKey(id){
-  localStorage.removeItem(KS+id);
-  document.getElementById('inp-'+id).value='';
-  setDot(id,'');setBadge(id,'no');
-  toast(id.toUpperCase()+' silindi','w');
-  updateSysStatus();
+  const input=document.getElementById('inp-'+id);if(input)input.value='';
+  showTR(id,'load','Browser input cleared. Server-side credential was not changed.');
 }
 function setDot(id,state){const d=document.getElementById('dot-'+id);if(!d)return;d.className='key-dot'+(state==='ok'?' ok':state==='err'?' err':'');}
 function setBadge(id,state){
   const b=document.getElementById('badge-'+id);if(!b)return;
-  const map={ok:['badge-ok','AKTİF ✓'],no:['badge-no','KAYITSIZ'],test:['badge-test','TEST...']};
-  const[cls,txt]=map[state]||map.no;
-  b.className='api-badge '+cls;b.textContent=txt;
+  const map={ok:['badge-ok','CONNECTED ✓'],no:['badge-no','NOT CONNECTED'],test:['badge-test','TESTING…']};
+  const[cls,txt]=map[state]||map.no;b.className='api-badge '+cls;b.textContent=txt;
 }
-
-// ── GERÇEK API TEST ──
 async function testKey(id){
-  const key=getKey(id);
-  if(!key){toast('Önce key kaydet!','w');return;}
-  showTR(id,'load','⟳ Test ediliyor...');
-  setBadge(id,'test');
+  showTR(id,'load','Testing server-side integration…');setBadge(id,'test');
   try{
-    let ok=false,msg='';
-    if(id==='anthropic'){
-      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Hi'}]})});
-      const d=await r.json();ok=!!d.content;msg=ok?'Claude bağlantısı başarılı ✓':(d.error?.message||'Hata');
-    } else if(id==='openai'){
-      const r=await fetch('https://api.openai.com/v1/models',{headers:{'Authorization':'Bearer '+key}});
-      ok=r.ok;msg=ok?'OpenAI bağlantısı başarılı ✓':'Geçersiz key';
-    } else if(id==='groq'){
-      const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
-      ok=r.ok;msg=ok?'Groq bağlantısı başarılı ✓':'Geçersiz key';
-    } else if(id==='github'){
-      const r=await fetch('https://api.github.com/user',{headers:{'Authorization':'Bearer '+key}});
-      const d=await r.json();ok=!!d.login;msg=ok?('GitHub: '+d.login+' ✓'):'Geçersiz token';
+    let response;
+    if(['anthropic','openai','groq'].includes(id)){
+      const body=id==='anthropic'
+        ?{model:'claude-3-5-haiku-latest',max_tokens:8,messages:[{role:'user',content:'Reply OK.'}]}
+        :{model:id==='openai'?'gpt-4o-mini':'llama-3.3-70b-versatile',max_tokens:8,messages:[{role:'user',content:'Reply OK.'}]};
+      response=await fetch('/api/ai/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    }else{
+      response=await fetch('/api/integrations/test/'+id,{cache:'no-store'});
     }
-    showTR(id,ok?'ok':'err',msg);
-    setBadge(id,ok?'ok':'no');
-    setDot(id,ok?'ok':'err');
-    if(ok)toast('✓ '+id.toUpperCase()+' doğrulandı');
-    else toast('✗ '+id.toUpperCase()+' hatalı','e');
-  }catch(e){showTR(id,'err','Bağlantı hatası: '+e.message);setBadge(id,'no');}
+    const payload=await response.json();
+    const ok=response.ok;
+    const message=ok?'Server-side connection verified':(payload.error||payload.reason||'Provider unavailable');
+    showTR(id,ok?'ok':'err',message);setBadge(id,ok?'ok':'no');setDot(id,ok?'ok':'err');
+  }catch(error){showTR(id,'err',error.message);setBadge(id,'no');setDot(id,'err');}
 }
 function showTR(id,type,msg){
   const el=document.getElementById('tr-'+id);if(!el)return;
   el.className='test-result tr-'+type;el.textContent=msg;el.style.display='block';
 }
-
-// ── CMD LINES ──
-function updateCmdLine(id,val){
+// Environment variable names only; never copy or display credential values.
+function updateCmdLine(id){
   const el=document.getElementById('cmd-'+id+'-line');if(!el)return;
-  el.className='tl-ok';
-  el.textContent=`export ${id.toUpperCase().replace('ANTHROPIC','ANTHROPIC_API_KEY').replace('OPENAI','OPENAI_API_KEY').replace('GROQ','GROQ_API_KEY').replace('GITHUB','GITHUB_TOKEN')}='${val.substring(0,8)}...' # ✓ kayıtlı`;
+  const envMap={anthropic:'ANTHROPIC_API_KEY',openai:'OPENAI_API_KEY',groq:'GROQ_API_KEY',github:'GITHUB_TOKEN'};
+  el.className='tl-info';el.textContent='Configure '+(envMap[id]||id.toUpperCase())+' on the server.';
 }
 function copyAllCmds(){
-  const keys=['anthropic','openai','groq','github'];
-  const envMap={anthropic:'ANTHROPIC_API_KEY',openai:'OPENAI_API_KEY',groq:'GROQ_API_KEY',github:'GITHUB_TOKEN'};
-  const lines=keys.map(k=>{const v=getKey(k);return v?`export ${envMap[k]}='${v}'`:`# ${envMap[k]} kayıtlı değil`;});
-  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('✓ Komutlar kopyalandı!'));
+  const lines=['ANTHROPIC_API_KEY=','OPENAI_API_KEY=','GROQ_API_KEY=','GITHUB_TOKEN='];
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('Environment variable names copied; no secrets copied.'));
 }
-
-// ── SYS STATUS ──
-function updateSysStatus(){
-  const has=getKey('anthropic')||getKey('openai')||getKey('groq');
+async function updateSysStatus(){
   const el=document.getElementById('sys-status');
-  if(el){el.textContent=has?'AKTİF ✓':'KEY GEREKİYOR';el.style.color=has?'var(--g)':'var(--y)';}
+  try{
+    const response=await fetch('/api/integrations/status',{cache:'no-store'});
+    const data=await response.json();
+    const active=['anthropic','openai','groq'].filter((name)=>data.providers?.[name]).length;
+    if(el){el.textContent=active+' SERVER PROVIDERS CONFIGURED';el.style.color=active?'var(--g)':'var(--y)';}
+  }catch{if(el){el.textContent='SERVER INTEGRATION STATUS UNAVAILABLE';el.style.color='var(--y)';}}
 }
-
 // ── PROVIDER & MODEL ──
 const MODELS={
   anthropic:[
@@ -494,29 +472,15 @@ async function sendChat(){
   const msgs=document.getElementById('chat-msgs');
   msgs.innerHTML+=`<div class="msg usr"><div class="msg-lbl">SİZ</div><div class="bbl">${msg}</div></div>`;
   msgs.scrollTop=9999;
-  const key=getKey(activeProvider);
-  if(!key){
-    msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">SİSTEM</div><div class="bbl">API key gerekli → "API ANAHTARLAR" sekmesinden ekle.</div></div>`;
-    btn.disabled=false;btn.textContent='GÖNDER';return;
-  }
+  const key='server-managed';
   try{
-    let reply='';
-    if(activeProvider==='anthropic'){
-      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:activeModel,max_tokens:600,system:SYS,messages:[{role:'user',content:msg}]})});
-      const d=await r.json();
-      if(d.error)throw new Error(d.error.message);
-      reply=d.content?.[0]?.text||'—';
-    } else if(activeProvider==='openai'){
-      const r=await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:activeModel,max_tokens:600,messages:[{role:'system',content:SYS},{role:'user',content:msg}]})});
-      const d=await r.json();
-      if(d.error)throw new Error(d.error.message);
-      reply=d.choices?.[0]?.message?.content||'—';
-    } else if(activeProvider==='groq'){
-      const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:activeModel,max_tokens:600,messages:[{role:'system',content:SYS},{role:'user',content:msg}]})});
-      const d=await r.json();
-      if(d.error)throw new Error(d.error.message);
-      reply=d.choices?.[0]?.message?.content||'—';
-    }
+    const body=activeProvider==='anthropic'
+      ?{model:activeModel,max_tokens:600,system:SYS,messages:[{role:'user',content:msg}]}
+      :{model:activeModel,max_tokens:600,messages:[{role:'system',content:SYS},{role:'user',content:msg}]};
+    const response=await fetch('/api/ai/'+activeProvider,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data=await response.json();
+    if(!response.ok)throw new Error(data.error?.message||data.error||data.detail||'Provider HTTP '+response.status);
+    const reply=activeProvider==='anthropic'?(data.content?.[0]?.text||'—'):(data.choices?.[0]?.message?.content||'—');
     const label=activeModel.split('-').slice(0,2).join(' ').toUpperCase();
     msgs.innerHTML+=`<div class="msg ai"><div class="msg-lbl">${label}</div><div class="bbl">${reply.replace(/\n/g,'<br>')}</div></div>`;
   }catch(e){
@@ -565,7 +529,7 @@ function startAgent(id){
   let i=0;agTimers[id]=setInterval(()=>{
     document.getElementById('atask-'+id).textContent=a.tasks[i%a.tasks.length];
     agTasks++;document.getElementById('k-tasks').textContent=agTasks;i++;
-  },1800+Math.random()*1200);
+  },0);
 }
 function stopAgent(id){
   if(agTimers[id]){clearInterval(agTimers[id]);delete agTimers[id];}
@@ -652,5 +616,6 @@ function init(){
 }
 init();
 </script>
+<script src="/modules/nexus-live-telemetry.js"></script>
 </body>
 </html>

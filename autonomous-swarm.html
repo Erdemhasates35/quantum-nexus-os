@@ -38,7 +38,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content
 .group-name{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;}
 .group-count{font-family:'Share Tech Mono',monospace;font-size:24px;font-weight:700;color:var(--p);}
 .group-status{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.15em;padding:3px 10px;border-radius:4px;}
-.status-active{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.2);}
+.status-registered{background:rgba(0,229,255,0.08);color:var(--p);border:1px solid rgba(0,229,255,0.2);}\n.status-active{background:rgba(57,255,20,0.1);color:var(--g);border:1px solid rgba(57,255,20,0.2);}
 .status-evolving{background:rgba(255,215,0,0.1);color:var(--y);border:1px solid rgba(255,215,0,0.2);animation:blink 1.5s infinite;}
 .status-merging{background:rgba(255,107,53,0.1);color:var(--o);border:1px solid rgba(255,107,53,0.2);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
@@ -97,22 +97,22 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
 <div class="page-header">
   <div class="page-tag">🧠 MODÜL 02 — OTONOM AI SWARM MİMARİSİ</div>
   <h1 class="page-title">AUTONOMOUS<br>SWARM</h1>
-  <div class="page-sub">MARL · FEDERATED LEARNING · EMERGENT BEHAVIOR · İNSAN MÜDAHALESİ: SIFIR</div>
+  <div class="page-sub">MARL · FEDERATED LEARNING · EMERGENT BEHAVIOR · ÜRETİM İŞLEMLERİNDE ONAY GEREKLİ</div>
 </div>
 
 <div class="content">
 
-  <!-- SWARM VIZ -->
+  <!-- REGISTERED ROLE MAP · NOT RUNNING WORKERS -->
   <div class="swarm-canvas-wrap">
     <canvas id="swarm-canvas"></canvas>
     <div class="swarm-overlay">
-      <div class="swarm-stat">TOPLAM AJAN: <span id="total-agents">247</span></div>
-      <div class="swarm-stat">AKTİF GÖREV: <span id="active-tasks">189</span></div>
-      <div class="swarm-stat">BİRLEŞME: <span id="merges">14</span></div>
+      <div class="swarm-stat">KAYITLI ROL: <span id="total-agents" data-nexus-role-count>60</span></div>
+      <div class="swarm-stat">AKTİF WORKER: <span id="active-tasks" data-nexus-active-count>0</span></div>
+      <div class="swarm-stat">DOĞRULANMIŞ BİRLEŞME: <span id="merges">0</span></div>
     </div>
     <div class="swarm-overlay-r">
-      <div class="swarm-stat">COLLEKTİF IQ: <span style="color:var(--p)">∞</span></div>
-      <div class="swarm-stat">ÖĞRENME HIZI: <span style="color:var(--g)">847x</span></div>
+      <div class="swarm-stat">COLLECTIVE IQ: <span style="color:var(--p)">ÖLÇÜLMEDİ</span></div>
+      <div class="swarm-stat">LEARNING RATE: <span style="color:var(--g)">VERİ YOK</span></div>
     </div>
   </div>
 
@@ -132,12 +132,12 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
       <div class="marl-card">
         <div class="marl-label">NASH EQUILIBRIUM — OPTIMAL STRATEJİ</div>
         <div class="marl-eq">∀i: Vᵢ(πᵢ*, π₋ᵢ*) ≥ Vᵢ(πᵢ, π₋ᵢ*)</div>
-        <div class="marl-desc">Nash dengesi: hiçbir ajan tek taraflı strateji değişikliğiyle iyileşemez. Swarm'ın kararlı çözüme yakınsaması bu denge noktasında garanti altında.</div>
+        <div class="marl-desc">Nash dengesi oyun-teorisi çözüm kavramıdır; yakınsama yalnızca belirli varsayımlar ve doğrulanmış algoritmalar altında incelenebilir.</div>
       </div>
       <div class="marl-card">
         <div class="marl-label">FEDERATED LEARNING — YAYILMA</div>
         <div class="marl-eq">w_global = Σᵢ (nᵢ/n) · wᵢ — FedAvg</div>
-        <div class="marl-desc">Her ajan yerel verisiyle eğitilir, yalnızca gradyanlar paylaşılır. Ham veri hiç merkeze gelmez. Gizlilik korumalı, dağıtık ağırlık güncelleme protokolü.</div>
+        <div class="marl-desc">Federated learning tasarım yaklaşımıdır. Çalışan eğitim workerı ve gradyan senkronizasyon kanıtı olmadan aktif kabul edilmez.</div>
       </div>
       <div class="marl-card">
         <div class="marl-label">KOLLEKTİF ÖDÜL FONKSİYONU</div>
@@ -145,25 +145,25 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
         <div class="marl-desc">Bireysel ödüllerin ağırlıklı toplamı + kolektif başarı bonusu. α ve β hiperparametreleri işbirliği vs rekabet dengesini otomatik ayarlar. Convergence: O(1/√T).</div>
       </div>
       <div class="marl-card">
-        <div class="marl-label">EMERGENT COMPLEXITY TEOREMİ</div>
+        <div class="marl-label">EMERGENT COMPLEXITY HYPOTHESIS</div>
         <div class="marl-eq">C(swarm) >> Σᵢ C(agentᵢ) — Superlinear</div>
-        <div class="marl-desc">Swarm'ın kolektif kapasitesi ajan kapasitelerinin toplamından üstel olarak büyüktür. Anderson's "More is Different" prensibi — emergent behavior garantisi.</div>
+        <div class="marl-desc">Bu araştırma hipotezidir; ölçüm, deney ve tekrarlanabilir sonuç olmadan teorem veya garanti olarak sunulamaz.</div>
       </div>
       <div class="marl-card">
         <div class="marl-label">AJAN SPAWNING ALGORİTMASI</div>
         <div class="marl-eq">N(t+1) = N(t) · e^(r·Δt) — Adaptive Growth</div>
-        <div class="marl-desc">Görev yüküne göre üstel büyüme: r=growth rate, Δt=zaman adımı. Kaynak limiti yaklaşınca logistik eğriye geçiş. Min:10, Max:∞ ajan.</div>
+        <div class="marl-desc">Worker ölçeklemesi kuyruk, CPU, bellek, bütçe ve rate-limit ölçümleriyle sınırlandırılmış kapasite politikası üzerinden yapılır.</div>
       </div>
     </div>
   </div>
 
   <!-- PIPELINE -->
-  <div class="section-title">◈ OTONOM PROJE GELİŞTİRME DÖNGÜSÜ — SIFIR İNSAN MÜDAHALESİ</div>
+  <div class="section-title">◈ OTONOM PROJE GELİŞTİRME DÖNGÜSÜ — ÜRETİM ONAYI GEREKLİ</div>
   <div class="pipeline">
     <div class="pipe-step">
       <div class="pipe-step-num">01</div>
       <div class="pipe-step-title">PAZAR TARAMA</div>
-      <div class="pipe-step-desc">Web scraper ajanlar günlük 50K fırsat analiz eder</div>
+      <div class="pipe-step-desc">Gerçek veri kaynağı ve worker bağlantısı kurulduğunda fırsat taraması yapılır</div>
     </div>
     <div class="pipe-arrow">→</div>
     <div class="pipe-step">
@@ -204,43 +204,43 @@ footer{text-align:center;padding:40px;font-family:'Share Tech Mono',monospace;fo
   </div>
 
   <!-- EMERGENT BEHAVIORS -->
-  <div class="section-title">◈ GÖZLEMLENEN EMERGENT (ORTAYA ÇIKAN) DAVRANIŞ PATERNLERİ</div>
+  <div class="section-title">◈ ARAŞTIRMA HİPOTEZLERİ — CANLI GÖZLEM KANITI BAĞLI DEĞİL</div>
   <div class="emerge-grid">
     <div class="emerge-card">
       <div class="emerge-icon">🔄</div>
       <div class="emerge-name">OTO-SPECİALİZASYON</div>
       <div class="emerge-desc">Başlangıçta genel ajanlar zamanla kendi başlarına belirli görevlere uzmanlaşıyor. Programlanmadı — ortaya çıktı.</div>
-      <div class="emerge-score">Gözlem: 847. döngü sonrası</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">🤝</div>
       <div class="emerge-name">ALT-GRUP OLUŞUMU</div>
       <div class="emerge-desc">Benzer uzmanlaşmış ajanlar kendiliğinden mini-swarm'lar oluşturdu. Hiyerarşi programlanmadı.</div>
-      <div class="emerge-score">Gözlem: 1.203. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">🧩</div>
       <div class="emerge-name">GÖREV PAYLAŞIMI</div>
       <div class="emerge-desc">Karmaşık görevleri otomatik alt görevlere böldü ve dağıttı. Divide-and-conquer kendi kendine keşfedildi.</div>
-      <div class="emerge-score">Gözlem: 2.891. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">🛡</div>
       <div class="emerge-name">HATA TOLERANSI</div>
       <div class="emerge-desc">Bir ajan çöktüğünde diğerleri otomatik devralıyor. Hiçbir recovery kodu yazılmadı.</div>
-      <div class="emerge-score">Gözlem: 412. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">📡</div>
       <div class="emerge-name">KOLLEKTİF HAFIZA</div>
       <div class="emerge-desc">Swarm distributed memory formatını kendi geliştirdi. PostgreSQL → vector hybrid — insan yazmadı.</div>
-      <div class="emerge-score">Gözlem: 5.441. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
     <div class="emerge-card">
       <div class="emerge-icon">⚡</div>
       <div class="emerge-name">PARALEL ÖĞRENME</div>
       <div class="emerge-desc">Bir ajan bir şey öğrendiğinde diğerleri 47ms içinde öğreniyor. FedAvg'dan 3x hızlı protokol ortaya çıktı.</div>
-      <div class="emerge-score">Gözlem: 7.892. döngü</div>
+      <div class="emerge-score">Canlı gözlem kaynağı bağlı değil</div>
     </div>
   </div>
 
@@ -261,14 +261,15 @@ function resizeC(){canvas.width=canvas.parentElement.offsetWidth;canvas.height=c
 resizeC();window.addEventListener('resize',resizeC);
 
 const agents=[];
-for(let i=0;i<80;i++){
-  const group=Math.floor(Math.random()*6);
-  const colors=['#00FFD4','#7B2FFF','#FF3D6B','#39FF14','#FFD700','#FF6B35'];
+const colors=['#00FFD4','#7B2FFF','#FF3D6B','#39FF14','#FFD700','#FF6B35'];
+for(let i=0;i<60;i++){
+  const group=i%6;
+  const angle=(i/60)*Math.PI*2;
+  const radius=Math.min(canvas.width,canvas.height)*0.34;
   agents.push({
-    x:Math.random()*canvas.width,y:Math.random()*canvas.height,
-    vx:(Math.random()-0.5)*1.2,vy:(Math.random()-0.5)*1.2,
-    group,color:colors[group],r:3+Math.random()*3,
-    energy:Math.random()
+    x:canvas.width/2+Math.cos(angle)*radius,
+    y:canvas.height/2+Math.sin(angle)*radius,
+    vx:0,vy:0,group,color:colors[group],r:3,energy:0.5
   });
 }
 
@@ -299,46 +300,41 @@ function drawSwarm(){
   requestAnimationFrame(drawSwarm);
 }drawSwarm();
 
-// Live counters
-setInterval(()=>{
-  document.getElementById('total-agents').textContent=240+Math.floor(Math.random()*15);
-  document.getElementById('active-tasks').textContent=180+Math.floor(Math.random()*20);
-  document.getElementById('merges').textContent=10+Math.floor(Math.random()*10);
-},2500);
+// Live counters are sourced from the worker heartbeat endpoint.
+document.getElementById("total-agents").textContent="60";
+document.getElementById("active-tasks").textContent="0";
+document.getElementById("merges").textContent="0";
 
 // Agent groups
-const groups=[
-  {name:'LLM ZİNCİR AJANLARI',count:48,status:'active',role:'GPT-4o, Claude, Llama3 modellerini zincirleme çalıştırır. Task decomposition ve synthesis uzmanı.',task:'Şu an: Yeni SaaS landing page kopyası yazılıyor...'},
-  {name:'KOD VE DEV AJANLARI',count:36,status:'active',role:'React, Python, Rust, Solidity kod üretimi. Tam stack geliştirme, test ve optimizasyon.',task:'Şu an: Payment gateway modülü test ediliyor...'},
-  {name:'VERİ VE QUANT AJANLARI',count:29,status:'evolving',role:'Finansal modelleme, istatistik analiz, backtest. Akademik seviyede veri bilimi pipeline.',task:'Şu an: DeFi yield stratejisi optimize ediliyor...'},
-  {name:'RED TEAM AJANLARI',count:22,status:'active',role:'Penetrasyon testi, güvenlik tarama, exploit araştırma. CVE veritabanı anlık izleme.',task:'Şu an: Web3 smart contract audit çalışıyor...'},
-  {name:'PAZAR ZEKÂSI AJANLARI',count:34,status:'active',role:'Sektör trendleri, rakip analizi, fiyatlandırma optimizasyonu. Geleceğe yönelik projeksiyon.',task:'Şu an: 2026-2030 AI sektör haritası çıkarılıyor...'},
-  {name:'GELİR OPTİMİZASYON',count:28,status:'merging',role:'A/B test, conversion optimizasyonu, ödeme akışı iyileştirme. Sıfır kayıp gelir garantisi.',task:'Şu an: Checkout funnel %23 → %31 hedefleniyor...'},
-  {name:'KUANTUM-KLASİK KÖPRÜ',count:18,status:'evolving',role:'VQE/QAOA kuantum algoritmaları klasik sistemlerle entegrasyon. Hibrit hesaplama koordinasyonu.',task:'Şu an: Protein folding simülasyonu koşuyor...'},
-  {name:'SELF-EVOLUTION CORE',count:32,status:'active',role:'Diğer tüm ajanları izler, değerlendirir ve geliştirir. Meta-learning ve architecture search.',task:'Şu an: 3 ajan yeni nöron mimarisi test ediyor...'},
-];
-
-const groupGrid=document.getElementById('agent-groups');
-groups.forEach(g=>{
-  const dots=Array.from({length:Math.min(g.count,30)},(_,i)=>{
-    const cls=i<g.count*0.7?'active':i<g.count*0.9?'busy':'idle';
-    return `<div class="dot ${cls}"></div>`;
-  }).join('');
-  const statusClass={active:'status-active',evolving:'status-evolving',merging:'status-merging'}[g.status];
-  const statusText={active:'AKTİF',evolving:'EVRİMLEŞİYOR',merging:'BİRLEŞİYOR'}[g.status];
-  groupGrid.innerHTML+=`<div class="agent-group">
-    <div class="group-header">
-      <div>
-        <div class="group-name">${g.name}</div>
-        <div class="group-count">${g.count}</div>
-      </div>
-      <span class="group-status ${statusClass}">${statusText}</span>
-    </div>
-    <div class="group-role">${g.role}</div>
-    <div class="agent-dots">${dots}</div>
-    <div class="group-task">${g.task}</div>
-  </div>`;
-});
+const groupGrid=document.getElementById("agent-groups");
+async function renderRegisteredRoles(){
+  try {
+    const response=await fetch("/api/registry",{cache:"no-store"});
+    if(!response.ok) throw new Error("registry_unavailable");
+    const registry=await response.json();
+    const groups=[
+      ...(registry.roles.core||[]).map((entry)=>({name:entry.cluster,count:1,role:entry.role,task:"Kayıtlı rol tanımı · Worker heartbeat bağlı değil"})),
+      {name:"AKADEMİK KONTROL",count:registry.counts.academic,role:(registry.roles.academic||[]).map((x)=>x.role).join(" · "),task:"20 araştırma rolü kayıtlı · Canlı görev kanıtı yok"},
+      {name:"SINIR ARAŞTIRMA",count:registry.counts.frontier,role:(registry.roles.frontier||[]).map((x)=>x.role).join(" · "),task:"10 araştırma rolü kayıtlı · Canlı görev kanıtı yok"}
+    ];
+    groupGrid.replaceChildren();
+    for(const group of groups){
+      const card=document.createElement("div");card.className="agent-group";
+      const header=document.createElement("div");header.className="group-header";
+      const details=document.createElement("div");
+      const name=document.createElement("div");name.className="group-name";name.textContent=group.name;
+      const count=document.createElement("div");count.className="group-count";count.textContent=String(group.count);
+      details.append(name,count);
+      const status=document.createElement("span");status.className="group-status status-registered";status.textContent="KAYITLI";
+      header.append(details,status);
+      const role=document.createElement("div");role.className="group-role";role.textContent=group.role;
+      const task=document.createElement("div");task.className="group-task";task.textContent=group.task;
+      card.append(header,role,task);groupGrid.append(card);
+    }
+  } catch { groupGrid.textContent="Rol kayıt dosyası yüklenemedi."; }
+}
+renderRegisteredRoles();
 </script>
+<script src="/modules/nexus-live-telemetry.js"></script>
 </body>
 </html>
